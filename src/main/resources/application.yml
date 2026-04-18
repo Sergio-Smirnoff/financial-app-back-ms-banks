@@ -1,0 +1,54 @@
+server:
+  port: 8083
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: banks-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/financialapp?currentSchema=banks}
+    username: ${DB_USERNAME:financialapp}
+    password: ${DB_PASSWORD:changeme}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        default_schema: banks
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+  flyway:
+    schemas: banks
+    default-schema: banks
+    locations: classpath:db/migration
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9093}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
