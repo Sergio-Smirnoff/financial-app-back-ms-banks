@@ -1,5 +1,6 @@
 package com.financialapp.banks.service;
 
+import com.financialapp.banks.client.InvestmentsClient;
 import com.financialapp.banks.exception.BusinessException;
 import com.financialapp.banks.exception.ResourceNotFoundException;
 import com.financialapp.banks.mapper.AccountMapper;
@@ -7,9 +8,11 @@ import com.financialapp.banks.model.dto.request.AccountRequest;
 import com.financialapp.banks.model.dto.response.AccountResponse;
 import com.financialapp.banks.model.entity.Account;
 import com.financialapp.banks.model.entity.Bank;
+import com.financialapp.banks.model.enums.AccountType;
 import com.financialapp.banks.repository.AccountRepository;
 import com.financialapp.banks.repository.BankRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,24 +21,26 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AccountService {
 
     private final AccountRepository accountRepository;
     private final BankRepository bankRepository;
     private final AccountMapper accountMapper;
+    private final InvestmentsClient investmentsClient;
 
     @Transactional(readOnly = true)
     public List<AccountResponse> listByUser(Long userId) {
         return accountRepository.findByUserIdOrderByNameAsc(userId).stream()
-                .map(accountMapper::toResponse)
+                .map(this::mapToResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public AccountResponse get(Long id, Long userId) {
-        return accountRepository.findByIdAndUserId(id, userId)
-                .map(accountMapper::toResponse)
+        Account account = accountRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + id));
+        return mapToResponse(account);
     }
 
     @Transactional
@@ -63,7 +68,7 @@ public class AccountService {
                 .currency(request.currency().toUpperCase())
                 .isActive(request.isActive() == null ? Boolean.TRUE : request.isActive())
                 .build();
-        return accountMapper.toResponse(accountRepository.save(account));
+        return mapToResponse(accountRepository.save(account));
     }
 
     @Transactional
@@ -85,7 +90,7 @@ public class AccountService {
         if (request.isActive() != null) {
             account.setIsActive(request.isActive());
         }
-        return accountMapper.toResponse(accountRepository.save(account));
+        return mapToResponse(accountRepository.save(account));
     }
 
     @Transactional
@@ -93,5 +98,20 @@ public class AccountService {
         Account account = accountRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + id));
         accountRepository.delete(account);
+    }
+
+    private AccountResponse mapToResponse(Account account) {
+        AccountResponse response = accountMapper.toResponse(account);
+        if (account.getType() == AccountType.INVESTMENT) {
+            try {
+                var valuation = investmentsClient.getValuation(account.getId()).getData();
+                if (valuation != null && valuation.totalValuation() != null) {
+                    return response.withBalance(valuation.totalValuation());
+                }
+            } catch (Exception e) {
+                log.error("Failed to fetch valuation for investment account {}: {}", account.getId(), e.getMessage());
+            }
+        }
+        return response;
     }
 }

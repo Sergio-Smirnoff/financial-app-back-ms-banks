@@ -18,4 +18,8 @@ public record AccountResponse(
         Boolean isActive,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-) {}
+) {
+    public AccountResponse withBalance(BigDecimal newBalance) {
+        return new AccountResponse(id, bankId, userId, name, type, newBalance, currency, isActive, createdAt, updatedAt);
+    }
+}
