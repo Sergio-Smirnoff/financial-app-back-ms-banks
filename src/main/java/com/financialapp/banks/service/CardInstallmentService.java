@@ -2,12 +2,15 @@ package com.financialapp.banks.service;
 
 import com.financialapp.banks.exception.BusinessException;
 import com.financialapp.banks.exception.ResourceNotFoundException;
+import com.financialapp.banks.kafka.event.PaymentEvent;
+import com.financialapp.banks.kafka.producer.BanksEventProducer;
 import com.financialapp.banks.mapper.CardInstallmentMapper;
 import com.financialapp.banks.model.dto.request.CardExpenseCreateRequest;
 import com.financialapp.banks.model.dto.response.CardInstallmentResponse;
 import com.financialapp.banks.model.entity.Card;
 import com.financialapp.banks.model.entity.CardInstallment;
 import com.financialapp.banks.model.enums.CardBehavior;
+import com.financialapp.banks.repository.AccountRepository;
 import com.financialapp.banks.repository.CardInstallmentRepository;
 import com.financialapp.banks.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +29,9 @@ public class CardInstallmentService {
 
     private final CardInstallmentRepository installmentRepository;
     private final CardRepository cardRepository;
+    private final AccountRepository accountRepository;
     private final CardInstallmentMapper installmentMapper;
+    private final BanksEventProducer eventProducer;
 
     @Transactional(readOnly = true)
     public List<CardInstallmentResponse> listByCard(Long cardId, Long userId) {
@@ -92,6 +97,17 @@ public class CardInstallmentService {
         installment.setPaid(true);
         installment.setPaidDate(paidDate != null ? paidDate : LocalDate.now());
 
-        return installmentMapper.toResponse(installmentRepository.save(installment));
+        CardInstallment saved = installmentRepository.save(installment);
+
+        eventProducer.sendPaymentEvent(new PaymentEvent(
+                userId,
+                saved.getCard().getAccountId(),
+                saved.getAmount(),
+                saved.getCurrency(),
+                "Card Installment: " + saved.getDescription() + " (" + saved.getInstallmentNumber() + "/" + saved.getTotalInstallments() + ")",
+                saved.getPaidDate()
+        ));
+
+        return installmentMapper.toResponse(saved);
     }
 }

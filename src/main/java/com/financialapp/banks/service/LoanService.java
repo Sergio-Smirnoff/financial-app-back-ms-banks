@@ -2,6 +2,8 @@ package com.financialapp.banks.service;
 
 import com.financialapp.banks.exception.BusinessException;
 import com.financialapp.banks.exception.ResourceNotFoundException;
+import com.financialapp.banks.kafka.event.PaymentEvent;
+import com.financialapp.banks.kafka.producer.BanksEventProducer;
 import com.financialapp.banks.mapper.LoanInstallmentMapper;
 import com.financialapp.banks.mapper.LoanMapper;
 import com.financialapp.banks.model.dto.request.LoanRequest;
@@ -32,6 +34,7 @@ public class LoanService {
     private final AccountRepository accountRepository;
     private final LoanMapper loanMapper;
     private final LoanInstallmentMapper installmentMapper;
+    private final BanksEventProducer eventProducer;
 
     @Transactional(readOnly = true)
     public List<LoanResponse> list(Long userId, Long accountId) {
@@ -131,6 +134,17 @@ public class LoanService {
             loan.setActive(false);
         }
         loanRepository.save(loan);
+
+        // Emit payment event to update finances
+        PaymentEvent event = new PaymentEvent(
+                userId,
+                loan.getAccountId(),
+                installment.getAmount(),
+                loan.getCurrency(),
+                "Loan Payment: " + loan.getName() + " (Installment " + installment.getInstallmentNumber() + ")",
+                installment.getPaidDate()
+        );
+        eventProducer.sendPaymentEvent(event);
 
         return installmentMapper.toResponse(installment);
     }
