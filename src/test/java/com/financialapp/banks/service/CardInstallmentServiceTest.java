@@ -1,12 +1,14 @@
 package com.financialapp.banks.service;
 
 import com.financialapp.banks.exception.BusinessException;
+import com.financialapp.banks.kafka.producer.BanksEventProducer;
 import com.financialapp.banks.mapper.CardInstallmentMapper;
 import com.financialapp.banks.model.dto.request.CardExpenseCreateRequest;
 import com.financialapp.banks.model.dto.response.CardInstallmentResponse;
 import com.financialapp.banks.model.entity.Card;
 import com.financialapp.banks.model.entity.CardInstallment;
 import com.financialapp.banks.model.enums.CardBehavior;
+import com.financialapp.banks.repository.AccountRepository;
 import com.financialapp.banks.repository.CardInstallmentRepository;
 import com.financialapp.banks.repository.CardRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +32,8 @@ class CardInstallmentServiceTest {
 
     @Mock CardInstallmentRepository installmentRepository;
     @Mock CardRepository cardRepository;
+    @Mock AccountRepository accountRepository;
+    @Mock BanksEventProducer eventProducer;
 
     CardInstallmentMapper installmentMapper = new CardInstallmentMapper() {};
 
@@ -37,7 +41,7 @@ class CardInstallmentServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new CardInstallmentService(installmentRepository, cardRepository, installmentMapper);
+        service = new CardInstallmentService(installmentRepository, cardRepository, accountRepository, installmentMapper, eventProducer);
     }
 
     @Test
@@ -73,7 +77,7 @@ class CardInstallmentServiceTest {
 
     @Test
     void payInstallment_marksAsPaid() {
-        Card card = Card.builder().id(500L).userId(1L).build();
+        Card card = Card.builder().id(500L).userId(1L).accountId(1L).build();
         CardInstallment installment = CardInstallment.builder().id(1000L).card(card).paid(false).build();
         
         when(cardRepository.findByIdAndUserId(500L, 1L)).thenReturn(Optional.of(card));

@@ -1,7 +1,7 @@
 package com.financialapp.banks.service;
 
 import com.financialapp.banks.exception.BusinessException;
-import com.financialapp.banks.exception.ResourceNotFoundException;
+import com.financialapp.banks.kafka.producer.BanksEventProducer;
 import com.financialapp.banks.mapper.CardMapper;
 import com.financialapp.banks.model.dto.request.CardRequest;
 import com.financialapp.banks.model.dto.response.CardResponse;
@@ -21,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +34,7 @@ class CardServiceTest {
     @Mock CardRepository cardRepository;
     @Mock AccountRepository accountRepository;
     @Mock BankRepository bankRepository;
+    @Mock BanksEventProducer eventProducer;
 
     CardMapper cardMapper = new CardMapper() {};
 
@@ -42,7 +42,7 @@ class CardServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new CardService(cardRepository, accountRepository, bankRepository, cardMapper);
+        service = new CardService(cardRepository, accountRepository, bankRepository, cardMapper, eventProducer);
     }
 
     @Test

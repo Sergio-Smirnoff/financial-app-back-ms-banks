@@ -1,5 +1,6 @@
 package com.financialapp.banks.service;
 
+import com.financialapp.banks.client.InvestmentsClient;
 import com.financialapp.banks.exception.BusinessException;
 import com.financialapp.banks.exception.ResourceNotFoundException;
 import com.financialapp.banks.mapper.AccountMapper;
@@ -29,6 +30,7 @@ class AccountServiceTest {
 
     @Mock BankRepository bankRepository;
     @Mock AccountRepository accountRepository;
+    @Mock InvestmentsClient investmentsClient;
 
     AccountMapper accountMapper = new AccountMapper() {};
 
@@ -36,7 +38,7 @@ class AccountServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new AccountService(accountRepository, bankRepository, accountMapper);
+        service = new AccountService(accountRepository, bankRepository, accountMapper, investmentsClient);
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.financialapp.banks.service;
 
 import com.financialapp.banks.exception.BusinessException;
 import com.financialapp.banks.exception.ResourceNotFoundException;
+import com.financialapp.banks.kafka.producer.BanksEventProducer;
 import com.financialapp.banks.mapper.LoanInstallmentMapper;
 import com.financialapp.banks.mapper.LoanMapper;
 import com.financialapp.banks.model.dto.request.LoanRequest;
@@ -34,6 +35,7 @@ class LoanServiceTest {
     @Mock LoanRepository loanRepository;
     @Mock LoanInstallmentRepository installmentRepository;
     @Mock AccountRepository accountRepository;
+    @Mock BanksEventProducer eventProducer;
 
     LoanMapper loanMapper = new LoanMapper() {};
     LoanInstallmentMapper installmentMapper = new LoanInstallmentMapper() {};
@@ -42,7 +44,7 @@ class LoanServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new LoanService(loanRepository, installmentRepository, accountRepository, loanMapper, installmentMapper);
+        service = new LoanService(loanRepository, installmentRepository, accountRepository, loanMapper, installmentMapper, eventProducer);
     }
 
     @Test
@@ -68,7 +70,7 @@ class LoanServiceTest {
 
     @Test
     void payInstallment_marksAsPaid() {
-        Loan loan = Loan.builder().id(500L).userId(1L).active(true).totalInstallments(3).remainingInstallments(3).build();
+        Loan loan = Loan.builder().id(500L).userId(1L).accountId(1L).active(true).totalInstallments(3).remainingInstallments(3).build();
         LoanInstallment inst = LoanInstallment.builder().id(1000L).loan(loan).paid(false).build();
 
         when(loanRepository.findByIdAndUserId(500L, 1L)).thenReturn(Optional.of(loan));
