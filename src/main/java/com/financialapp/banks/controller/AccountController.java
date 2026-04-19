@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -35,6 +36,15 @@ public class AccountController {
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(accountService.get(id, userId)));
+    }
+
+    @PatchMapping("/{id}/balance/adjust")
+    @Operation(summary = "Adjust account balance (internal use)")
+    public ResponseEntity<ApiResponse<Void>> adjustBalance(
+            @PathVariable Long id,
+            @RequestParam java.math.BigDecimal delta) {
+        accountService.adjustBalance(id, delta);
+        return ResponseEntity.ok(ApiResponse.ok("Balance adjusted", null));
     }
 
     @PostMapping

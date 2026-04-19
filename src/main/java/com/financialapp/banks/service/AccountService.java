@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -35,6 +36,14 @@ public class AccountService {
         return accountRepository.findByIdAndUserId(id, userId)
                 .map(accountMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + id));
+    }
+
+    @Transactional
+    public void adjustBalance(Long id, BigDecimal delta) {
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + id));
+        account.setBalance(account.getBalance().add(delta));
+        accountRepository.save(account);
     }
 
     @Transactional

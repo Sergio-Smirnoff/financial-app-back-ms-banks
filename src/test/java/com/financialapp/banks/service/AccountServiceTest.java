@@ -82,4 +82,27 @@ class AccountServiceTest {
         assertThatThrownBy(() -> service.create(1L, req))
                 .isInstanceOf(BusinessException.class);
     }
+
+    @Test
+    void adjustBalance_updatesBalanceCorrectly() {
+        Account account = Account.builder()
+                .id(1L)
+                .balance(new BigDecimal("100.00"))
+                .build();
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+        when(accountRepository.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        service.adjustBalance(1L, new BigDecimal("50.50"));
+
+        assertThat(account.getBalance()).isEqualByComparingTo("150.50");
+    }
+
+    @Test
+    void adjustBalance_throwsExceptionWhenAccountNotFound() {
+        when(accountRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.adjustBalance(1L, new BigDecimal("50.50")))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Account not found");
+    }
 }
