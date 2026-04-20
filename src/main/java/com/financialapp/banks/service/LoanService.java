@@ -32,6 +32,7 @@ public class LoanService {
 
     private final LoanRepository loanRepository;
     private final BankRepository bankRepository;
+    private final AccountRepository accountRepository;
     private final LoanInstallmentRepository installmentRepository;
     private final AccountService accountService;
     private final LoanMapper loanMapper;
@@ -60,16 +61,22 @@ public class LoanService {
 
     @Transactional
     public LoanResponse create(Long userId, LoanRequest request) {
-        // Simple create, bank existence check
         bankRepository.findByIdAndUserId(request.bankId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + request.bankId()));
+
+        Account destinationAccount = accountRepository.findByIdAndUserId(request.destinationAccountId(), userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Destination account not found: " + request.destinationAccountId()));
+
+        if (!destinationAccount.getBankId().equals(request.bankId())) {
+            throw new BusinessException("Destination account does not belong to the selected bank");
+        }
         
         Loan loan = Loan.builder()
                 .bankId(request.bankId())
                 .userId(userId)
                 .name(request.name())
                 .principal(request.principal())
-                .currency("USD") // Default, should ideally be configurable or derived
+                .currency(destinationAccount.getCurrency())
                 .interestRate(request.interestRate())
                 .totalInstallments(request.totalInstallments())
                 .remainingInstallments(request.totalInstallments())
@@ -78,6 +85,19 @@ public class LoanService {
                 .build();
 
         loan = loanRepository.save(loan);
+
+        // Credit principal to destination account
+        accountService.adjustBalance(destinationAccount.getId(), request.principal(), loan.getCurrency());
+
+        // Record the deposit in finances
+        eventProducer.sendPaymentEvent(new PaymentEvent(
+                userId,
+                destinationAccount.getId(),
+                request.principal(),
+                loan.getCurrency(),
+                "Loan Deposit: " + loan.getName(),
+                LocalDate.now()
+        ));
 
         // Simple amortization: (principal * (1 + interest/100)) / installments
         BigDecimal totalWithInterest = request.principal()
