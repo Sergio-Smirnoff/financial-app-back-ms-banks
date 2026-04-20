@@ -60,12 +60,14 @@ public class CardInstallment {
 
     @PrePersist
     protected void onCreate() {
+        if (currency != null) currency = currency.toUpperCase();
         if (createdAt == null) createdAt = LocalDateTime.now();
         if (updatedAt == null) updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
+        if (currency != null) currency = currency.toUpperCase();
         updatedAt = LocalDateTime.now();
     }
 }

@@ -76,7 +76,7 @@ public class LoanService {
                 .userId(userId)
                 .name(request.name())
                 .principal(request.principal())
-                .currency(destinationAccount.getCurrency())
+                .currency(destinationAccount.getCurrency().toUpperCase())
                 .interestRate(request.interestRate())
                 .totalInstallments(request.totalInstallments())
                 .remainingInstallments(request.totalInstallments())

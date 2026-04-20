@@ -52,12 +52,14 @@ public class Account {
     protected void onCreate() {
         if (balance == null) balance = BigDecimal.ZERO;
         if (isActive == null) isActive = Boolean.TRUE;
+        if (currency != null) currency = currency.toUpperCase();
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
+        if (currency != null) currency = currency.toUpperCase();
         updatedAt = LocalDateTime.now();
     }
 }
