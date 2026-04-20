@@ -13,8 +13,6 @@ import com.financialapp.banks.model.entity.Bank;
 import com.financialapp.banks.model.enums.AccountType;
 import com.financialapp.banks.repository.AccountRepository;
 import com.financialapp.banks.repository.BankRepository;
-import com.financialapp.banks.repository.CardInstallmentRepository;
-import com.financialapp.banks.repository.LoanInstallmentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,8 +28,6 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final BankRepository bankRepository;
-    private final CardInstallmentRepository cardInstallmentRepository;
-    private final LoanInstallmentRepository loanInstallmentRepository;
     private final AccountMapper accountMapper;
     private final InvestmentsClient investmentsClient;
     private final BanksEventProducer eventProducer;
@@ -148,18 +144,6 @@ public class AccountService {
         // 1. Check balance is zero
         if (account.getBalance().compareTo(BigDecimal.ZERO) != 0) {
             throw new BusinessException("Cannot delete account with non-zero balance: " + account.getBalance());
-        }
-
-        // 2. Check for unpaid card installments
-        int unpaidCards = cardInstallmentRepository.countByCardAccountIdAndPaidFalse(id);
-        if (unpaidCards > 0) {
-            throw new BusinessException("Cannot delete account with " + unpaidCards + " unpaid card installments");
-        }
-
-        // 3. Check for unpaid loan installments
-        int unpaidLoans = loanInstallmentRepository.countByLoanAccountIdAndPaidFalse(id);
-        if (unpaidLoans > 0) {
-            throw new BusinessException("Cannot delete account with " + unpaidLoans + " unpaid loan installments");
         }
 
         accountRepository.delete(account);
