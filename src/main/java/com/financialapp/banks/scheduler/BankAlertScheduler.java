@@ -42,8 +42,7 @@ public class BankAlertScheduler {
         
         log.info("Found {} card(s) expiring within 30 days", expiring.size());
         for (Card card : expiring) {
-            Long bankId = accountRepository.findById(card.getAccountId())
-                    .map(Account::getBankId).orElse(null);
+            Long bankId = card.getBankId();
 
             eventProducer.sendBankAlert(BankAlertEvent.builder()
                     .userId(card.getUserId())
@@ -63,8 +62,7 @@ public class BankAlertScheduler {
 
         log.info("Found {} loan installment(s) due within 3 days", upcoming.size());
         for (LoanInstallment inst : upcoming) {
-            Long bankId = accountRepository.findById(inst.getLoan().getAccountId())
-                    .map(Account::getBankId).orElse(null);
+            Long bankId = inst.getLoan().getBankId();
 
             eventProducer.sendBankAlert(BankAlertEvent.builder()
                     .userId(inst.getLoan().getUserId())

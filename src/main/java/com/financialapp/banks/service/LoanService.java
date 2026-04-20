@@ -13,6 +13,7 @@ import com.financialapp.banks.model.entity.Account;
 import com.financialapp.banks.model.entity.Loan;
 import com.financialapp.banks.model.entity.LoanInstallment;
 import com.financialapp.banks.repository.AccountRepository;
+import com.financialapp.banks.repository.BankRepository;
 import com.financialapp.banks.repository.LoanInstallmentRepository;
 import com.financialapp.banks.repository.LoanRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ import java.util.List;
 public class LoanService {
 
     private final LoanRepository loanRepository;
+    private final BankRepository bankRepository;
     private final LoanInstallmentRepository installmentRepository;
     private final AccountService accountService;
     private final LoanMapper loanMapper;
