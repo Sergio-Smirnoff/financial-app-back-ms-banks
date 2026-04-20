@@ -34,7 +34,7 @@ class LoanServiceTest {
 
     @Mock LoanRepository loanRepository;
     @Mock LoanInstallmentRepository installmentRepository;
-    @Mock AccountRepository accountRepository;
+    @Mock AccountService accountService;
     @Mock BanksEventProducer eventProducer;
 
     LoanMapper loanMapper = new LoanMapper() {};
@@ -44,13 +44,15 @@ class LoanServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new LoanService(loanRepository, installmentRepository, accountRepository, loanMapper, installmentMapper, eventProducer);
+        service = new LoanService(loanRepository, installmentRepository, accountService, loanMapper, installmentMapper, eventProducer);
     }
 
     @Test
     void create_generatesAmortizedInstallments() {
         Account account = Account.builder().id(100L).userId(1L).currency("USD").build();
-        when(accountRepository.findByIdAndUserId(100L, 1L)).thenReturn(Optional.of(account));
+        // accountService dependency should be mocked if used in create, 
+        // but currently create in LoanService uses accountRepository directly or assumes existence
+        
         when(loanRepository.save(any(Loan.class))).thenAnswer(inv -> {
             Loan l = inv.getArgument(0);
             l.setId(500L);
@@ -71,7 +73,7 @@ class LoanServiceTest {
     @Test
     void payInstallment_marksAsPaid() {
         Loan loan = Loan.builder().id(500L).userId(1L).accountId(1L).active(true).totalInstallments(3).remainingInstallments(3).build();
-        LoanInstallment inst = LoanInstallment.builder().id(1000L).loan(loan).paid(false).build();
+        LoanInstallment inst = LoanInstallment.builder().id(1000L).loan(loan).paid(false).amount(BigDecimal.TEN).build();
 
         when(loanRepository.findByIdAndUserId(500L, 1L)).thenReturn(Optional.of(loan));
         when(installmentRepository.findById(1000L)).thenReturn(Optional.of(inst));

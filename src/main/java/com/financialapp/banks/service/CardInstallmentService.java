@@ -29,7 +29,7 @@ public class CardInstallmentService {
 
     private final CardInstallmentRepository installmentRepository;
     private final CardRepository cardRepository;
-    private final AccountRepository accountRepository;
+    private final AccountService accountService;
     private final CardInstallmentMapper installmentMapper;
     private final BanksEventProducer eventProducer;
 
@@ -94,11 +94,15 @@ public class CardInstallmentService {
             throw new BusinessException("Installment is already paid");
         }
 
+        // 1. Deduct funds from account (fail-fast)
+        accountService.adjustBalance(installment.getCard().getAccountId(), installment.getAmount().negate(), installment.getCurrency());
+
+        // 2. Mark as paid
         installment.setPaid(true);
         installment.setPaidDate(paidDate != null ? paidDate : LocalDate.now());
-
         CardInstallment saved = installmentRepository.save(installment);
 
+        // 3. Emit event (only for recording transaction in finances)
         eventProducer.sendPaymentEvent(new PaymentEvent(
                 userId,
                 saved.getCard().getAccountId(),

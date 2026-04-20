@@ -2,7 +2,6 @@ package com.financialapp.banks.service;
 
 import com.financialapp.banks.exception.BusinessException;
 import com.financialapp.banks.exception.ResourceNotFoundException;
-import com.financialapp.banks.mapper.AccountMapper;
 import com.financialapp.banks.mapper.BankMapper;
 import com.financialapp.banks.model.dto.request.BankRequest;
 import com.financialapp.banks.model.dto.response.AccountResponse;
@@ -77,13 +76,20 @@ public class BankService {
     public void delete(Long id, Long userId) {
         Bank bank = bankRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + id));
+        
+        // 1. Check all accounts are empty and paid
+        List<Account> accounts = accountRepository.findByBankIdOrderByNameAsc(id);
+        for (Account account : accounts) {
+            accountService.delete(account.getId(), userId);
+        }
+
         bankRepository.delete(bank);
     }
 
     private BankResponse mapToResponse(Bank bank) {
         List<Account> accounts = accountRepository.findByBankIdOrderByNameAsc(bank.getId());
         List<AccountResponse> accountResponses = accounts.stream()
-                .map(a -> accountService.get(a.getId(), bank.getUserId())) // use accountService.get to include live valuation
+                .map(a -> accountService.get(a.getId(), bank.getUserId()))
                 .toList();
 
         Map<String, BigDecimal> totalBalances = accountResponses.stream()

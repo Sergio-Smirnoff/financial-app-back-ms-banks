@@ -38,12 +38,13 @@ public class AccountController {
         return ResponseEntity.ok(ApiResponse.ok(accountService.get(id, userId)));
     }
 
-    @PatchMapping("/{id}/balance/adjust")
+    @PostMapping("/{id}/balance/adjust")
     @Operation(summary = "Adjust account balance (internal use)")
     public ResponseEntity<ApiResponse<Void>> adjustBalance(
             @PathVariable Long id,
-            @RequestParam java.math.BigDecimal delta) {
-        accountService.adjustBalance(id, delta);
+            @RequestParam java.math.BigDecimal delta,
+            @RequestParam(required = false) String currency) {
+        accountService.adjustBalance(id, delta, currency);
         return ResponseEntity.ok(ApiResponse.ok("Balance adjusted", null));
     }
 

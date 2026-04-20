@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface LoanInstallmentRepository extends JpaRepository<LoanInstallment, Long> {
     List<LoanInstallment> findByLoanIdOrderByInstallmentNumberAsc(Long loanId);
+    int countByLoanAccountIdAndPaidFalse(Long accountId);
 
     @Query("SELECT li FROM LoanInstallment li WHERE li.paid = false AND li.dueDate BETWEEN :from AND :to")
     List<LoanInstallment> findUpcomingUnpaid(@Param("from") LocalDate from, @Param("to") LocalDate to);

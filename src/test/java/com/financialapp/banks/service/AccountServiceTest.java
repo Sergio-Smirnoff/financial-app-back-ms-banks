@@ -3,6 +3,7 @@ package com.financialapp.banks.service;
 import com.financialapp.banks.client.InvestmentsClient;
 import com.financialapp.banks.exception.BusinessException;
 import com.financialapp.banks.exception.ResourceNotFoundException;
+import com.financialapp.banks.kafka.producer.BanksEventProducer;
 import com.financialapp.banks.mapper.AccountMapper;
 import com.financialapp.banks.model.dto.request.AccountRequest;
 import com.financialapp.banks.model.dto.response.AccountResponse;
@@ -11,6 +12,8 @@ import com.financialapp.banks.model.entity.Bank;
 import com.financialapp.banks.model.enums.AccountType;
 import com.financialapp.banks.repository.AccountRepository;
 import com.financialapp.banks.repository.BankRepository;
+import com.financialapp.banks.repository.CardInstallmentRepository;
+import com.financialapp.banks.repository.LoanInstallmentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +33,10 @@ class AccountServiceTest {
 
     @Mock BankRepository bankRepository;
     @Mock AccountRepository accountRepository;
+    @Mock CardInstallmentRepository cardInstallmentRepository;
+    @Mock LoanInstallmentRepository loanInstallmentRepository;
     @Mock InvestmentsClient investmentsClient;
+    @Mock BanksEventProducer eventProducer;
 
     AccountMapper accountMapper = new AccountMapper() {};
 
@@ -38,7 +44,7 @@ class AccountServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new AccountService(accountRepository, bankRepository, accountMapper, investmentsClient);
+        service = new AccountService(accountRepository, bankRepository, cardInstallmentRepository, loanInstallmentRepository, accountMapper, investmentsClient, eventProducer);
     }
 
     @Test
@@ -90,11 +96,12 @@ class AccountServiceTest {
         Account account = Account.builder()
                 .id(1L)
                 .balance(new BigDecimal("100.00"))
+                .currency("USD")
                 .build();
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
         when(accountRepository.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        service.adjustBalance(1L, new BigDecimal("50.50"));
+        service.adjustBalance(1L, new BigDecimal("50.50"), "USD");
 
         assertThat(account.getBalance()).isEqualByComparingTo("150.50");
     }
@@ -103,8 +110,22 @@ class AccountServiceTest {
     void adjustBalance_throwsExceptionWhenAccountNotFound() {
         when(accountRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.adjustBalance(1L, new BigDecimal("50.50")))
+        assertThatThrownBy(() -> service.adjustBalance(1L, new BigDecimal("50.50"), "USD"))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Account not found");
+    }
+
+    @Test
+    void adjustBalance_throwsExceptionWhenInsufficientFunds() {
+        Account account = Account.builder()
+                .id(1L)
+                .balance(new BigDecimal("100.00"))
+                .currency("USD")
+                .build();
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        assertThatThrownBy(() -> service.adjustBalance(1L, new BigDecimal("-150.00"), "USD"))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Insufficient funds");
     }
 }

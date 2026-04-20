@@ -30,9 +30,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(DataIntegrityViolationException ex) {
-        log.warn("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
+        String msg = ex.getMostSpecificCause().getMessage();
+        log.warn("Data integrity violation: {}", msg);
+        
+        String userFriendlyMessage = "Resource already exists or violates a database constraint";
+        if (msg.contains("uq_accounts_bank_name")) {
+            userFriendlyMessage = "An account with this name already exists in the selected bank";
+        } else if (msg.contains("uq_banks_user_name")) {
+            userFriendlyMessage = "A bank with this name already exists for your user";
+        } else if (msg.contains("uq_cards_account_brand_type_last4")) {
+            userFriendlyMessage = "This card is already registered for this account";
+        }
+
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error("Resource already exists or violates a database constraint"));
+                .body(ApiResponse.error(userFriendlyMessage));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -51,6 +62,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
         log.error("Unexpected error", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("An unexpected error occurred"));
+                .body(ApiResponse.error("An unexpected error occurred: " + ex.getMessage()));
     }
 }
