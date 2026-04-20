@@ -18,7 +18,7 @@ public interface CardMapper {
 
         return CardResponse.builder()
                 .id(card.getId())
-                .accountId(card.getAccountId())
+                .bankId(card.getBankId())
                 .userId(card.getUserId())
                 .displayName(displayName)
                 .brand(card.getBrand())

@@ -11,10 +11,10 @@ import java.util.Optional;
 
 public interface LoanRepository extends JpaRepository<Loan, Long> {
     List<Loan> findByUserId(Long userId);
-    List<Loan> findByAccountId(Long accountId);
+    List<Loan> findByBankId(Long bankId);
     Optional<Loan> findByIdAndUserId(Long id, Long userId);
 
-    int countByAccountId(Long accountId);
+    int countByBankId(Long bankId);
 
     @Query("SELECT l FROM Loan l WHERE l.active = true AND " +
            "(SELECT MIN(li.dueDate) FROM LoanInstallment li WHERE li.loan = l AND li.paid = false) BETWEEN :from AND :to")

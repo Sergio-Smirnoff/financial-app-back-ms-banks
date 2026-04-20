@@ -23,11 +23,11 @@ public class CardController {
     private final CardService cardService;
 
     @GetMapping
-    @Operation(summary = "List user cards, optionally filtered by account")
+    @Operation(summary = "List user cards, optionally filtered by bank")
     public ResponseEntity<ApiResponse<List<CardResponse>>> list(
             @RequestHeader("X-User-Id") Long userId,
-            @RequestParam(required = false) Long accountId) {
-        return ResponseEntity.ok(ApiResponse.ok(cardService.list(userId, accountId)));
+            @RequestParam(required = false) Long bankId) {
+        return ResponseEntity.ok(ApiResponse.ok(cardService.list(userId, bankId)));
     }
 
     @GetMapping("/{id}")

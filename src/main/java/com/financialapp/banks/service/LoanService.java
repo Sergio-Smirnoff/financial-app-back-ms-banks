@@ -37,10 +37,10 @@ public class LoanService {
     private final BanksEventProducer eventProducer;
 
     @Transactional(readOnly = true)
-    public List<LoanResponse> list(Long userId, Long accountId) {
+    public List<LoanResponse> list(Long userId, Long bankId) {
         List<Loan> loans;
-        if (accountId != null) {
-            loans = loanRepository.findByAccountId(accountId);
+        if (bankId != null) {
+            loans = loanRepository.findByBankId(bankId);
         } else {
             loans = loanRepository.findByUserId(userId);
         }
@@ -58,15 +58,16 @@ public class LoanService {
 
     @Transactional
     public LoanResponse create(Long userId, LoanRequest request) {
-        // Simple create, account existence is checked by service call if needed, 
-        // but here we just need to ensure it belongs to user
+        // Simple create, bank existence check
+        bankRepository.findByIdAndUserId(request.bankId(), userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + request.bankId()));
         
         Loan loan = Loan.builder()
-                .accountId(request.accountId())
+                .bankId(request.bankId())
                 .userId(userId)
                 .name(request.name())
                 .principal(request.principal())
-                .currency("USD") // Temporary, should come from account
+                .currency("USD") // Default, should ideally be configurable or derived
                 .interestRate(request.interestRate())
                 .totalInstallments(request.totalInstallments())
                 .remainingInstallments(request.totalInstallments())
@@ -104,7 +105,7 @@ public class LoanService {
     }
 
     @Transactional
-    public LoanInstallmentResponse payInstallment(Long loanId, Long installmentId, Long userId, LocalDate paidDate) {
+    public LoanInstallmentResponse payInstallment(Long loanId, Long installmentId, Long userId, Long accountId, LocalDate paidDate) {
         Loan loan = loanRepository.findByIdAndUserId(loanId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan not found: " + loanId));
 
@@ -123,8 +124,8 @@ public class LoanService {
             throw new BusinessException("Installment is already paid");
         }
 
-        // 1. Deduct funds from account (fail-fast)
-        accountService.adjustBalance(loan.getAccountId(), installment.getAmount().negate(), loan.getCurrency());
+        // 1. Deduct funds from selected account (fail-fast)
+        accountService.adjustBalance(accountId, installment.getAmount().negate(), loan.getCurrency());
 
         // 2. Mark as paid
         installment.setPaid(true);
@@ -140,7 +141,7 @@ public class LoanService {
         // 3. Emit payment event to update finances
         PaymentEvent event = new PaymentEvent(
                 userId,
-                loan.getAccountId(),
+                accountId,
                 installment.getAmount(),
                 loan.getCurrency(),
                 "Loan Payment: " + loan.getName() + " (Installment " + installment.getInstallmentNumber() + ")",

@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record LoanRequest(
-        @NotNull Long accountId,
+        @NotNull Long bankId,
         @NotBlank String name,
         @NotNull @DecimalMin("0.01") BigDecimal principal,
         @NotNull @DecimalMin("0.00") BigDecimal interestRate,

@@ -79,7 +79,7 @@ public class CardInstallmentService {
     }
 
     @Transactional
-    public CardInstallmentResponse payInstallment(Long cardId, Long installmentId, Long userId, LocalDate paidDate) {
+    public CardInstallmentResponse payInstallment(Long cardId, Long installmentId, Long userId, Long accountId, LocalDate paidDate) {
         cardRepository.findByIdAndUserId(cardId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cardId));
 
@@ -95,7 +95,7 @@ public class CardInstallmentService {
         }
 
         // 1. Deduct funds from account (fail-fast)
-        accountService.adjustBalance(installment.getCard().getAccountId(), installment.getAmount().negate(), installment.getCurrency());
+        accountService.adjustBalance(accountId, installment.getAmount().negate(), installment.getCurrency());
 
         // 2. Mark as paid
         installment.setPaid(true);
@@ -105,7 +105,7 @@ public class CardInstallmentService {
         // 3. Emit event (only for recording transaction in finances)
         eventProducer.sendPaymentEvent(new PaymentEvent(
                 userId,
-                saved.getCard().getAccountId(),
+                accountId,
                 saved.getAmount(),
                 saved.getCurrency(),
                 "Card Installment: " + saved.getDescription() + " (" + saved.getInstallmentNumber() + "/" + saved.getTotalInstallments() + ")",

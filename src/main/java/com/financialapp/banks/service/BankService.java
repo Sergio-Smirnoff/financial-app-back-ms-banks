@@ -98,13 +98,8 @@ public class BankService {
                         Collectors.reducing(BigDecimal.ZERO, AccountResponse::balance, BigDecimal::add)
                 ));
 
-        int cardsCount = accounts.stream()
-                .mapToInt(a -> cardRepository.countByAccountId(a.getId()))
-                .sum();
-
-        int loansCount = accounts.stream()
-                .mapToInt(a -> loanRepository.countByAccountId(a.getId()))
-                .sum();
+        int cardsCount = cardRepository.countByBankId(bank.getId());
+        int loansCount = loanRepository.countByBankId(bank.getId());
 
         return bankMapper.toResponse(bank, accountResponses, totalBalances, cardsCount, loansCount);
     }

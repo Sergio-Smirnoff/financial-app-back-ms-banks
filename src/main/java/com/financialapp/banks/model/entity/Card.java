@@ -22,8 +22,8 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "account_id", nullable = false)
-    private Long accountId;
+    @Column(name = "bank_id", nullable = false)
+    private Long bankId;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;

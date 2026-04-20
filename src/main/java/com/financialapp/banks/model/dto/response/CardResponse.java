@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public record CardResponse(
         Long id,
-        Long accountId,
+        Long bankId,
         Long userId,
         String displayName,
         CardBrand brand,

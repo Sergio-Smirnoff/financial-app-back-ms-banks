@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 public record LoanResponse(
         Long id,
-        Long accountId,
+        Long bankId,
         Long userId,
         String name,
         BigDecimal principal,

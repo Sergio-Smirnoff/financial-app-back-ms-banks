@@ -25,11 +25,11 @@ public class LoanController {
     private final LoanService loanService;
 
     @GetMapping
-    @Operation(summary = "List user loans, optionally filtered by account")
+    @Operation(summary = "List user loans, optionally filtered by bank")
     public ResponseEntity<ApiResponse<List<LoanResponse>>> list(
             @RequestHeader("X-User-Id") Long userId,
-            @RequestParam(required = false) Long accountId) {
-        return ResponseEntity.ok(ApiResponse.ok(loanService.list(userId, accountId)));
+            @RequestParam(required = false) Long bankId) {
+        return ResponseEntity.ok(ApiResponse.ok(loanService.list(userId, bankId)));
     }
 
     @PostMapping
@@ -59,13 +59,14 @@ public class LoanController {
     }
 
     @PostMapping("/{id}/installments/{installmentId}/pay")
-    @Operation(summary = "Mark a loan installment as paid")
+    @Operation(summary = "Mark a loan installment as paid from a specific account")
     public ResponseEntity<ApiResponse<LoanInstallmentResponse>> payInstallment(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id,
             @PathVariable Long installmentId,
+            @RequestParam Long accountId,
             @RequestParam(required = false) LocalDate paidDate) {
         return ResponseEntity.ok(ApiResponse.ok("Installment paid",
-                loanService.payInstallment(id, installmentId, userId, paidDate)));
+                loanService.payInstallment(id, installmentId, userId, accountId, paidDate)));
     }
 }

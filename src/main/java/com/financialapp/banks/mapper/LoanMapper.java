@@ -10,7 +10,7 @@ public interface LoanMapper {
         if (loan == null) return null;
         return LoanResponse.builder()
                 .id(loan.getId())
-                .accountId(loan.getAccountId())
+                .bankId(loan.getBankId())
                 .userId(loan.getUserId())
                 .name(loan.getName())
                 .principal(loan.getPrincipal())

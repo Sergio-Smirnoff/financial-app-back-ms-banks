@@ -32,13 +32,13 @@ public class CardService {
     private final BanksEventProducer eventProducer;
 
     @Transactional(readOnly = true)
-    public List<CardResponse> list(Long userId, Long accountId) {
+    public List<CardResponse> list(Long userId, Long bankId) {
         List<Card> cards;
-        if (accountId != null) {
-            // Verify account belongs to user
-            accountRepository.findByIdAndUserId(accountId, userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + accountId));
-            cards = cardRepository.findByAccountId(accountId);
+        if (bankId != null) {
+            // Verify bank belongs to user
+            bankRepository.findByIdAndUserId(bankId, userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + bankId));
+            cards = cardRepository.findByBankId(bankId);
         } else {
             cards = cardRepository.findByUserId(userId);
         }
@@ -56,16 +56,16 @@ public class CardService {
 
     @Transactional
     public CardResponse create(Long userId, CardRequest request) {
-        Account account = accountRepository.findByIdAndUserId(request.accountId(), userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + request.accountId()));
+        Bank bank = bankRepository.findByIdAndUserId(request.bankId(), userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + request.bankId()));
 
-        if (cardRepository.existsByAccountIdAndBrandAndCardTypeAndLast4Digits(
-                request.accountId(), request.brand(), request.cardType(), request.last4Digits())) {
-            throw new BusinessException("A similar card with these 4 digits already exists for this account");
+        if (cardRepository.existsByBankIdAndBrandAndCardTypeAndLast4Digits(
+                request.bankId(), request.brand(), request.cardType(), request.last4Digits())) {
+            throw new BusinessException("A similar card with these 4 digits already exists for this bank");
         }
 
         Card card = Card.builder()
-                .accountId(request.accountId())
+                .bankId(request.bankId())
                 .userId(userId)
                 .brand(request.brand())
                 .cardType(request.cardType())
@@ -87,16 +87,16 @@ public class CardService {
     }
 
     @Transactional
-    public void recordInstantExpense(Long cardId, Long userId, BigDecimal amount, String description, LocalDate date) {
+    public void recordInstantExpense(Long cardId, Long userId, BigDecimal amount, String description, LocalDate date, Long accountId) {
         Card card = cardRepository.findByIdAndUserId(cardId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cardId));
 
-        Account account = accountRepository.findById(card.getAccountId())
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + card.getAccountId()));
+        Account account = accountRepository.findByIdAndUserId(accountId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + accountId));
 
         PaymentEvent event = new PaymentEvent(
                 userId,
-                card.getAccountId(),
+                accountId,
                 amount,
                 account.getCurrency(),
                 description,
@@ -106,11 +106,7 @@ public class CardService {
     }
 
     private CardResponse mapToResponse(Card card) {
-        Bank bank = bankRepository.findById(
-                accountRepository.findById(card.getAccountId())
-                        .map(Account::getBankId)
-                        .orElse(0L)
-        ).orElse(null);
+        Bank bank = bankRepository.findById(card.getBankId()).orElse(null);
         String bankName = bank != null ? bank.getName() : "Unknown";
         return cardMapper.toResponse(card, bankName);
     }

@@ -40,13 +40,14 @@ public class CardInstallmentController {
     }
 
     @PostMapping("/{installmentId}/pay")
-    @Operation(summary = "Mark an installment as paid")
+    @Operation(summary = "Mark an installment as paid from a specific account")
     public ResponseEntity<ApiResponse<CardInstallmentResponse>> pay(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long cardId,
             @PathVariable Long installmentId,
+            @RequestParam Long accountId,
             @RequestParam(required = false) LocalDate paidDate) {
         return ResponseEntity.ok(ApiResponse.ok("Installment paid",
-                installmentService.payInstallment(cardId, installmentId, userId, paidDate)));
+                installmentService.payInstallment(cardId, installmentId, userId, accountId, paidDate)));
     }
 }
