@@ -2,13 +2,14 @@ package com.financialapp.banks.service;
 
 import com.financialapp.banks.exception.BusinessException;
 import com.financialapp.banks.exception.ResourceNotFoundException;
-import com.financialapp.banks.mapper.AccountMapper;
 import com.financialapp.banks.mapper.BankMapper;
 import com.financialapp.banks.model.dto.request.BankRequest;
 import com.financialapp.banks.model.dto.response.BankResponse;
 import com.financialapp.banks.model.entity.Bank;
 import com.financialapp.banks.repository.AccountRepository;
 import com.financialapp.banks.repository.BankRepository;
+import com.financialapp.banks.repository.CardRepository;
+import com.financialapp.banks.repository.LoanRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +29,9 @@ class BankServiceTest {
 
     @Mock BankRepository bankRepository;
     @Mock AccountRepository accountRepository;
-    @Mock AccountMapper accountMapper;
+    @Mock CardRepository cardRepository;
+    @Mock LoanRepository loanRepository;
+    @Mock AccountService accountService;
 
     BankMapper bankMapper = new BankMapper() {};
 
@@ -36,7 +39,7 @@ class BankServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new BankService(bankRepository, accountRepository, bankMapper, accountMapper);
+        service = new BankService(bankRepository, accountRepository, cardRepository, loanRepository, bankMapper, accountService);
     }
 
     @Test

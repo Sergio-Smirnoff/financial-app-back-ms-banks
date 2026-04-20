@@ -7,14 +7,20 @@ import com.financialapp.banks.mapper.BankMapper;
 import com.financialapp.banks.model.dto.request.BankRequest;
 import com.financialapp.banks.model.dto.response.AccountResponse;
 import com.financialapp.banks.model.dto.response.BankResponse;
+import com.financialapp.banks.model.entity.Account;
 import com.financialapp.banks.model.entity.Bank;
 import com.financialapp.banks.repository.AccountRepository;
 import com.financialapp.banks.repository.BankRepository;
+import com.financialapp.banks.repository.CardRepository;
+import com.financialapp.banks.repository.LoanRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,13 +28,15 @@ public class BankService {
 
     private final BankRepository bankRepository;
     private final AccountRepository accountRepository;
+    private final CardRepository cardRepository;
+    private final LoanRepository loanRepository;
     private final BankMapper bankMapper;
-    private final AccountMapper accountMapper;
+    private final AccountService accountService;
 
     @Transactional(readOnly = true)
     public List<BankResponse> list(Long userId) {
         return bankRepository.findByUserIdOrderByNameAsc(userId).stream()
-                .map(b -> bankMapper.toResponse(b, accountsFor(b.getId())))
+                .map(this::mapToResponse)
                 .toList();
     }
 
@@ -36,7 +44,7 @@ public class BankService {
     public BankResponse get(Long id, Long userId) {
         Bank bank = bankRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + id));
-        return bankMapper.toResponse(bank, accountsFor(bank.getId()));
+        return mapToResponse(bank);
     }
 
     @Transactional
@@ -49,7 +57,7 @@ public class BankService {
                 .name(request.name())
                 .logoUrl(request.logoUrl())
                 .build();
-        return bankMapper.toResponse(bankRepository.save(bank), List.of());
+        return mapToResponse(bankRepository.save(bank));
     }
 
     @Transactional
@@ -62,7 +70,7 @@ public class BankService {
         }
         bank.setName(request.name());
         bank.setLogoUrl(request.logoUrl());
-        return bankMapper.toResponse(bankRepository.save(bank), accountsFor(bank.getId()));
+        return mapToResponse(bankRepository.save(bank));
     }
 
     @Transactional
@@ -72,9 +80,26 @@ public class BankService {
         bankRepository.delete(bank);
     }
 
-    private List<AccountResponse> accountsFor(Long bankId) {
-        return accountRepository.findByBankIdOrderByNameAsc(bankId).stream()
-                .map(accountMapper::toResponse)
+    private BankResponse mapToResponse(Bank bank) {
+        List<Account> accounts = accountRepository.findByBankIdOrderByNameAsc(bank.getId());
+        List<AccountResponse> accountResponses = accounts.stream()
+                .map(a -> accountService.get(a.getId(), bank.getUserId())) // use accountService.get to include live valuation
                 .toList();
+
+        Map<String, BigDecimal> totalBalances = accountResponses.stream()
+                .collect(Collectors.groupingBy(
+                        AccountResponse::currency,
+                        Collectors.reducing(BigDecimal.ZERO, AccountResponse::balance, BigDecimal::add)
+                ));
+
+        int cardsCount = accounts.stream()
+                .mapToInt(a -> cardRepository.countByAccountId(a.getId()))
+                .sum();
+
+        int loansCount = accounts.stream()
+                .mapToInt(a -> loanRepository.countByAccountId(a.getId()))
+                .sum();
+
+        return bankMapper.toResponse(bank, accountResponses, totalBalances, cardsCount, loansCount);
     }
 }

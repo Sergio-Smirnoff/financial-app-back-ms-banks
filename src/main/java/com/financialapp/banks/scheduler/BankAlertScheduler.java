@@ -42,13 +42,16 @@ public class BankAlertScheduler {
         
         log.info("Found {} card(s) expiring within 30 days", expiring.size());
         for (Card card : expiring) {
+            Long bankId = accountRepository.findById(card.getAccountId())
+                    .map(Account::getBankId).orElse(null);
+
             eventProducer.sendBankAlert(BankAlertEvent.builder()
                     .userId(card.getUserId())
                     .type("CARD_EXPIRING")
                     .title("Card Expiring Soon")
                     .message(String.format("Your card ending in %s expires on %s.", 
                             card.getLast4Digits(), card.getExpiringDate()))
-                    .metadata("{\"cardId\":" + card.getId() + "}")
+                    .metadata(String.format("{\"cardId\":%d,\"bankId\":%d}", card.getId(), bankId))
                     .build());
         }
     }
@@ -60,13 +63,17 @@ public class BankAlertScheduler {
 
         log.info("Found {} loan installment(s) due within 3 days", upcoming.size());
         for (LoanInstallment inst : upcoming) {
+            Long bankId = accountRepository.findById(inst.getLoan().getAccountId())
+                    .map(Account::getBankId).orElse(null);
+
             eventProducer.sendBankAlert(BankAlertEvent.builder()
                     .userId(inst.getLoan().getUserId())
                     .type("LOAN_REMINDER")
                     .title("Loan Payment Due")
                     .message(String.format("Installment #%d of your loan '%s' is due on %s.",
                             inst.getInstallmentNumber(), inst.getLoan().getName(), inst.getDueDate()))
-                    .metadata("{\"loanId\":" + inst.getLoan().getId() + ",\"installmentId\":" + inst.getId() + "}")
+                    .metadata(String.format("{\"loanId\":%d,\"installmentId\":%d,\"bankId\":%d}", 
+                            inst.getLoan().getId(), inst.getId(), bankId))
                     .build());
         }
     }
@@ -83,7 +90,7 @@ public class BankAlertScheduler {
                     .title("Low Account Balance")
                     .message(String.format("Your account '%s' has a low balance of %s %s.",
                             account.getName(), account.getBalance(), account.getCurrency()))
-                    .metadata("{\"accountId\":" + account.getId() + "}")
+                    .metadata(String.format("{\"accountId\":%d,\"bankId\":%d}", account.getId(), account.getBankId()))
                     .build());
         }
     }

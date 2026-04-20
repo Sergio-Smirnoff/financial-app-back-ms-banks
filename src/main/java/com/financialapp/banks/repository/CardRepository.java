@@ -17,6 +17,8 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     Optional<Card> findByIdAndUserId(Long id, Long userId);
     boolean existsByAccountIdAndBrandAndCardTypeAndLast4Digits(Long accountId, CardBrand brand, CardType cardType, String last4Digits);
 
+    int countByAccountId(Long accountId);
+
     @Query("SELECT c FROM Card c WHERE c.expiringDate BETWEEN :from AND :to")
     List<Card> findExpiringBetween(@Param("from") LocalDate from, @Param("to") LocalDate to);
 }

@@ -14,6 +14,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     List<Loan> findByAccountId(Long accountId);
     Optional<Loan> findByIdAndUserId(Long id, Long userId);
 
+    int countByAccountId(Long accountId);
+
     @Query("SELECT l FROM Loan l WHERE l.active = true AND " +
            "(SELECT MIN(li.dueDate) FROM LoanInstallment li WHERE li.loan = l AND li.paid = false) BETWEEN :from AND :to")
     List<Loan> findActiveWithUpcomingPayment(@Param("from") LocalDate from, @Param("to") LocalDate to);
