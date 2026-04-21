@@ -107,8 +107,8 @@ public class AccountService {
                     "An account with name '" + request.name() + "' already exists in this bank");
         }
 
-        if (request.type() == AccountType.INVESTMENT && accountRepository.existsByBankIdAndType(bank.getId(), AccountType.INVESTMENT)) {
-            throw new BusinessException("This bank already has an investment account. Only one is allowed per bank.");
+        if (request.type() == AccountType.INVESTMENT && accountRepository.existsByBankIdAndTypeAndCurrency(bank.getId(), AccountType.INVESTMENT, request.currency().toUpperCase())) {
+            throw new BusinessException("This bank already has an investment account in " + request.currency().toUpperCase() + ". Only one is allowed per currency.");
         }
 
         Account account = Account.builder()
