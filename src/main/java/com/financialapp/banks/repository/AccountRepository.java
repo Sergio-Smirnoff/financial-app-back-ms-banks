@@ -14,6 +14,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByBankIdOrderByNameAsc(Long bankId);
     Optional<Account> findByIdAndUserId(Long id, Long userId);
     boolean existsByBankIdAndName(Long bankId, String name);
+    boolean existsByBankIdAndType(Long bankId, com.financialapp.banks.model.enums.AccountType type);
 
     @Query("SELECT a FROM Account a WHERE a.isActive = true AND a.balance < :threshold")
     List<Account> findLowBalanceAccounts(@Param("threshold") BigDecimal threshold);

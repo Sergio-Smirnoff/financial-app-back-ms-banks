@@ -53,6 +53,10 @@ public class AccountService {
         Account account = accountRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + id));
         
+        if (account.getType() == AccountType.INVESTMENT) {
+            throw new BusinessException("Cannot manually adjust balance of an investment account. It is automatically calculated from holdings.");
+        }
+
         if (expectedCurrency != null && !account.getCurrency().equalsIgnoreCase(expectedCurrency)) {
             throw new BusinessException("Currency mismatch: account is " + account.getCurrency() + " but operation is " + expectedCurrency);
         }
@@ -102,6 +106,11 @@ public class AccountService {
             throw new BusinessException(
                     "An account with name '" + request.name() + "' already exists in this bank");
         }
+
+        if (request.type() == AccountType.INVESTMENT && accountRepository.existsByBankIdAndType(bank.getId(), AccountType.INVESTMENT)) {
+            throw new BusinessException("This bank already has an investment account. Only one is allowed per bank.");
+        }
+
         Account account = Account.builder()
                 .bankId(bank.getId())
                 .userId(userId)
@@ -141,8 +150,21 @@ public class AccountService {
         Account account = accountRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + id));
         
-        // 1. Check balance is zero
-        if (account.getBalance().compareTo(BigDecimal.ZERO) != 0) {
+        if (account.getType() == AccountType.INVESTMENT) {
+            try {
+                var response = investmentsClient.countHoldings(id);
+                if (response.getData() != null && response.getData() > 0) {
+                    throw new BusinessException("Cannot delete investment account because it still has active holdings. Sell or delete the holdings first.");
+                }
+            } catch (Exception e) {
+                if (e instanceof BusinessException) throw e;
+                log.error("Failed to check holdings for account {}: {}", id, e.getMessage());
+                throw new BusinessException("Safety check failed: Could not verify if account has active holdings. Please try again later.");
+            }
+        }
+
+        // 1. Check balance is zero (for non-investment accounts)
+        if (account.getType() != AccountType.INVESTMENT && account.getBalance().compareTo(BigDecimal.ZERO) != 0) {
             throw new BusinessException("Cannot delete account with non-zero balance: " + account.getBalance());
         }
 

@@ -13,5 +13,8 @@ public interface InvestmentsClient {
     @GetMapping("/api/v1/investments/holdings/valuation")
     ApiResponse<AccountValuation> getValuation(@RequestParam("accountId") Long accountId);
 
+    @GetMapping("/api/v1/investments/holdings/count")
+    ApiResponse<Long> countHoldings(@RequestParam("accountId") Long accountId);
+
     record AccountValuation(Long accountId, BigDecimal totalValuation, String currency) {}
 }
