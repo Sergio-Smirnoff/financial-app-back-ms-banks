@@ -77,14 +77,14 @@ class CardInstallmentServiceTest {
 
     @Test
     void payInstallment_marksAsPaid() {
-        Card card = Card.builder().id(500L).userId(1L).accountId(1L).build();
-        CardInstallment installment = CardInstallment.builder().id(1000L).card(card).paid(false).amount(BigDecimal.TEN).build();
+        Card card = Card.builder().id(500L).userId(1L).bankId(10L).build();
+        CardInstallment installment = CardInstallment.builder().id(1000L).card(card).paid(false).amount(BigDecimal.TEN).currency("USD").build();
         
         when(cardRepository.findByIdAndUserId(500L, 1L)).thenReturn(Optional.of(card));
         when(installmentRepository.findById(1000L)).thenReturn(Optional.of(installment));
         when(installmentRepository.save(installment)).thenReturn(installment);
 
-        CardInstallmentResponse res = service.payInstallment(500L, 1000L, 1L, LocalDate.now());
+        CardInstallmentResponse res = service.payInstallment(500L, 1000L, 1L, 100L, LocalDate.now());
 
         assertThat(res.paid()).isTrue();
         assertThat(res.paidDate()).isNotNull();

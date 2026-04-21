@@ -47,9 +47,9 @@ class CardServiceTest {
 
     @Test
     void create_persistsCardForCurrentUser() {
-        Account account = Account.builder().id(100L).bankId(10L).userId(1L).build();
-        when(accountRepository.findByIdAndUserId(100L, 1L)).thenReturn(Optional.of(account));
-        when(cardRepository.existsByAccountIdAndBrandAndCardTypeAndLast4Digits(any(), any(), any(), any())).thenReturn(false);
+        Bank bank = Bank.builder().id(10L).userId(1L).name("Chase").build();
+        when(bankRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(bank));
+        when(cardRepository.existsByBankIdAndBrandAndCardTypeAndLast4Digits(any(), any(), any(), any())).thenReturn(false);
         when(cardRepository.save(any(Card.class))).thenAnswer(inv -> {
             Card c = inv.getArgument(0);
             c.setId(500L);
@@ -57,10 +57,9 @@ class CardServiceTest {
         });
 
         // For display name mapping
-        when(accountRepository.findById(100L)).thenReturn(Optional.of(account));
-        when(bankRepository.findById(10L)).thenReturn(Optional.of(Bank.builder().name("Chase").build()));
+        when(bankRepository.findById(10L)).thenReturn(Optional.of(bank));
 
-        CardRequest request = new CardRequest(100L, CardBrand.VISA, CardType.PLATINUM,
+        CardRequest request = new CardRequest(10L, CardBrand.VISA, CardType.PLATINUM,
                 CardBehavior.INSTALLMENTS, "1234", LocalDate.now().plusYears(2), 20, 10);
 
         CardResponse res = service.create(1L, request);
@@ -71,10 +70,10 @@ class CardServiceTest {
 
     @Test
     void create_rejectsDuplicateLast4() {
-        when(accountRepository.findByIdAndUserId(100L, 1L)).thenReturn(Optional.of(new Account()));
-        when(cardRepository.existsByAccountIdAndBrandAndCardTypeAndLast4Digits(any(), any(), any(), any())).thenReturn(true);
+        when(bankRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(Bank.builder().id(10L).build()));
+        when(cardRepository.existsByBankIdAndBrandAndCardTypeAndLast4Digits(any(), any(), any(), any())).thenReturn(true);
 
-        CardRequest request = new CardRequest(100L, CardBrand.VISA, CardType.PLATINUM,
+        CardRequest request = new CardRequest(10L, CardBrand.VISA, CardType.PLATINUM,
                 CardBehavior.INSTALLMENTS, "1234", LocalDate.now().plusYears(2), 20, 10);
 
         assertThatThrownBy(() -> service.create(1L, request))

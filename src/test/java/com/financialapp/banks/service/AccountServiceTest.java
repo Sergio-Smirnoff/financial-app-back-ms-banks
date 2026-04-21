@@ -33,8 +33,6 @@ class AccountServiceTest {
 
     @Mock BankRepository bankRepository;
     @Mock AccountRepository accountRepository;
-    @Mock CardInstallmentRepository cardInstallmentRepository;
-    @Mock LoanInstallmentRepository loanInstallmentRepository;
     @Mock InvestmentsClient investmentsClient;
     @Mock BanksEventProducer eventProducer;
 
@@ -44,7 +42,7 @@ class AccountServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new AccountService(accountRepository, bankRepository, cardInstallmentRepository, loanInstallmentRepository, accountMapper, investmentsClient, eventProducer);
+        service = new AccountService(accountRepository, bankRepository, accountMapper, investmentsClient, eventProducer);
     }
 
     @Test

@@ -9,9 +9,11 @@ import com.financialapp.banks.model.dto.request.LoanRequest;
 import com.financialapp.banks.model.dto.response.LoanInstallmentResponse;
 import com.financialapp.banks.model.dto.response.LoanResponse;
 import com.financialapp.banks.model.entity.Account;
+import com.financialapp.banks.model.entity.Bank;
 import com.financialapp.banks.model.entity.Loan;
 import com.financialapp.banks.model.entity.LoanInstallment;
 import com.financialapp.banks.repository.AccountRepository;
+import com.financialapp.banks.repository.BankRepository;
 import com.financialapp.banks.repository.LoanInstallmentRepository;
 import com.financialapp.banks.repository.LoanRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +35,8 @@ import static org.mockito.Mockito.*;
 class LoanServiceTest {
 
     @Mock LoanRepository loanRepository;
+    @Mock BankRepository bankRepository;
+    @Mock AccountRepository accountRepository;
     @Mock LoanInstallmentRepository installmentRepository;
     @Mock AccountService accountService;
     @Mock BanksEventProducer eventProducer;
@@ -44,22 +48,23 @@ class LoanServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new LoanService(loanRepository, installmentRepository, accountService, loanMapper, installmentMapper, eventProducer);
+        service = new LoanService(loanRepository, bankRepository, accountRepository, installmentRepository, accountService, loanMapper, installmentMapper, eventProducer);
     }
 
     @Test
     void create_generatesAmortizedInstallments() {
-        Account account = Account.builder().id(100L).userId(1L).currency("USD").build();
-        // accountService dependency should be mocked if used in create, 
-        // but currently create in LoanService uses accountRepository directly or assumes existence
+        Bank bank = Bank.builder().id(10L).userId(1L).build();
+        Account account = Account.builder().id(100L).bankId(10L).userId(1L).currency("USD").build();
         
+        when(bankRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(bank));
+        when(accountRepository.findByIdAndUserId(100L, 1L)).thenReturn(Optional.of(account));
         when(loanRepository.save(any(Loan.class))).thenAnswer(inv -> {
             Loan l = inv.getArgument(0);
             l.setId(500L);
             return l;
         });
 
-        LoanRequest request = new LoanRequest(100L, "Car Loan", new BigDecimal("1000.00"),
+        LoanRequest request = new LoanRequest(10L, 100L, "Car Loan", new BigDecimal("1000.00"),
                 new BigDecimal("10.00"), 3, LocalDate.of(2026, 1, 1));
 
         LoanResponse res = service.create(1L, request);
@@ -68,11 +73,12 @@ class LoanServiceTest {
         assertThat(res.principal()).isEqualTo(new BigDecimal("1000.00"));
         assertThat(res.totalInstallments()).isEqualTo(3);
         verify(installmentRepository, times(1)).saveAll(anyList());
+        verify(accountService, times(1)).adjustBalance(eq(100L), any(BigDecimal.class), eq("USD"));
     }
 
     @Test
     void payInstallment_marksAsPaid() {
-        Loan loan = Loan.builder().id(500L).userId(1L).accountId(1L).active(true).totalInstallments(3).remainingInstallments(3).build();
+        Loan loan = Loan.builder().id(500L).userId(1L).bankId(10L).active(true).totalInstallments(3).remainingInstallments(3).currency("USD").build();
         LoanInstallment inst = LoanInstallment.builder().id(1000L).loan(loan).paid(false).amount(BigDecimal.TEN).build();
 
         when(loanRepository.findByIdAndUserId(500L, 1L)).thenReturn(Optional.of(loan));
@@ -80,9 +86,10 @@ class LoanServiceTest {
         when(installmentRepository.save(inst)).thenReturn(inst);
         when(loanRepository.save(loan)).thenReturn(loan);
 
-        LoanInstallmentResponse res = service.payInstallment(500L, 1000L, 1L, LocalDate.now());
+        LoanInstallmentResponse res = service.payInstallment(500L, 1000L, 1L, 100L, LocalDate.now());
 
         assertThat(res.paid()).isTrue();
         assertThat(loan.getRemainingInstallments()).isEqualTo(2);
+        verify(accountService, times(1)).adjustBalance(eq(100L), any(BigDecimal.class), eq("USD"));
     }
 }
