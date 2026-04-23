@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface CardInstallmentRepository extends JpaRepository<CardInstallment, Long> {
     List<CardInstallment> findByCardIdOrderByDueDateAsc(Long cardId);
+    boolean existsByCardIdAndPaidFalse(Long cardId);
 }

@@ -164,7 +164,7 @@ public class LoanService {
         PaymentEvent event = new PaymentEvent(
                 userId,
                 accountId,
-                installment.getAmount(),
+                installment.getAmount().negate(),
                 loan.getCurrency(),
                 "Loan Payment: " + loan.getName() + " (Installment " + installment.getInstallmentNumber() + ")",
                 installment.getPaidDate()

@@ -35,8 +35,8 @@ public class AccountService {
     private static final BigDecimal LOW_BALANCE_THRESHOLD = new BigDecimal("500.00");
 
     @Transactional(readOnly = true)
-    public List<AccountResponse> listByUser(Long userId) {
-        return accountRepository.findByUserIdOrderByNameAsc(userId).stream()
+    public List<AccountResponse> listByUser(Long userId, AccountType type, String currency) {
+        return accountRepository.findFiltered(userId, type, currency).stream()
                 .map(this::mapToResponse)
                 .toList();
     }
@@ -76,7 +76,7 @@ public class AccountService {
                     .userId(account.getUserId())
                     .type("LOW_BALANCE")
                     .title("Low Account Balance")
-                    .message(String.format("Your account '%s' has a low balance of %s %s.",
+                    .message(String.format("Your account '%s' has a low balance of %.2f %s.",
                             account.getName(), newBalance, account.getCurrency()))
                     .metadata(String.format("{\"accountId\":%d,\"bankId\":%d}", account.getId(), account.getBankId()))
                     .build());
@@ -91,9 +91,9 @@ public class AccountService {
                 .userId(account.getUserId())
                 .type(type)
                 .title(title)
-                .message(String.format("%s %s has been %s your account '%s'.",
+                .message(String.format("%.2f %s has been %s your account '%s'.",
                         delta.abs(), account.getCurrency(), action, account.getName()))
-                .metadata(String.format("{\"accountId\":%d,\"bankId\":%d,\"amount\":%s}", 
+                .metadata(String.format("{\"accountId\":%d,\"bankId\":%d,\"amount\":%.2f}", 
                         account.getId(), account.getBankId(), delta.abs()))
                 .build());
     }

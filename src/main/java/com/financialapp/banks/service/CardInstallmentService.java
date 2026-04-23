@@ -106,7 +106,7 @@ public class CardInstallmentService {
         eventProducer.sendPaymentEvent(new PaymentEvent(
                 userId,
                 accountId,
-                saved.getAmount(),
+                saved.getAmount().negate(),
                 saved.getCurrency(),
                 "Card Installment: " + saved.getDescription() + " (" + saved.getInstallmentNumber() + "/" + saved.getTotalInstallments() + ")",
                 saved.getPaidDate()

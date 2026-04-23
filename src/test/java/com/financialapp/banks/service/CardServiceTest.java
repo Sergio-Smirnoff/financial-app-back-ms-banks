@@ -13,6 +13,7 @@ import com.financialapp.banks.model.enums.CardBrand;
 import com.financialapp.banks.model.enums.CardType;
 import com.financialapp.banks.repository.AccountRepository;
 import com.financialapp.banks.repository.BankRepository;
+import com.financialapp.banks.repository.CardInstallmentRepository;
 import com.financialapp.banks.repository.CardRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,7 @@ class CardServiceTest {
     @Mock CardRepository cardRepository;
     @Mock AccountRepository accountRepository;
     @Mock BankRepository bankRepository;
+    @Mock CardInstallmentRepository cardInstallmentRepository;
     @Mock BanksEventProducer eventProducer;
 
     CardMapper cardMapper = new CardMapper() {};
@@ -42,7 +44,7 @@ class CardServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new CardService(cardRepository, accountRepository, bankRepository, cardMapper, eventProducer);
+        service = new CardService(cardRepository, accountRepository, bankRepository, cardInstallmentRepository, cardMapper, eventProducer);
     }
 
     @Test
@@ -85,6 +87,7 @@ class CardServiceTest {
     void delete_removesCard() {
         Card card = Card.builder().id(500L).userId(1L).build();
         when(cardRepository.findByIdAndUserId(500L, 1L)).thenReturn(Optional.of(card));
+        when(cardInstallmentRepository.existsByCardIdAndPaidFalse(500L)).thenReturn(false);
 
         service.delete(500L, 1L);
 

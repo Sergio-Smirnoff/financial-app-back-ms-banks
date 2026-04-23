@@ -12,6 +12,7 @@ import com.financialapp.banks.model.entity.Bank;
 import com.financialapp.banks.model.entity.Card;
 import com.financialapp.banks.repository.AccountRepository;
 import com.financialapp.banks.repository.BankRepository;
+import com.financialapp.banks.repository.CardInstallmentRepository;
 import com.financialapp.banks.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class CardService {
     private final CardRepository cardRepository;
     private final AccountRepository accountRepository;
     private final BankRepository bankRepository;
+    private final CardInstallmentRepository cardInstallmentRepository;
     private final CardMapper cardMapper;
     private final BanksEventProducer eventProducer;
 
@@ -83,6 +85,13 @@ public class CardService {
     public void delete(Long id, Long userId) {
         Card card = cardRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + id));
+        
+        // Check for unpaid installments
+        boolean hasUnpaid = cardInstallmentRepository.existsByCardIdAndPaidFalse(id);
+        if (hasUnpaid) {
+            throw new BusinessException("Cannot delete card with unpaid installments. Pay them first.");
+        }
+        
         cardRepository.delete(card);
     }
 
@@ -97,7 +106,7 @@ public class CardService {
         PaymentEvent event = new PaymentEvent(
                 userId,
                 accountId,
-                amount,
+                amount.negate(),
                 account.getCurrency(),
                 description,
                 date

@@ -19,4 +19,13 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     @Query("SELECT a FROM Account a WHERE a.isActive = true AND a.balance < :threshold")
     List<Account> findLowBalanceAccounts(@Param("threshold") BigDecimal threshold);
+
+    @Query("SELECT a FROM Account a WHERE a.userId = :userId " +
+           "AND (:type IS NULL OR a.type = :type) " +
+           "AND (:currency IS NULL OR UPPER(a.currency) = UPPER(:currency)) " +
+           "ORDER BY a.name ASC")
+    List<Account> findFiltered(
+            @Param("userId") Long userId,
+            @Param("type") com.financialapp.banks.model.enums.AccountType type,
+            @Param("currency") String currency);
 }

@@ -26,8 +26,10 @@ public class AccountController {
     @GetMapping
     @Operation(summary = "List all accounts for the current user (across banks)")
     public ResponseEntity<ApiResponse<List<AccountResponse>>> list(
-            @RequestHeader("X-User-Id") Long userId) {
-        return ResponseEntity.ok(ApiResponse.ok(accountService.listByUser(userId)));
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestParam(required = false) com.financialapp.banks.model.enums.AccountType type,
+            @RequestParam(required = false) String currency) {
+        return ResponseEntity.ok(ApiResponse.ok(accountService.listByUser(userId, type, currency)));
     }
 
     @GetMapping("/{id}")
