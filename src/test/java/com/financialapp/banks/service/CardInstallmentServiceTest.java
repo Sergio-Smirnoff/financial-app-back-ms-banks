@@ -84,7 +84,7 @@ class CardInstallmentServiceTest {
         when(installmentRepository.findById(1000L)).thenReturn(Optional.of(installment));
         when(installmentRepository.save(installment)).thenReturn(installment);
 
-        CardInstallmentResponse res = service.payInstallment(500L, 1000L, 1L, 100L, LocalDate.now());
+        CardInstallmentResponse res = service.payInstallment(500L, 1000L, 1L, 100L, LocalDate.now(), false);
 
         assertThat(res.paid()).isTrue();
         assertThat(res.paidDate()).isNotNull();

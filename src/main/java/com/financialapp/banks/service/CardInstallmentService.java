@@ -6,11 +6,12 @@ import com.financialapp.banks.kafka.event.PaymentEvent;
 import com.financialapp.banks.kafka.producer.BanksEventProducer;
 import com.financialapp.banks.mapper.CardInstallmentMapper;
 import com.financialapp.banks.model.dto.request.CardExpenseCreateRequest;
+import com.financialapp.banks.model.dto.request.CardExpenseImportRequest;
+import com.financialapp.banks.model.dto.response.BatchImportResponse;
 import com.financialapp.banks.model.dto.response.CardInstallmentResponse;
 import com.financialapp.banks.model.entity.Card;
 import com.financialapp.banks.model.entity.CardInstallment;
 import com.financialapp.banks.model.enums.CardBehavior;
-import com.financialapp.banks.repository.AccountRepository;
 import com.financialapp.banks.repository.CardInstallmentRepository;
 import com.financialapp.banks.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -79,7 +81,57 @@ public class CardInstallmentService {
     }
 
     @Transactional
-    public CardInstallmentResponse payInstallment(Long cardId, Long installmentId, Long userId, Long accountId, LocalDate paidDate) {
+    public BatchImportResponse importExpenses(Long cardId, Long userId, CardExpenseImportRequest req, boolean bypassBalance) {
+        cardRepository.findByIdAndUserId(cardId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cardId));
+
+        int imported = 0, skipped = 0;
+        List<String> errors = new ArrayList<>();
+
+        for (CardExpenseImportRequest.ImportedExpense expense : req.expenses()) {
+            Long accountId = resolveAccount(expense.currency(), req.arsAccountId(), req.usdAccountId());
+            if (accountId == null) {
+                skipped++;
+                continue;
+            }
+
+            try {
+                // Reuse existing createExpense() + payInstallment()
+                List<CardInstallmentResponse> created = createExpense(cardId, userId,
+                        new CardExpenseCreateRequest(
+                                expense.description(), expense.amount(), expense.currency(), 1, expense.date()
+                        ));
+                payInstallment(cardId, created.get(0).id(), userId, accountId, expense.date(), bypassBalance);
+                imported++;
+            } catch (Exception e) {
+                errors.add(expense.description() + ": " + e.getMessage());
+            }
+        }
+        return new BatchImportResponse(imported, skipped, errors);
+    }
+
+    private Long resolveAccount(String currency, Long arsId, Long usdId) {
+        return switch (currency.toUpperCase()) {
+            case "ARS" -> arsId;
+            case "USD" -> usdId;  // null if not provided -> caller skips
+            default -> null;
+        };
+    }
+
+    @Transactional(readOnly = true)
+    public List<Integer> checkDuplicates(Long cardId, List<CardExpenseCreateRequest> expenses) {
+        return IntStream.range(0, expenses.size())
+                .filter(i -> {
+                    CardExpenseCreateRequest req = expenses.get(i);
+                    return installmentRepository.existsByCardIdAndDescriptionAndAmountAndDueDate(
+                            cardId, req.description(), req.totalAmount(), req.firstDueDate());
+                })
+                .boxed()
+                .toList();
+    }
+
+    @Transactional
+    public CardInstallmentResponse payInstallment(Long cardId, Long installmentId, Long userId, Long accountId, LocalDate paidDate, boolean bypassBalance) {
         cardRepository.findByIdAndUserId(cardId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cardId));
 
@@ -95,7 +147,9 @@ public class CardInstallmentService {
         }
 
         // 1. Deduct funds from account (fail-fast)
-        accountService.adjustBalance(accountId, installment.getAmount().negate(), installment.getCurrency());
+        if (!bypassBalance) {
+            accountService.adjustBalance(accountId, installment.getAmount().negate(), installment.getCurrency());
+        }
 
         // 2. Mark as paid
         installment.setPaid(true);
