@@ -99,23 +99,14 @@ public class LoanService {
                 LocalDate.now()
         ));
 
-        // Simple amortization: (principal * (1 + interest/100)) / installments
-        BigDecimal totalWithInterest = request.principal()
-                .multiply(BigDecimal.ONE.add(request.interestRate().divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)));
-        
-        BigDecimal installmentAmount = totalWithInterest
-                .divide(BigDecimal.valueOf(request.totalInstallments()), 2, RoundingMode.DOWN);
-        
-        BigDecimal lastInstallmentAmount = totalWithInterest
-                .subtract(installmentAmount.multiply(BigDecimal.valueOf(request.totalInstallments() - 1)));
+        BigDecimal installmentAmount = calculateFrenchInstallment(request.principal(), request.interestRate(), request.totalInstallments());
 
         List<LoanInstallment> installments = new ArrayList<>();
         for (int i = 1; i <= request.totalInstallments(); i++) {
-            BigDecimal currentAmount = (i == request.totalInstallments()) ? lastInstallmentAmount : installmentAmount;
             LoanInstallment inst = LoanInstallment.builder()
                     .loan(loan)
                     .installmentNumber(i)
-                    .amount(currentAmount)
+                    .amount(installmentAmount)
                     .dueDate(request.startDate().plusMonths(i - 1))
                     .paid(false)
                     .build();
@@ -124,6 +115,23 @@ public class LoanService {
         
         installmentRepository.saveAll(installments);
         return loanMapper.toResponse(loan);
+    }
+
+    private BigDecimal calculateFrenchInstallment(BigDecimal principal, BigDecimal annualRate, int n) {
+        if (annualRate.compareTo(BigDecimal.ZERO) == 0) {
+            return principal.divide(BigDecimal.valueOf(n), 2, RoundingMode.HALF_UP);
+        }
+
+        BigDecimal i = annualRate.divide(BigDecimal.valueOf(1200), 10, RoundingMode.HALF_UP);
+        double onePlusI = 1.0 + i.doubleValue();
+        double powN = Math.pow(onePlusI, n);
+        
+        // A = P * [i * (1+i)^n] / [(1+i)^n - 1]
+        double numerator = i.doubleValue() * powN;
+        double denominator = powN - 1.0;
+        
+        return principal.multiply(BigDecimal.valueOf(numerator / denominator))
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     @Transactional
