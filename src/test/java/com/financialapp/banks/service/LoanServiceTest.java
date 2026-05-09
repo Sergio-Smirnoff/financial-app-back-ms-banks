@@ -19,6 +19,7 @@ import com.financialapp.banks.repository.LoanRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -64,16 +65,26 @@ class LoanServiceTest {
             return l;
         });
 
-        LoanRequest request = new LoanRequest(10L, 100L, "Car Loan", new BigDecimal("1000.00"),
-                new BigDecimal("10.00"), 3, LocalDate.of(2026, 1, 1));
+        // principal: 10,000 | rate: 12% | installments: 12
+        // Monthly rate: 1% (0.01)
+        // Installment = 10000 * (0.01 * 1.01^12) / (1.01^12 - 1) = 888.49
+        LoanRequest request = new LoanRequest(10L, 100L, "Car Loan", new BigDecimal("10000.00"),
+                new BigDecimal("12.00"), 12, LocalDate.of(2026, 1, 1));
 
         LoanResponse res = service.create(1L, request);
 
         assertThat(res.id()).isEqualTo(500L);
-        assertThat(res.principal()).isEqualTo(new BigDecimal("1000.00"));
-        assertThat(res.totalInstallments()).isEqualTo(3);
-        verify(installmentRepository, times(1)).saveAll(anyList());
-        verify(accountService, times(1)).adjustBalance(eq(100L), any(BigDecimal.class), eq("USD"));
+        assertThat(res.principal()).isEqualTo(new BigDecimal("10000.00"));
+        assertThat(res.totalInstallments()).isEqualTo(12);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<LoanInstallment>> captor = ArgumentCaptor.forClass(List.class);
+        verify(installmentRepository).saveAll(captor.capture());
+        
+        List<LoanInstallment> installments = captor.getValue();
+        assertThat(installments).hasSize(12);
+        assertThat(installments.get(0).getAmount()).isEqualByComparingTo("888.49");
+        assertThat(installments.get(11).getAmount()).isEqualByComparingTo("888.49");
     }
 
     @Test

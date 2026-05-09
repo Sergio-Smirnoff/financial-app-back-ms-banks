@@ -4,7 +4,7 @@ import com.financialapp.banks.kafka.event.BankAlertEvent;
 import com.financialapp.banks.kafka.event.PaymentEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,15 +12,15 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class BanksEventProducer {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
     public void sendPaymentEvent(PaymentEvent event) {
-        log.info("Sending payment event: {}", event);
-        kafkaTemplate.send("payment-events", event.userId().toString(), event);
+        log.info("Queuing transactional payment event: {}", event);
+        eventPublisher.publishEvent(new TransactionalKafkaEvent("payment-events", event.userId().toString(), event));
     }
 
     public void sendBankAlert(BankAlertEvent event) {
-        log.info("Sending bank alert event: {}", event);
-        kafkaTemplate.send("bank-alerts", event.getUserId().toString(), event);
+        log.info("Queuing transactional bank alert event: {}", event);
+        eventPublisher.publishEvent(new TransactionalKafkaEvent("bank-alerts", event.getUserId().toString(), event));
     }
 }
