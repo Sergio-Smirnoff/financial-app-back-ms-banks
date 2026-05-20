@@ -6,13 +6,13 @@ import com.financialapp.banks.domain.model.bank.BankName;
 
 import java.time.LocalDateTime;
 
-public record Account(
-    String cbu, 
-    String alias,
-    Money balance,
-    UserId userId,
-    BankName bankName,
-    AccountDetails details,
-    LocalDateTime createdAt,
-    LocalDateTime updatedAt
-) {}
+public abstract class Account {
+    String cbu; // id
+    String alias;
+    Money balance;
+    UserId userId;
+    BankName bankName;
+    String name;
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
+}

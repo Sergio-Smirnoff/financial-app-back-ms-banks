@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface BankRepository {
     List<Bank> findAll();
-    Optional<Bank> findByName(BankName name);
+    Optional<Bank> findByName(BankName name); // id
     boolean existsByName(BankName name);
     Bank save(Bank bank);
     void delete(BankName name);

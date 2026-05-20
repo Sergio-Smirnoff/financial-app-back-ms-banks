@@ -5,7 +5,6 @@ import java.time.LocalDate;
 public record CardDetails(
     CardBrand brand,
     CardType cardType,
-    CardBehavior behavior,
     LocalDate expiringDate,
     CardBilling billing
 ) {}

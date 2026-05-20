@@ -1,10 +1,10 @@
 package com.financialapp.banks.domain.event;
 
+import com.financialapp.banks.domain.common.DomainEvent;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.account.AccountId;
 import com.financialapp.banks.domain.model.bank.BankName;
-import com.financialapp.banks.domain.shared.DomainEvent;
 
 public record BalanceAdjustedEvent(
         UserId userId,

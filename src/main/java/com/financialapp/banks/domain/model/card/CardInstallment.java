@@ -7,11 +7,10 @@ import java.time.LocalDateTime;
 
 public record CardInstallment(
     CardInstallmentId id,
-    CardId cardId,
+    String cardNumber,
     String description,
     Money totalAmount,
     int installmentNumber,
-    int totalInstallments,
     Money amount,
     LocalDate dueDate,
     boolean paid,

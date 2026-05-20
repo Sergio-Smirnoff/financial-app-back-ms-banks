@@ -5,11 +5,11 @@ import com.financialapp.banks.domain.model.bank.BankName;
 
 import java.time.LocalDateTime;
 
-public record Card(
-    String cardNumber,
-    UserId userId,
-    BankName bankName,
-    CardDetails details,
-    LocalDateTime createdAt,
-    LocalDateTime updatedAt
-) {}
+public abstract class Card {
+    String cardNumber; // id
+    UserId userId;
+    BankName bankName;
+    CardDetails details;
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
+}
