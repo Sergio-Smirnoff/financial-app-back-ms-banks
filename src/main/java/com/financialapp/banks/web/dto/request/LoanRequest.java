@@ -1,4 +1,4 @@
-package com.financialapp.banks.model.dto.request;
+package com.financialapp.banks.web.dto.request;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;

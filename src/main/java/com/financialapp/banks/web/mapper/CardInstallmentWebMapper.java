@@ -1,28 +1,28 @@
-package com.financialapp.banks.mapper;
+package com.financialapp.banks.web.mapper;
 
-import com.financialapp.banks.model.dto.response.CardInstallmentResponse;
-import com.financialapp.banks.model.entity.CardInstallment;
-import org.mapstruct.Mapper;
+import com.financialapp.banks.domain.model.card.CardInstallment;
+import com.financialapp.banks.web.dto.response.CardInstallmentResponse;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-public interface CardInstallmentMapper {
+@Component
+public class CardInstallmentWebMapper {
 
-    default CardInstallmentResponse toResponse(CardInstallment installment) {
+    public CardInstallmentResponse toResponse(CardInstallment installment) {
         if (installment == null) return null;
         return CardInstallmentResponse.builder()
-                .id(installment.getId())
-                .cardId(installment.getCard().getId())
-                .description(installment.getDescription())
-                .totalAmount(installment.getTotalAmount())
-                .currency(installment.getCurrency())
-                .installmentNumber(installment.getInstallmentNumber())
-                .totalInstallments(installment.getTotalInstallments())
-                .amount(installment.getAmount())
-                .dueDate(installment.getDueDate())
-                .paid(installment.isPaid())
-                .paidDate(installment.getPaidDate())
-                .createdAt(installment.getCreatedAt())
-                .updatedAt(installment.getUpdatedAt())
+                .id(installment.id().value())
+                .cardId(installment.cardId().value())
+                .description(installment.description())
+                .totalAmount(installment.totalAmount().amount())
+                .currency(installment.totalAmount().currency().getCurrencyCode())
+                .installmentNumber(installment.installmentNumber())
+                .totalInstallments(installment.totalInstallments())
+                .amount(installment.amount().amount())
+                .dueDate(installment.dueDate())
+                .paid(installment.paid())
+                .paidDate(installment.paidDate())
+                .createdAt(installment.createdAt())
+                .updatedAt(installment.updatedAt())
                 .build();
     }
 }

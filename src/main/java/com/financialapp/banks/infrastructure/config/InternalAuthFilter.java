@@ -1,4 +1,4 @@
-package com.financialapp.banks.config;
+package com.financialapp.banks.infrastructure.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

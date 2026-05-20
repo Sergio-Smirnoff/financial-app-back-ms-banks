@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 
 @Service
@@ -34,18 +35,17 @@ public class ImportCardExpensesUseCaseImpl implements ImportCardExpensesUseCase 
         List<String> errors = new ArrayList<>();
 
         for (ImportCardExpensesCommand.ImportedExpense expense : cmd.expenses()) {
-            AccountId accountId = resolveAccount(expense.currency(), cmd.arsAccountId(), cmd.usdAccountId());
+            AccountId accountId = resolveAccount(expense.amount().currency(), cmd.arsAccountId(), cmd.usdAccountId());
             if (accountId == null) {
                 skipped++;
                 continue;
             }
             try {
                 List<CardInstallment> created = createExpense.execute(new CreateCardExpenseCommand(
-                        cmd.cardId(), cmd.userId(), expense.description(), expense.amount(),
-                        expense.currency(), 1, expense.date()));
+                        cmd.cardId(), cmd.userId(), expense.description(), expense.amount(), 1, expense.date()));
                 payInstallment.execute(new PayCardInstallmentCommand(
                         cmd.cardId(), created.get(0).id(), cmd.userId(), accountId,
-                        expense.date(), cmd.bypassBalance()));
+                        expense.date()));
                 imported++;
             } catch (Exception e) {
                 errors.add(expense.description() + ": " + e.getMessage());
@@ -55,8 +55,8 @@ public class ImportCardExpensesUseCaseImpl implements ImportCardExpensesUseCase 
         return new BatchImportResult(imported, skipped, errors);
     }
 
-    private AccountId resolveAccount(String currency, AccountId arsId, AccountId usdId) {
-        return switch (currency.toUpperCase()) {
+    private AccountId resolveAccount(Currency currency, AccountId arsId, AccountId usdId) {
+        return switch (currency.toString().toUpperCase()) {
             case "ARS" -> arsId;
             case "USD" -> usdId;
             default -> null;

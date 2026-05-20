@@ -1,4 +1,4 @@
-package com.financialapp.banks.model.entity;
+package com.financialapp.banks.infrastructure.persistence.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

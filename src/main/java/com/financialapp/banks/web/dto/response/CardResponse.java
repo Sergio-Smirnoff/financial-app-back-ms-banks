@@ -1,8 +1,8 @@
-package com.financialapp.banks.model.dto.response;
+package com.financialapp.banks.web.dto.response;
 
-import com.financialapp.banks.model.enums.CardBehavior;
-import com.financialapp.banks.model.enums.CardBrand;
-import com.financialapp.banks.model.enums.CardType;
+import com.financialapp.banks.domain.model.card.CardBehavior;
+import com.financialapp.banks.domain.model.card.CardBrand;
+import com.financialapp.banks.domain.model.card.CardType;
 import lombok.Builder;
 
 import java.time.LocalDate;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public record CardResponse(
         Long id,
-        Long bankId,
+        String bankName,
         Long userId,
         String displayName,
         CardBrand brand,

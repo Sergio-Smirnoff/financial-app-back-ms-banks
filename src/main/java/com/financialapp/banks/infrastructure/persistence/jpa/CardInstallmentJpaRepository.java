@@ -1,6 +1,6 @@
-package com.financialapp.banks.repository;
+package com.financialapp.banks.infrastructure.persistence.jpa;
 
-import com.financialapp.banks.model.entity.CardInstallment;
+import com.financialapp.banks.infrastructure.persistence.entity.CardInstallment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.math.BigDecimal;

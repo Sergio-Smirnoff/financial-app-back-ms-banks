@@ -12,6 +12,5 @@ public record PayCardInstallmentCommand(
     CardInstallmentId installmentId,
     UserId userId,
     AccountId accountId,
-    LocalDate paidDate,
-    boolean bypassBalance
+    LocalDate paidDate
 ) {}

@@ -1,27 +1,32 @@
-package com.financialapp.banks.kafka.listener;
+package com.financialapp.banks.infrastructure.messaging.listener;
 
-import com.financialapp.banks.kafka.event.TransactionCreatedEvent;
-import com.financialapp.banks.model.entity.ProcessedEvent;
-import com.financialapp.banks.repository.ProcessedEventRepository;
-import com.financialapp.banks.service.AccountService;
+import com.financialapp.banks.application.account.command.AdjustBalanceCommand;
+import com.financialapp.banks.application.account.usecase.AdjustBalanceUseCase;
+import com.financialapp.banks.domain.common.model.Money;
+import com.financialapp.banks.domain.model.account.AccountId;
+import com.financialapp.banks.infrastructure.messaging.payload.TransactionCreatedEvent;
+import com.financialapp.banks.infrastructure.persistence.entity.ProcessedEventJpaEntity;
+import com.financialapp.banks.infrastructure.persistence.jpa.ProcessedEventJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Currency;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class TransactionEventListener {
 
-    private final AccountService accountService;
-    private final ProcessedEventRepository processedEventRepository;
+    private final AdjustBalanceUseCase adjustBalanceUseCase;
+    private final ProcessedEventJpaRepository processedEventRepository;
 
     @KafkaListener(topics = "transaction.created", groupId = "banks-group")
     @Transactional
     public void handleTransactionCreated(TransactionCreatedEvent event) {
-        log.info("Received transaction.created event: id={}, accountId={}, amount={}", 
+        log.info("Received transaction.created event: id={}, accountId={}, amount={}",
                 event.transactionId(), event.accountId(), event.amount());
 
         if (processedEventRepository.existsById(event.transactionId())) {
@@ -30,15 +35,16 @@ public class TransactionEventListener {
         }
 
         try {
-            // Basic security check: verify account ownership
-            accountService.get(event.accountId(), event.userId());
-            
-            accountService.adjustBalance(event.accountId(), event.amount(), event.currency());
-            
-            processedEventRepository.save(ProcessedEvent.builder()
+            Currency currency = event.currency() != null ? Currency.getInstance(event.currency()) : null;
+            adjustBalanceUseCase.execute(new AdjustBalanceCommand(
+                    new AccountId(event.accountId()),
+                    new Money(event.amount(), currency)
+            ));
+
+            processedEventRepository.save(ProcessedEventJpaEntity.builder()
                     .eventId(event.transactionId())
                     .build());
-            
+
             log.info("Successfully adjusted balance for transaction: {}", event.transactionId());
         } catch (Exception e) {
             log.error("Failed to process transaction event {}: {}", event.transactionId(), e.getMessage());

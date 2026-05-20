@@ -36,7 +36,7 @@ public class GetUpcomingPaymentsUseCaseImpl implements GetUpcomingPaymentsUseCas
                 if (loan.userId().equals(userId)) {
                     results.add(new UpcomingPayment(
                             li.id().value(), "LOAN", loan.name(),
-                            li.amount(), loan.details().currency(), li.dueDate(),
+                            li.amount(), li.dueDate(),
                             li.installmentNumber(), loan.details().totalInstallments(), li.paid()
                     ));
                 }
@@ -47,7 +47,7 @@ public class GetUpcomingPaymentsUseCaseImpl implements GetUpcomingPaymentsUseCas
         for (CardInstallment ci : cardInsts) {
             results.add(new UpcomingPayment(
                     ci.id().value(), "CARD", ci.description(),
-                    ci.amount(), ci.currency(), ci.dueDate(),
+                    ci.amount(), ci.dueDate(),
                     ci.installmentNumber(), ci.totalInstallments(), ci.paid()
             ));
         }

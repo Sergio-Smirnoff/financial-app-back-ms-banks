@@ -2,6 +2,7 @@ package com.financialapp.banks.application.card.impl;
 
 import com.financialapp.banks.application.card.command.CreateCardExpenseCommand;
 import com.financialapp.banks.application.card.usecase.CreateCardExpenseUseCase;
+import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.card.CardBehavior;
@@ -36,9 +37,9 @@ public class CreateCardExpenseUseCaseImpl implements CreateCardExpenseUseCase {
             throw new BusinessException("Instant payment cards do not support installment-based expenses");
         }
 
-        BigDecimal perInstallment = cmd.totalAmount()
+        BigDecimal perInstallment = cmd.amount().amount()
                 .divide(BigDecimal.valueOf(cmd.totalInstallments()), 2, RoundingMode.HALF_UP);
-        BigDecimal lastInstallment = cmd.totalAmount()
+        BigDecimal lastInstallment = cmd.amount().amount()
                 .subtract(perInstallment.multiply(BigDecimal.valueOf(cmd.totalInstallments() - 1)));
 
         List<CardInstallment> installments = new ArrayList<>();
@@ -48,11 +49,10 @@ public class CreateCardExpenseUseCaseImpl implements CreateCardExpenseUseCase {
                     new CardInstallmentId(null),
                     cmd.cardId(),
                     cmd.description(),
-                    cmd.totalAmount(),
-                    cmd.currency(),
+                    cmd.amount(),
                     i,
                     cmd.totalInstallments(),
-                    amount,
+                    new Money(amount, cmd.amount().currency()),
                     cmd.firstDueDate().plusMonths(i - 1),
                     false,
                     null,

@@ -1,9 +1,18 @@
-package com.financialapp.banks.controller;
+package com.financialapp.banks.web.controller;
 
-import com.financialapp.banks.model.dto.request.CardRequest;
-import com.financialapp.banks.model.dto.response.ApiResponse;
-import com.financialapp.banks.model.dto.response.CardResponse;
-import com.financialapp.banks.service.CardService;
+import com.financialapp.banks.application.card.command.CreateCardCommand;
+import com.financialapp.banks.application.card.command.DeleteCardCommand;
+import com.financialapp.banks.application.card.usecase.CreateCardUseCase;
+import com.financialapp.banks.application.card.usecase.DeleteCardUseCase;
+import com.financialapp.banks.application.card.usecase.GetCardUseCase;
+import com.financialapp.banks.application.card.usecase.ListCardsUseCase;
+import com.financialapp.banks.domain.common.model.UserId;
+import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.card.CardId;
+import com.financialapp.banks.web.dto.request.CardRequest;
+import com.financialapp.banks.web.dto.response.ApiResponse;
+import com.financialapp.banks.web.dto.response.CardResponse;
+import com.financialapp.banks.web.mapper.CardWebMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -20,14 +29,21 @@ import java.util.List;
 @Tag(name = "Cards", description = "User cards management")
 public class CardController {
 
-    private final CardService cardService;
+    private final ListCardsUseCase listCardsUseCase;
+    private final GetCardUseCase getCardUseCase;
+    private final CreateCardUseCase createCardUseCase;
+    private final DeleteCardUseCase deleteCardUseCase;
+    private final CardWebMapper cardMapper;
 
     @GetMapping
     @Operation(summary = "List user cards, optionally filtered by bank")
     public ResponseEntity<ApiResponse<List<CardResponse>>> list(
             @RequestHeader("X-User-Id") Long userId,
-            @RequestParam(required = false) Long bankId) {
-        return ResponseEntity.ok(ApiResponse.ok(cardService.list(userId, bankId)));
+            @RequestParam(required = false) String bankName) {
+        BankName bank = bankName != null ? BankName.valueOf(bankName) : null;
+        List<CardResponse> result = listCardsUseCase.execute(new UserId(userId), bank)
+                .stream().map(cardMapper::toResponse).toList();
+        return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
     @GetMapping("/{id}")
@@ -35,7 +51,8 @@ public class CardController {
     public ResponseEntity<ApiResponse<CardResponse>> get(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(cardService.get(id, userId)));
+        return ResponseEntity.ok(ApiResponse.ok(
+                cardMapper.toResponse(getCardUseCase.execute(new CardId(id), new UserId(userId)))));
     }
 
     @PostMapping
@@ -43,8 +60,19 @@ public class CardController {
     public ResponseEntity<ApiResponse<CardResponse>> create(
             @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody CardRequest request) {
+        var result = createCardUseCase.execute(new CreateCardCommand(
+                new UserId(userId),
+                BankName.valueOf(request.bankName()),
+                request.brand(),
+                request.cardType(),
+                request.behavior(),
+                request.last4Digits(),
+                request.expiringDate(),
+                request.closingDay(),
+                request.dueDay()
+        ));
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Card created", cardService.create(userId, request)));
+                .body(ApiResponse.ok("Card created", cardMapper.toResponse(result)));
     }
 
     @DeleteMapping("/{id}")
@@ -52,7 +80,7 @@ public class CardController {
     public ResponseEntity<ApiResponse<Void>> delete(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id) {
-        cardService.delete(id, userId);
+        deleteCardUseCase.execute(new DeleteCardCommand(new CardId(id), new UserId(userId)));
         return ResponseEntity.ok(ApiResponse.ok("Card deleted", null));
     }
 }

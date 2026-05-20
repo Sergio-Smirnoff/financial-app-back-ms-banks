@@ -1,7 +1,6 @@
 package com.financialapp.banks.application.account.command;
 
 import com.financialapp.banks.domain.model.account.AccountId;
+import com.financialapp.banks.domain.common.model.Money;
 
-import java.math.BigDecimal;
-
-public record AdjustBalanceCommand(AccountId accountId, BigDecimal delta, String expectedCurrency) {}
+public record AdjustBalanceCommand(AccountId accountId, Money delta) {}

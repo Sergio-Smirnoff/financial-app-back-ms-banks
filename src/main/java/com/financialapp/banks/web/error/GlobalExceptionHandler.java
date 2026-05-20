@@ -1,6 +1,8 @@
-package com.financialapp.banks.exception;
+package com.financialapp.banks.web.error;
 
-import com.financialapp.banks.model.dto.response.ApiResponse;
+import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import com.financialapp.banks.web.dto.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

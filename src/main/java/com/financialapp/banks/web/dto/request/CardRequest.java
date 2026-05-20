@@ -1,8 +1,8 @@
-package com.financialapp.banks.model.dto.request;
+package com.financialapp.banks.web.dto.request;
 
-import com.financialapp.banks.model.enums.CardBehavior;
-import com.financialapp.banks.model.enums.CardBrand;
-import com.financialapp.banks.model.enums.CardType;
+import com.financialapp.banks.domain.model.card.CardBehavior;
+import com.financialapp.banks.domain.model.card.CardBrand;
+import com.financialapp.banks.domain.model.card.CardType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

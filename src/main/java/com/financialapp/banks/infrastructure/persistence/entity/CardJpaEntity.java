@@ -1,8 +1,8 @@
-package com.financialapp.banks.model.entity;
+package com.financialapp.banks.infrastructure.persistence.entity;
 
-import com.financialapp.banks.model.enums.CardBehavior;
-import com.financialapp.banks.model.enums.CardBrand;
-import com.financialapp.banks.model.enums.CardType;
+import com.financialapp.banks.domain.model.card.CardBehavior;
+import com.financialapp.banks.domain.model.card.CardBrand;
+import com.financialapp.banks.domain.model.card.CardType;
 import jakarta.persistence.*;
 import lombok.*;
 

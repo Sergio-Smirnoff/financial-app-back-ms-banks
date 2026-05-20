@@ -1,4 +1,4 @@
-package com.financialapp.banks.config;
+package com.financialapp.banks.infrastructure.config;
 
 import feign.RequestInterceptor;
 import org.springframework.beans.factory.annotation.Value;

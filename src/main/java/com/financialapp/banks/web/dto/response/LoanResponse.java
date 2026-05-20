@@ -1,4 +1,4 @@
-package com.financialapp.banks.model.dto.response;
+package com.financialapp.banks.web.dto.response;
 
 import lombok.Builder;
 
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 public record LoanResponse(
         Long id,
-        Long bankId,
+        String bankName,
         Long userId,
         String name,
         BigDecimal principal,

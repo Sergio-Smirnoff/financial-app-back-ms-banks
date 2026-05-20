@@ -1,6 +1,6 @@
-package com.financialapp.banks.repository;
+package com.financialapp.banks.infrastructure.persistence.jpa;
 
-import com.financialapp.banks.model.entity.ProcessedEvent;
+import com.financialapp.banks.infrastructure.persistence.entity.ProcessedEventJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

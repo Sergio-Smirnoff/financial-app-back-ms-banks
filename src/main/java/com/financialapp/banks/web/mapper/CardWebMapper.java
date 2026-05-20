@@ -1,35 +1,33 @@
-package com.financialapp.banks.mapper;
+package com.financialapp.banks.web.mapper;
 
-import com.financialapp.banks.model.dto.response.CardResponse;
-import com.financialapp.banks.model.entity.Card;
-import org.mapstruct.Mapper;
+import com.financialapp.banks.domain.model.card.Card;
+import com.financialapp.banks.web.dto.response.CardResponse;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-public interface CardMapper {
+@Component
+public class CardWebMapper {
 
-    default CardResponse toResponse(Card card, String bankName) {
+    public CardResponse toResponse(Card card) {
         if (card == null) return null;
-
         String displayName = String.format("%s %s %s ••%s",
-                bankName != null ? bankName : "Unknown",
-                card.getBrand(),
-                card.getCardType(),
-                card.getLast4Digits());
-
+                card.bankName().getDisplayName(),
+                card.details().brand(),
+                card.details().cardType(),
+                card.details().cardNumber());
         return CardResponse.builder()
-                .id(card.getId())
-                .bankId(card.getBankId())
-                .userId(card.getUserId())
+                .id(card.id().value())
+                .bankName(card.bankName().name())
+                .userId(card.userId().value())
                 .displayName(displayName)
-                .brand(card.getBrand())
-                .cardType(card.getCardType())
-                .behavior(card.getBehavior())
-                .last4Digits(card.getLast4Digits())
-                .expiringDate(card.getExpiringDate())
-                .closingDay(card.getClosingDay())
-                .dueDay(card.getDueDay())
-                .createdAt(card.getCreatedAt())
-                .updatedAt(card.getUpdatedAt())
+                .brand(card.details().brand())
+                .cardType(card.details().cardType())
+                .behavior(card.details().behavior())
+                .last4Digits(card.details().cardNumber())
+                .expiringDate(card.details().expiringDate())
+                .closingDay(card.details().billing().closingDay())
+                .dueDay(card.details().billing().dueDay())
+                .createdAt(card.createdAt())
+                .updatedAt(card.updatedAt())
                 .build();
     }
 }

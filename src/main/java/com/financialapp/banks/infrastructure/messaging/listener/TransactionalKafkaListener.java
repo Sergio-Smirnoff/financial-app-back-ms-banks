@@ -1,4 +1,4 @@
-package com.financialapp.banks.kafka.producer;
+package com.financialapp.banks.infrastructure.messaging.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

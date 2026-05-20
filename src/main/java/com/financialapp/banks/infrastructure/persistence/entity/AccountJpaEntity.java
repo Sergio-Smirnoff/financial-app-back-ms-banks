@@ -1,6 +1,6 @@
-package com.financialapp.banks.model.entity;
+package com.financialapp.banks.infrastructure.persistence.entity;
 
-import com.financialapp.banks.model.enums.AccountType;
+import com.financialapp.banks.domain.model.account.AccountType;
 import jakarta.persistence.*;
 import lombok.*;
 

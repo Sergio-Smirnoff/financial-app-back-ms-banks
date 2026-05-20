@@ -24,7 +24,7 @@ public class CheckDuplicateExpensesUseCaseImpl implements CheckDuplicateExpenses
                 .filter(i -> {
                     CreateCardExpenseCommand cmd = expenses.get(i);
                     return installmentRepository.existsByCardIdAndDescriptionAndAmountAndDueDate(
-                            cardId, cmd.description(), cmd.totalAmount(), cmd.firstDueDate());
+                            cardId, cmd.description(), cmd.amount(), cmd.firstDueDate());
                 })
                 .boxed()
                 .toList();

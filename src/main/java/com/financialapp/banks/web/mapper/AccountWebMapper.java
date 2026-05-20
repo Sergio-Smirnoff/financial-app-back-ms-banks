@@ -1,25 +1,27 @@
-package com.financialapp.banks.mapper;
+package com.financialapp.banks.web.mapper;
 
-import com.financialapp.banks.model.dto.response.AccountResponse;
-import com.financialapp.banks.model.entity.Account;
-import org.mapstruct.Mapper;
+import com.financialapp.banks.domain.model.account.Account;
+import com.financialapp.banks.web.dto.response.AccountResponse;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-public interface AccountMapper {
+@Component
+public class AccountWebMapper {
 
-    default AccountResponse toResponse(Account account) {
+    public AccountResponse toResponse(Account account) {
         if (account == null) return null;
         return AccountResponse.builder()
-                .id(account.getId())
-                .bankId(account.getBankId())
-                .userId(account.getUserId())
-                .name(account.getName())
-                .type(account.getType())
-                .balance(account.getBalance())
-                .currency(account.getCurrency())
-                .isActive(account.getIsActive())
-                .createdAt(account.getCreatedAt())
-                .updatedAt(account.getUpdatedAt())
+                .id(account.id().value())
+                .bankName(account.bankName().name())
+                .userId(account.userId().value())
+                .name(account.details().name())
+                .type(account.details().type())
+                .balance(account.details().balance().amount())
+                .currency(account.details().balance().currency().getCurrencyCode())
+                .cbu(account.information().cbu())
+                .alias(account.information().alias())
+                .isActive(account.details().isActive())
+                .createdAt(account.createdAt())
+                .updatedAt(account.updatedAt())
                 .build();
     }
 }

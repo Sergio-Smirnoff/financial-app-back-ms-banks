@@ -1,13 +1,15 @@
-package com.financialapp.banks.kafka.event;
+package com.financialapp.banks.infrastructure.messaging.payload;
 
-import java.math.BigDecimal;
+import com.financialapp.banks.domain.common.model.Money;
+import lombok.Builder;
+
 import java.time.LocalDate;
 
+@Builder
 public record PaymentEvent(
         Long userId,
         Long accountId,
-        BigDecimal amount,
-        String currency,
+        Money amount,
         String description,
         LocalDate date
 ) {}

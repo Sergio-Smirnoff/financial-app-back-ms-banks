@@ -1,6 +1,6 @@
-package com.financialapp.banks.model.dto.request;
+package com.financialapp.banks.web.dto.request;
 
-import com.financialapp.banks.model.enums.AccountType;
+import com.financialapp.banks.domain.model.account.AccountType;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;

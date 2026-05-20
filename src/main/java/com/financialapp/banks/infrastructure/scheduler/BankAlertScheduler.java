@@ -1,13 +1,13 @@
-package com.financialapp.banks.scheduler;
+package com.financialapp.banks.infrastructure.scheduler;
 
-import com.financialapp.banks.kafka.event.BankAlertEvent;
-import com.financialapp.banks.kafka.producer.BanksEventProducer;
-import com.financialapp.banks.model.entity.Account;
-import com.financialapp.banks.model.entity.Card;
-import com.financialapp.banks.model.entity.LoanInstallment;
-import com.financialapp.banks.repository.AccountRepository;
-import com.financialapp.banks.repository.CardRepository;
-import com.financialapp.banks.repository.LoanInstallmentRepository;
+import com.financialapp.banks.domain.model.Card;
+import com.financialapp.banks.domain.model.Account;
+import com.financialapp.banks.domain.model.LoanInstallment;
+import com.financialapp.banks.infrastructure.persistence.CardRepository;
+import com.financialapp.banks.infrastructure.persistence.LoanInstallmentRepository;
+import com.financialapp.banks.infrastructure.persistence.AccountRepository;
+import com.financialapp.banks.application.event.BankAlertEvent;
+import com.financialapp.banks.infrastructure.event.BanksEventProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

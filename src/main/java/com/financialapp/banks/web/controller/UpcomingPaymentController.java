@@ -1,8 +1,9 @@
-package com.financialapp.banks.controller;
+package com.financialapp.banks.web.controller;
 
-import com.financialapp.banks.model.dto.response.ApiResponse;
-import com.financialapp.banks.model.dto.response.UpcomingPaymentResponse;
-import com.financialapp.banks.service.UpcomingPaymentService;
+import com.financialapp.banks.application.upcoming.usecase.GetUpcomingPaymentsUseCase;
+import com.financialapp.banks.domain.common.model.UserId;
+import com.financialapp.banks.web.dto.response.ApiResponse;
+import com.financialapp.banks.web.dto.response.UpcomingPaymentResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ import java.util.List;
 @Tag(name = "Upcoming Payments", description = "Consolidated view of upcoming installments")
 public class UpcomingPaymentController {
 
-    private final UpcomingPaymentService upcomingPaymentService;
+    private final GetUpcomingPaymentsUseCase getUpcomingPaymentsUseCase;
 
     @GetMapping
     @Operation(summary = "Get upcoming loan and card installments")
@@ -27,6 +28,14 @@ public class UpcomingPaymentController {
             @RequestHeader("X-User-Id") Long userId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        return ResponseEntity.ok(ApiResponse.ok(upcomingPaymentService.getUpcomingPayments(userId, from, to)));
+        List<UpcomingPaymentResponse> result = getUpcomingPaymentsUseCase
+                .execute(new UserId(userId), from, to)
+                .stream()
+                .map(p -> new UpcomingPaymentResponse(
+                        p.id(), p.type(), p.description(),
+                        p.amount().amount(), p.amount().currency().getCurrencyCode(),
+                        p.dueDate(), p.installmentNumber(), p.totalInstallments(), p.paid()))
+                .toList();
+        return ResponseEntity.ok(ApiResponse.ok(result));
     }
 }

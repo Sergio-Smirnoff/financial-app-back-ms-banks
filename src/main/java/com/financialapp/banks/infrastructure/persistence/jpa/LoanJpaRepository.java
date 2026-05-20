@@ -1,6 +1,6 @@
-package com.financialapp.banks.repository;
+package com.financialapp.banks.infrastructure.persistence.jpa;
 
-import com.financialapp.banks.model.entity.Loan;
+import com.financialapp.banks.infrastructure.persistence.entity.Loan;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

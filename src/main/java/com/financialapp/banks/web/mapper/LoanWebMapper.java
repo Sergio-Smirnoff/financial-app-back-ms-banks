@@ -1,27 +1,28 @@
-package com.financialapp.banks.mapper;
+package com.financialapp.banks.web.mapper;
 
-import com.financialapp.banks.model.dto.response.LoanResponse;
-import com.financialapp.banks.model.entity.Loan;
-import org.mapstruct.Mapper;
+import com.financialapp.banks.domain.model.loan.Loan;
+import com.financialapp.banks.web.dto.response.LoanResponse;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-public interface LoanMapper {
-    default LoanResponse toResponse(Loan loan) {
+@Component
+public class LoanWebMapper {
+
+    public LoanResponse toResponse(Loan loan) {
         if (loan == null) return null;
         return LoanResponse.builder()
-                .id(loan.getId())
-                .bankId(loan.getBankId())
-                .userId(loan.getUserId())
-                .name(loan.getName())
-                .principal(loan.getPrincipal())
-                .currency(loan.getCurrency())
-                .interestRate(loan.getInterestRate())
-                .totalInstallments(loan.getTotalInstallments())
-                .remainingInstallments(loan.getRemainingInstallments())
-                .startDate(loan.getStartDate())
-                .active(loan.isActive())
-                .createdAt(loan.getCreatedAt())
-                .updatedAt(loan.getUpdatedAt())
+                .id(loan.id().value())
+                .bankName(loan.bankName().name())
+                .userId(loan.userId().value())
+                .name(loan.name())
+                .principal(loan.details().principal())
+                .currency(loan.details().currency())
+                .interestRate(loan.details().interestRate())
+                .totalInstallments(loan.details().totalInstallments())
+                .remainingInstallments(loan.remainingInstallments())
+                .startDate(loan.startDate())
+                .active(loan.active())
+                .createdAt(loan.createdAt())
+                .updatedAt(loan.updatedAt())
                 .build();
     }
 }

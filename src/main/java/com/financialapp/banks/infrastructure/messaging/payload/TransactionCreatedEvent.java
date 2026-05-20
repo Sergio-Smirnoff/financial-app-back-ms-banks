@@ -1,4 +1,4 @@
-package com.financialapp.banks.kafka.event;
+package com.financialapp.banks.infrastructure.messaging.payload;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

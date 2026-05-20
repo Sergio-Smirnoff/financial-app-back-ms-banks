@@ -1,33 +1,31 @@
-package com.financialapp.banks.mapper;
+package com.financialapp.banks.web.mapper;
 
-import com.financialapp.banks.model.dto.response.AccountResponse;
-import com.financialapp.banks.model.dto.response.BankResponse;
-import com.financialapp.banks.model.entity.Bank;
-import org.mapstruct.Mapper;
+import com.financialapp.banks.domain.model.bank.Bank;
+import com.financialapp.banks.web.dto.response.AccountResponse;
+import com.financialapp.banks.web.dto.response.BankResponse;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
-public interface BankMapper {
+@Component
+public class BankWebMapper {
 
-    default BankResponse toResponse(Bank bank, List<AccountResponse> accounts, 
-                                   Map<String, BigDecimal> totalBalances, 
-                                   int cardsCount, int loansCount) {
+    public BankResponse toResponse(Bank bank, List<AccountResponse> accounts) {
         if (bank == null) return null;
+        Map<String, BigDecimal> totalBalances = accounts.stream()
+                .collect(Collectors.groupingBy(
+                        AccountResponse::currency,
+                        Collectors.reducing(BigDecimal.ZERO, AccountResponse::balance, BigDecimal::add)
+                ));
         return BankResponse.builder()
-                .id(bank.getId())
-                .userId(bank.getUserId())
-                .name(bank.getName())
-                .logoUrl(bank.getLogoUrl())
-                .accounts(accounts == null ? List.of() : accounts)
+                .name(bank.name().name())
+                .logoUrl(bank.logo() != null ? bank.logo().url() : null)
+                .accounts(accounts)
                 .totalBalances(totalBalances)
-                .accountsCount(accounts == null ? 0 : accounts.size())
-                .cardsCount(cardsCount)
-                .loansCount(loansCount)
-                .createdAt(bank.getCreatedAt())
-                .updatedAt(bank.getUpdatedAt())
+                .accountsCount(accounts.size())
                 .build();
     }
 }

@@ -4,6 +4,7 @@ import com.financialapp.banks.application.account.command.AdjustBalanceCommand;
 import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
 import com.financialapp.banks.application.loan.command.CreateLoanCommand;
 import com.financialapp.banks.application.loan.usecase.CreateLoanUseCase;
+import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
@@ -17,7 +18,7 @@ import com.financialapp.banks.domain.repository.AccountRepository;
 import com.financialapp.banks.domain.repository.BankRepository;
 import com.financialapp.banks.domain.repository.LoanInstallmentRepository;
 import com.financialapp.banks.domain.repository.LoanRepository;
-import com.financialapp.banks.infrastructure.messaging.payload.PaymentEvent;
+import com.financialapp.banks.domain.event.LoanCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 
 @Service
@@ -43,24 +45,24 @@ public class CreateLoanUseCaseImpl implements CreateLoanUseCase {
     @Override
     @Transactional
     public Loan execute(CreateLoanCommand cmd) {
-        bankRepository.findByIdForUser(cmd.bankId(), cmd.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + cmd.bankId().value()));
+        bankRepository.findByName(cmd.bankName())
+                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + cmd.bankName()));
 
-        Account dest = accountRepository.findByIdAndUserId(cmd.destinationAccountId(), cmd.userId())
+        Account dest = accountRepository.findById(cmd.destinationAccountId())
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + cmd.destinationAccountId().value()));
 
-        if (!dest.bankId().equals(cmd.bankId())) {
+        if (!dest.bankName().equals(cmd.bankName())) {
             throw new BusinessException("Destination account does not belong to the selected bank");
         }
 
-        String currency = dest.details().currency();
+        Currency currency = dest.details().balance().currency();
 
         Loan loan = new Loan(
                 new LoanId(null),
                 cmd.userId(),
-                cmd.bankId(),
+                cmd.bankName(),
                 cmd.name(),
-                new LoanDetails(cmd.principal(), currency, cmd.interestRate(), cmd.totalInstallments(), cmd.amortizationType()),
+                new LoanDetails(new Money(cmd.principal(), currency), cmd.interestRate(), cmd.totalInstallments(), cmd.amortizationType()),
                 cmd.totalInstallments(),
                 cmd.startDate(),
                 true,
@@ -70,16 +72,15 @@ public class CreateLoanUseCaseImpl implements CreateLoanUseCase {
 
         loan = loanRepository.save(loan);
 
-        adjustBalance.execute(new AdjustBalanceCommand(cmd.destinationAccountId(), cmd.principal(), currency));
+        adjustBalance.execute(new AdjustBalanceCommand(cmd.destinationAccountId(), new Money(cmd.principal(), currency)));
 
-        eventPublisher.publish(PaymentEvent.builder()
-                .userId(cmd.userId().value())
-                .accountId(cmd.destinationAccountId().value())
-                .amount(cmd.principal())
-                .currency(currency)
-                .description("Loan Deposit: " + cmd.name())
-                .date(LocalDate.now())
-                .build());
+        eventPublisher.publish(new LoanCreatedEvent(
+                cmd.userId(),
+                cmd.destinationAccountId(),
+                new Money(cmd.principal(), currency),
+                cmd.name(),
+                LocalDate.now()
+        ));
 
         BigDecimal installmentAmount = calculateFrenchInstallment(cmd.principal(), cmd.interestRate(), cmd.totalInstallments());
 
@@ -89,7 +90,7 @@ public class CreateLoanUseCaseImpl implements CreateLoanUseCase {
                     new LoanInstallmentId(null),
                     loan.id(),
                     i,
-                    installmentAmount,
+                    new Money(installmentAmount, currency),
                     cmd.startDate().plusMonths(i - 1),
                     false,
                     null,

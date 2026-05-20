@@ -26,23 +26,23 @@ public class CreateCardUseCaseImpl implements CreateCardUseCase {
     @Override
     @Transactional
     public Card execute(CreateCardCommand cmd) {
-        bankRepository.findByIdForUser(cmd.bankId(), cmd.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + cmd.bankId().value()));
+        bankRepository.findByName(cmd.bankName())
+                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + cmd.bankName()));
 
-        if (cardRepository.existsByBankIdAndBrandAndTypeAndLast4Digits(
-                cmd.bankId(), cmd.brand(), cmd.cardType(), cmd.last4Digits())) {
+        if (cardRepository.existsByBankNameAndBrandAndTypeAndCardNumber(
+                cmd.bankName(), cmd.brand(), cmd.cardType(), cmd.number())) {
             throw new BusinessException("A similar card with these 4 digits already exists for this bank");
         }
 
         Card card = new Card(
                 new CardId(null),
                 cmd.userId(),
-                cmd.bankId(),
+                cmd.bankName(),
                 new CardDetails(
                         cmd.brand(),
                         cmd.cardType(),
                         cmd.behavior(),
-                        cmd.last4Digits(),
+                        cmd.number(),
                         cmd.expiringDate(),
                         new CardBilling(cmd.closingDay(), cmd.dueDay())
                 ),

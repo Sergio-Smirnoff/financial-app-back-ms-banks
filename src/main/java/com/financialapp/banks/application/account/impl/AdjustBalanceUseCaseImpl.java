@@ -2,21 +2,22 @@ package com.financialapp.banks.application.account.impl;
 
 import com.financialapp.banks.application.account.command.AdjustBalanceCommand;
 import com.financialapp.banks.application.account.usecase.AdjustBalanceUseCase;
+import com.financialapp.banks.domain.event.BalanceAdjustedEvent;
+import com.financialapp.banks.domain.event.LowBalanceEvent;
 import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.AccountDetails;
 import com.financialapp.banks.domain.model.account.AccountType;
+import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.AccountRepository;
-import com.financialapp.banks.infrastructure.messaging.payload.PaymentEvent;
-import com.financialapp.banks.domain.common.model.Money;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -37,15 +38,15 @@ public class AdjustBalanceUseCaseImpl implements AdjustBalanceUseCase {
             throw new BusinessException("Cannot manually adjust balance of an investment account");
         }
 
-        if (cmd.expectedCurrency() != null &&
-                !account.details().balance().currency().equals(cmd.expectedCurrency())) {
-            throw new BusinessException("Currency mismatch: account is " + account.details().balance() +
-                    " but operation is " + cmd.expectedCurrency());
+        if (cmd.delta().currency() != null &&
+                !account.details().balance().currency().equals(cmd.delta().currency())) {
+            throw new BusinessException("Currency mismatch: account is " + account.details().balance().currency() +
+                    " but operation is " + cmd.delta().currency());
         }
 
-        BigDecimal newBalance = account.details().balance().amount().add(cmd.delta());
+        BigDecimal newBalance = account.details().balance().amount().add(cmd.delta().amount());
 
-                if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessException("Insufficient funds in account: " + account.details().name());
         }
 
@@ -62,34 +63,26 @@ public class AdjustBalanceUseCaseImpl implements AdjustBalanceUseCase {
                 account.bankName(),
                 updatedDetails,
                 account.createdAt(),
-                java.time.LocalDateTime.now()
+                LocalDateTime.now()
         );
         accountRepository.save(updated);
 
         if (newBalance.compareTo(LOW_BALANCE_THRESHOLD) < 0) {
-            eventPublisher.publish(BankAlertEvent.builder()
-                    .userId(account.userId().value())
-                    .type("LOW_BALANCE")
-                    .title("Low Account Balance")
-                    .message(String.format("Account '%s' has a low balance of %.2f %s.",
-                            account.details().name(), newBalance, account.details().balance().currency()))
-                    .metadata(String.format("{\"accountId\":%d,\"bankName\":%s,\"balance\":%.2f}",
-                            account.id().value(), account.bankName(), newBalance))
-                    .build());
+            eventPublisher.publish(new LowBalanceEvent(
+                    account.userId(),
+                    account.id(),
+                    account.bankName(),
+                    account.details().name(),
+                    account.details().balance()
+            ));
         }
 
-        String type = cmd.delta().compareTo(BigDecimal.ZERO) >= 0 ? "TRANSFER_RECEIVED" : "TRANSFER_SENT";
-        String title = cmd.delta().compareTo(BigDecimal.ZERO) >= 0 ? "Funds Received" : "Funds Sent";
-        String action = cmd.delta().compareTo(BigDecimal.ZERO) >= 0 ? "credited to" : "debited from";
-
-        eventPublisher.publish(BankAlertEvent.builder()
-                .userId(account.userId().value())
-                .type(type)
-                .title(title)
-                .message(String.format("%.2f %s has been %s account '%s'.",
-                        cmd.delta().abs(), account.details().balance().currency(), action, account.details().name()))
-                .metadata(String.format("{\"accountId\":%d,\"bankName\":%s,\"amount\":%.2f}",
-                        account.id().value(), account.bankName(), cmd.delta().abs()))
-                .build());
+        eventPublisher.publish(new BalanceAdjustedEvent(
+                account.userId(),
+                account.id(),
+                account.bankName(),
+                account.details().name(),
+                cmd.delta()
+        ));
     }
 }

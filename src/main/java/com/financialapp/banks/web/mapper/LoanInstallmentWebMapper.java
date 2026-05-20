@@ -1,23 +1,24 @@
-package com.financialapp.banks.mapper;
+package com.financialapp.banks.web.mapper;
 
-import com.financialapp.banks.model.dto.response.LoanInstallmentResponse;
-import com.financialapp.banks.model.entity.LoanInstallment;
-import org.mapstruct.Mapper;
+import com.financialapp.banks.domain.model.loan.LoanInstallment;
+import com.financialapp.banks.web.dto.response.LoanInstallmentResponse;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-public interface LoanInstallmentMapper {
-    default LoanInstallmentResponse toResponse(LoanInstallment installment) {
+@Component
+public class LoanInstallmentWebMapper {
+
+    public LoanInstallmentResponse toResponse(LoanInstallment installment) {
         if (installment == null) return null;
         return LoanInstallmentResponse.builder()
-                .id(installment.getId())
-                .loanId(installment.getLoan().getId())
-                .installmentNumber(installment.getInstallmentNumber())
-                .amount(installment.getAmount())
-                .dueDate(installment.getDueDate())
-                .paid(installment.isPaid())
-                .paidDate(installment.getPaidDate())
-                .createdAt(installment.getCreatedAt())
-                .updatedAt(installment.getUpdatedAt())
+                .id(installment.id().value())
+                .loanId(installment.loanId().value())
+                .installmentNumber(installment.installmentNumber())
+                .amount(installment.amount().amount())
+                .dueDate(installment.dueDate())
+                .paid(installment.paid())
+                .paidDate(installment.paidDate())
+                .createdAt(installment.createdAt())
+                .updatedAt(installment.updatedAt())
                 .build();
     }
 }

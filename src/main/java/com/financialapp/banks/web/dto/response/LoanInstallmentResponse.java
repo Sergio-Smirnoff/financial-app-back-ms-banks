@@ -1,4 +1,4 @@
-package com.financialapp.banks.model.dto.response;
+package com.financialapp.banks.web.dto.response;
 
 import lombok.Builder;
 

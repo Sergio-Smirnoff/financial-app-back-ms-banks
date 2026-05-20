@@ -11,7 +11,8 @@ import com.financialapp.banks.domain.model.loan.LoanInstallment;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.LoanInstallmentRepository;
 import com.financialapp.banks.domain.repository.LoanRepository;
-import com.financialapp.banks.infrastructure.messaging.payload.PaymentEvent;
+import com.financialapp.banks.domain.event.LoanInstallmentPaidEvent;
+import com.financialapp.banks.domain.common.model.Money;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +50,7 @@ public class PayLoanInstallmentUseCaseImpl implements PayLoanInstallmentUseCase 
         }
 
         adjustBalance.execute(new AdjustBalanceCommand(
-                cmd.accountId(), installment.amount().negate(), loan.details().currency()));
+                cmd.accountId(), new Money(installment.amount().amount().negate(), installment.amount().currency())));
 
         LocalDate paidDate = cmd.paidDate() != null ? cmd.paidDate() : LocalDate.now();
         LoanInstallment paid = new LoanInstallment(
@@ -67,19 +68,19 @@ public class PayLoanInstallmentUseCaseImpl implements PayLoanInstallmentUseCase 
 
         int remaining = loan.remainingInstallments() - 1;
         Loan updated = new Loan(
-                loan.id(), loan.userId(), loan.bankId(), loan.name(), loan.details(),
+                loan.id(), loan.userId(), loan.bankName(), loan.name(), loan.details(),
                 remaining, loan.startDate(), remaining > 0, loan.createdAt(), LocalDateTime.now()
         );
         loanRepository.save(updated);
 
-        eventPublisher.publish(PaymentEvent.builder()
-                .userId(cmd.userId().value())
-                .accountId(cmd.accountId().value())
-                .amount(saved.amount().negate())
-                .currency(loan.details().currency())
-                .description("Loan Payment: " + loan.name() + " (Installment " + saved.installmentNumber() + ")")
-                .date(paidDate)
-                .build());
+        eventPublisher.publish(new LoanInstallmentPaidEvent(
+                cmd.userId(),
+                cmd.accountId(),
+                new Money(saved.amount().amount().negate(), saved.amount().currency()),
+                loan.name(),
+                saved.installmentNumber(),
+                paidDate
+        ));
 
         return saved;
     }

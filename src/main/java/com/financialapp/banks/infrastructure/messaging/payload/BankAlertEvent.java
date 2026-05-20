@@ -1,4 +1,4 @@
-package com.financialapp.banks.kafka.event;
+package com.financialapp.banks.infrastructure.messaging.payload;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

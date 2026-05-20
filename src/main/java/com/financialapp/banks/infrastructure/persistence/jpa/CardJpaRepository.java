@@ -1,8 +1,8 @@
-package com.financialapp.banks.repository;
+package com.financialapp.banks.infrastructure.persistence.jpa;
 
-import com.financialapp.banks.model.entity.Card;
-import com.financialapp.banks.model.enums.CardBrand;
-import com.financialapp.banks.model.enums.CardType;
+import com.financialapp.banks.infrastructure.persistence.entity.Card;
+import com.financialapp.banks.domain.model.card.CardBrand;
+import com.financialapp.banks.domain.model.card.CardType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
