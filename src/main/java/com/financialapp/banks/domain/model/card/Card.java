@@ -6,7 +6,7 @@ import com.financialapp.banks.domain.model.bank.BankName;
 import java.time.LocalDateTime;
 
 public record Card(
-    CardId id,
+    String cardNumber,
     UserId userId,
     BankName bankName,
     CardDetails details,

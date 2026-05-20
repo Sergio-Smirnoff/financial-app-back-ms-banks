@@ -6,7 +6,6 @@ public record CardDetails(
     CardBrand brand,
     CardType cardType,
     CardBehavior behavior,
-    String cardNumber,
     LocalDate expiringDate,
     CardBilling billing
 ) {}

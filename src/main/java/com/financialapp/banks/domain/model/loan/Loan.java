@@ -18,3 +18,5 @@ public record Loan(
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {}
+
+
