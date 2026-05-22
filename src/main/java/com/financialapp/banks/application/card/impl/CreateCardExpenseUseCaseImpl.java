@@ -30,8 +30,8 @@ public class CreateCardExpenseUseCaseImpl implements CreateCardExpenseUseCase {
     @Override
     @Transactional
     public List<CardInstallment> execute(CreateCardExpenseCommand cmd) {
-        var card = cardRepository.findByIdAndUserId(cmd.cardId(), cmd.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cmd.cardId().value()));
+        var card = cardRepository.findByCardNumberAndUserId(cmd.cardNumber(), cmd.userId())
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cmd.cardNumber()));
 
         if (card.details().behavior() == CardBehavior.INSTANT_PAYMENT) {
             throw new BusinessException("Instant payment cards do not support installment-based expenses");
@@ -47,7 +47,7 @@ public class CreateCardExpenseUseCaseImpl implements CreateCardExpenseUseCase {
             BigDecimal amount = (i == cmd.totalInstallments()) ? lastInstallment : perInstallment;
             installments.add(new CardInstallment(
                     new CardInstallmentId(null),
-                    cmd.cardId(),
+                    cmd.cardNumber(),
                     cmd.description(),
                     cmd.amount(),
                     i,

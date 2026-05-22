@@ -2,7 +2,6 @@ package com.financialapp.banks.application.card.impl;
 
 import com.financialapp.banks.application.card.command.CreateCardExpenseCommand;
 import com.financialapp.banks.application.card.usecase.CheckDuplicateExpensesUseCase;
-import com.financialapp.banks.domain.model.card.CardId;
 import com.financialapp.banks.domain.repository.CardInstallmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,12 +18,12 @@ public class CheckDuplicateExpensesUseCaseImpl implements CheckDuplicateExpenses
 
     @Override
     @Transactional(readOnly = true)
-    public List<Integer> execute(CardId cardId, List<CreateCardExpenseCommand> expenses) {
+    public List<Integer> execute(String cardNumber, List<CreateCardExpenseCommand> expenses) {
         return IntStream.range(0, expenses.size())
                 .filter(i -> {
                     CreateCardExpenseCommand cmd = expenses.get(i);
-                    return installmentRepository.existsByCardIdAndDescriptionAndAmountAndDueDate(
-                            cardId, cmd.description(), cmd.amount(), cmd.firstDueDate());
+                    return installmentRepository.existsByCardNumberAndDescriptionAndAmountAndDueDate(
+                            cardNumber, cmd.description(), cmd.amount(), cmd.firstDueDate());
                 })
                 .boxed()
                 .toList();

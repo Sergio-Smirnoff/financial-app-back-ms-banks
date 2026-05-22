@@ -11,7 +11,7 @@ public class CardInstallmentWebMapper {
         if (installment == null) return null;
         return CardInstallmentResponse.builder()
                 .id(installment.id().value())
-                .cardId(installment.cardId().value())
+                .cardNumber(installment.cardNumber())
                 .description(installment.description())
                 .totalAmount(installment.totalAmount().amount())
                 .currency(installment.totalAmount().currency().getCurrencyCode())

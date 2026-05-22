@@ -1,7 +1,6 @@
 package com.financialapp.banks.application.loan.command;
 
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.account.AccountId;
 import com.financialapp.banks.domain.model.loan.LoanId;
 import com.financialapp.banks.domain.model.loan.LoanInstallmentId;
 
@@ -11,6 +10,6 @@ public record PayLoanInstallmentCommand(
     LoanId loanId,
     LoanInstallmentId installmentId,
     UserId userId,
-    AccountId accountId,
+    String accountCbu,
     LocalDate paidDate
 ) {}

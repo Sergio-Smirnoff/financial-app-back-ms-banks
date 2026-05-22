@@ -12,7 +12,7 @@ import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 
 public record CardRequest(
-        @NotNull Long bankId,
+        @NotBlank String bankName,
         @NotNull CardBrand brand,
         @NotNull CardType cardType,
         @NotNull CardBehavior behavior,

@@ -37,7 +37,7 @@ public class GetUpcomingPaymentsUseCaseImpl implements GetUpcomingPaymentsUseCas
                     results.add(new UpcomingPayment(
                             li.id().value(), "LOAN", loan.name(),
                             li.amount(), li.dueDate(),
-                            li.installmentNumber(), loan.details().totalInstallments(), li.paid()
+                            li.installmentNumber(), loan.totalInstallments(), li.paid()
                     ));
                 }
             });

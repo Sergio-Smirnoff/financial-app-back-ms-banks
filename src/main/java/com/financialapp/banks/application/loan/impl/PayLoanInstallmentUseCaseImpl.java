@@ -50,7 +50,7 @@ public class PayLoanInstallmentUseCaseImpl implements PayLoanInstallmentUseCase 
         }
 
         adjustBalance.execute(new AdjustBalanceCommand(
-                cmd.accountId(), new Money(installment.amount().amount().negate(), installment.amount().currency())));
+                cmd.accountCbu(), new Money(installment.amount().amount().negate(), installment.amount().currency())));
 
         LocalDate paidDate = cmd.paidDate() != null ? cmd.paidDate() : LocalDate.now();
         LoanInstallment paid = new LoanInstallment(
@@ -68,14 +68,16 @@ public class PayLoanInstallmentUseCaseImpl implements PayLoanInstallmentUseCase 
 
         int remaining = loan.remainingInstallments() - 1;
         Loan updated = new Loan(
-                loan.id(), loan.userId(), loan.bankName(), loan.name(), loan.details(),
-                remaining, loan.startDate(), remaining > 0, loan.createdAt(), LocalDateTime.now()
+                loan.id(), loan.userId(), loan.bankName(), loan.name(),
+                loan.principal(), loan.interestRate(), loan.totalInstallments(), remaining,
+                loan.amortizationType(), loan.startDate(), remaining > 0,
+                loan.createdAt(), LocalDateTime.now()
         );
         loanRepository.save(updated);
 
         eventPublisher.publish(new LoanInstallmentPaidEvent(
                 cmd.userId(),
-                cmd.accountId(),
+                cmd.accountCbu(),
                 new Money(saved.amount().amount().negate(), saved.amount().currency()),
                 loan.name(),
                 saved.installmentNumber(),

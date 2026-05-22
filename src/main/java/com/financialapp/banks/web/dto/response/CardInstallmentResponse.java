@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 public record CardInstallmentResponse(
         Long id,
-        Long cardId,
+        String cardNumber,
         String description,
         BigDecimal totalAmount,
         String currency,

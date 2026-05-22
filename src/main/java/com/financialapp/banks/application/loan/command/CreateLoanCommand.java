@@ -1,7 +1,6 @@
 package com.financialapp.banks.application.loan.command;
 
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.account.AccountId;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.domain.model.loan.AmortizationType;
 
@@ -11,7 +10,7 @@ import java.time.LocalDate;
 public record CreateLoanCommand(
     UserId userId,
     BankName bankName,
-    AccountId destinationAccountId,
+    String destinationAccountCbu,
     String name,
     BigDecimal principal,
     BigDecimal interestRate,

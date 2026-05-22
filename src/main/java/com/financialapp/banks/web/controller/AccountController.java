@@ -4,8 +4,6 @@ import com.financialapp.banks.application.account.command.*;
 import com.financialapp.banks.application.account.usecase.*;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.account.AccountId;
-import com.financialapp.banks.domain.model.account.AccountInformation;
 import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.web.dto.request.AccountRequest;
@@ -43,21 +41,25 @@ public class AccountController {
     public ResponseEntity<ApiResponse<List<AccountResponse>>> list(
             @RequestHeader("X-User-Id") Long userId,
             @RequestParam(required = false) AccountType type,
-            @RequestParam(required = false) String currency) {
+            @RequestParam(required = false) String currency,
+            @RequestParam(required = false) String bankName,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false, defaultValue = "false") boolean hideEmpty) {
         Currency cur = currency != null ? Currency.getInstance(currency) : null;
+        BankName bank = bankName != null ? BankName.valueOf(bankName) : null;
         List<AccountResponse> result = listAccountsUseCase.execute(
-                new FilterAccountCommand(new UserId(userId), type, cur, null))
+                new FilterAccountCommand(new UserId(userId), type, cur, bank, name, hideEmpty))
                 .stream().map(accountMapper::toResponse).toList();
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Get an account by id")
+    @GetMapping("/{cbu}")
+    @Operation(summary = "Get an account by CBU")
     public ResponseEntity<ApiResponse<AccountResponse>> get(
             @RequestHeader("X-User-Id") Long userId,
-            @PathVariable Long id) {
+            @PathVariable String cbu) {
         return ResponseEntity.ok(ApiResponse.ok(
-                accountMapper.toResponse(getAccountUseCase.execute(new AccountId(id)))));
+                accountMapper.toResponse(getAccountUseCase.execute(cbu))));
     }
 
     @PostMapping
@@ -80,35 +82,35 @@ public class AccountController {
                 .body(ApiResponse.ok("Account created", accountMapper.toResponse(result)));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{cbu}")
     @Operation(summary = "Update an account")
     public ResponseEntity<ApiResponse<AccountResponse>> update(
             @RequestHeader("X-User-Id") Long userId,
-            @PathVariable Long id,
+            @PathVariable String cbu,
             @Valid @RequestBody AccountRequest request) {
         Money balance = new Money(request.balance(), Currency.getInstance(request.currency()));
         var result = updateAccountUseCase.execute(new UpdateAccountCommand(
-                new AccountId(id), request.name(), balance, request.isActive()));
+                cbu, request.name(), balance, request.isActive()));
         return ResponseEntity.ok(ApiResponse.ok(accountMapper.toResponse(result)));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{cbu}")
     @Operation(summary = "Delete an account")
     public ResponseEntity<ApiResponse<Void>> delete(
             @RequestHeader("X-User-Id") Long userId,
-            @PathVariable Long id) {
-        deleteAccountUseCase.execute(new DeleteAccountCommand(new AccountId(id), null));
+            @PathVariable String cbu,
+            @RequestParam String bankName) {
+        deleteAccountUseCase.execute(new DeleteAccountCommand(cbu, BankName.valueOf(bankName)));
         return ResponseEntity.ok(ApiResponse.ok("Account deleted", null));
     }
 
-    @PostMapping("/{id}/balance/adjust")
+    @PostMapping("/{cbu}/balance/adjust")
     @Operation(summary = "Adjust account balance")
     public ResponseEntity<ApiResponse<Void>> adjustBalance(
-            @PathVariable Long id,
+            @PathVariable String cbu,
             @RequestParam BigDecimal delta,
-            @RequestParam(required = false) String currency) {
-        Currency cur = currency != null ? Currency.getInstance(currency) : null;
-        adjustBalanceUseCase.execute(new AdjustBalanceCommand(new AccountId(id), new Money(delta, cur)));
+            @RequestParam String currency) {
+        adjustBalanceUseCase.execute(new AdjustBalanceCommand(cbu, new Money(delta, Currency.getInstance(currency))));
         return ResponseEntity.ok(ApiResponse.ok("Balance adjusted", null));
     }
 }

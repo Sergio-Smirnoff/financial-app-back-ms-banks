@@ -4,7 +4,6 @@ import com.financialapp.banks.application.card.usecase.GetCardUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.card.Card;
-import com.financialapp.banks.domain.model.card.CardId;
 import com.financialapp.banks.domain.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,8 +17,8 @@ public class GetCardUseCaseImpl implements GetCardUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public Card execute(CardId id, UserId userId) {
-        return cardRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + id.value()));
+    public Card execute(String cardNumber, UserId userId) {
+        return cardRepository.findByCardNumberAndUserId(cardNumber, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cardNumber));
     }
 }

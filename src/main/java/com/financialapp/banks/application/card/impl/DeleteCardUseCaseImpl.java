@@ -20,13 +20,13 @@ public class DeleteCardUseCaseImpl implements DeleteCardUseCase {
     @Override
     @Transactional
     public void execute(DeleteCardCommand command) {
-        cardRepository.findByIdAndUserId(command.id(), command.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + command.id().value()));
+        cardRepository.findByCardNumberAndUserId(command.cardNumber(), command.userId())
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + command.cardNumber()));
 
-        if (installmentRepository.existsByCardIdAndUnpaid(command.id())) {
+        if (installmentRepository.existsByCardNumberAndUnpaid(command.cardNumber())) {
             throw new BusinessException("Cannot delete card with unpaid installments. Pay them first.");
         }
 
-        cardRepository.delete(command.id());
+        cardRepository.delete(command.cardNumber());
     }
 }

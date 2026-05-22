@@ -11,6 +11,7 @@ public record CardInstallment(
     String description,
     Money totalAmount,
     int installmentNumber,
+    int totalInstallments,
     Money amount,
     LocalDate dueDate,
     boolean paid,

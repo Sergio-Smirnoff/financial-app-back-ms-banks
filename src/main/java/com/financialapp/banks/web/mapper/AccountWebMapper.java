@@ -10,16 +10,15 @@ public class AccountWebMapper {
     public AccountResponse toResponse(Account account) {
         if (account == null) return null;
         return AccountResponse.builder()
-                .id(account.id().value())
                 .bankName(account.bankName().name())
                 .userId(account.userId().value())
-                .name(account.details().name())
-                .type(account.details().type())
-                .balance(account.details().balance().amount())
-                .currency(account.details().balance().currency().getCurrencyCode())
-                .cbu(account.information().cbu())
-                .alias(account.information().alias())
-                .isActive(account.details().isActive())
+                .name(account.name())
+                .type(account.type())
+                .balance(account.balance().amount())
+                .currency(account.balance().currency().getCurrencyCode())
+                .cbu(account.cbu())
+                .alias(account.alias())
+                .isActive(account.isActive())
                 .createdAt(account.createdAt())
                 .updatedAt(account.updatedAt())
                 .build();

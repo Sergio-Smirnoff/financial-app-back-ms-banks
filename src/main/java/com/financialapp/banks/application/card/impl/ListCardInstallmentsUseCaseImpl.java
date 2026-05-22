@@ -3,7 +3,6 @@ package com.financialapp.banks.application.card.impl;
 import com.financialapp.banks.application.card.usecase.ListCardInstallmentsUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
-import com.financialapp.banks.domain.model.card.CardId;
 import com.financialapp.banks.domain.model.card.CardInstallment;
 import com.financialapp.banks.domain.repository.CardInstallmentRepository;
 import com.financialapp.banks.domain.repository.CardRepository;
@@ -22,9 +21,9 @@ public class ListCardInstallmentsUseCaseImpl implements ListCardInstallmentsUseC
 
     @Override
     @Transactional(readOnly = true)
-    public List<CardInstallment> execute(CardId cardId, UserId userId) {
-        cardRepository.findByIdAndUserId(cardId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cardId.value()));
-        return installmentRepository.findByCardId(cardId);
+    public List<CardInstallment> execute(String cardNumber, UserId userId) {
+        cardRepository.findByCardNumberAndUserId(cardNumber, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cardNumber));
+        return installmentRepository.findByCardNumber(cardNumber);
     }
 }

@@ -3,8 +3,8 @@ package com.financialapp.banks.application.account.impl;
 import com.financialapp.banks.application.account.usecase.GetAccountUseCase;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
-import com.financialapp.banks.domain.model.account.AccountId;
 import com.financialapp.banks.domain.repository.AccountRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +17,8 @@ public class GetAccountUseCaseImpl implements GetAccountUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public Account execute(AccountId id) {
-        return accountRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + id.value()));
+    public Account execute(String cbu) {
+        return accountRepository.findByCbu(cbu)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + cbu));
     }
 }

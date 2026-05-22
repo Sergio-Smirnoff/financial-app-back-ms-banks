@@ -46,11 +46,11 @@ public class BankController {
     public ResponseEntity<ApiResponse<List<BankResponse>>> list(@RequestHeader("X-User-Id") Long userId) {
         UserId uid = new UserId(userId);
         List<BankResponse> responses = listBanksUseCase.execute().stream()
-                .map(bank -> {
+                .map(summary -> {
                     List<AccountResponse> accounts = listAccountsUseCase.execute(
-                            new FilterAccountCommand(uid, null, null, bank.name()))
+                            new FilterAccountCommand(uid, null, null, summary.bank().name(), null, false))
                             .stream().map(accountMapper::toResponse).toList();
-                    return bankMapper.toResponse(bank, accounts);
+                    return bankMapper.toResponse(summary.bank(), accounts);
                 })
                 .filter(b -> !b.accounts().isEmpty())
                 .toList();
@@ -64,7 +64,7 @@ public class BankController {
             @PathVariable String name) {
         Bank bank = getBankUseCase.execute(BankName.valueOf(name));
         List<AccountResponse> accounts = listAccountsUseCase.execute(
-                new FilterAccountCommand(new UserId(userId), null, null, bank.name()))
+                new FilterAccountCommand(new UserId(userId), null, null, bank.name(), null, false))
                 .stream().map(accountMapper::toResponse).toList();
         return ResponseEntity.ok(ApiResponse.ok(bankMapper.toResponse(bank, accounts)));
     }

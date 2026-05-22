@@ -1,13 +1,12 @@
 package com.financialapp.banks.application.card.command;
 
-import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.card.CardId;
 import com.financialapp.banks.domain.common.model.Money;
+import com.financialapp.banks.domain.common.model.UserId;
 
 import java.time.LocalDate;
 
 public record CreateCardExpenseCommand(
-    CardId cardId,
+    String cardNumber,
     UserId userId,
     String description,
     Money amount,

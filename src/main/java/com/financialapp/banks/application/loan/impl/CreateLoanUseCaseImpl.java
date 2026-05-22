@@ -9,7 +9,6 @@ import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.loan.Loan;
-import com.financialapp.banks.domain.model.loan.LoanDetails;
 import com.financialapp.banks.domain.model.loan.LoanId;
 import com.financialapp.banks.domain.model.loan.LoanInstallment;
 import com.financialapp.banks.domain.model.loan.LoanInstallmentId;
@@ -48,22 +47,25 @@ public class CreateLoanUseCaseImpl implements CreateLoanUseCase {
         bankRepository.findByName(cmd.bankName())
                 .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + cmd.bankName()));
 
-        Account dest = accountRepository.findById(cmd.destinationAccountId())
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + cmd.destinationAccountId().value()));
+        Account dest = accountRepository.findByCbu(cmd.destinationAccountCbu())
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + cmd.destinationAccountCbu()));
 
         if (!dest.bankName().equals(cmd.bankName())) {
             throw new BusinessException("Destination account does not belong to the selected bank");
         }
 
-        Currency currency = dest.details().balance().currency();
+        Currency currency = dest.balance().currency();
 
         Loan loan = new Loan(
                 new LoanId(null),
                 cmd.userId(),
                 cmd.bankName(),
                 cmd.name(),
-                new LoanDetails(new Money(cmd.principal(), currency), cmd.interestRate(), cmd.totalInstallments(), cmd.amortizationType()),
+                new Money(cmd.principal(), currency),
+                cmd.interestRate(),
                 cmd.totalInstallments(),
+                cmd.totalInstallments(),
+                cmd.amortizationType(),
                 cmd.startDate(),
                 true,
                 LocalDateTime.now(),
@@ -72,17 +74,19 @@ public class CreateLoanUseCaseImpl implements CreateLoanUseCase {
 
         loan = loanRepository.save(loan);
 
-        adjustBalance.execute(new AdjustBalanceCommand(cmd.destinationAccountId(), new Money(cmd.principal(), currency)));
+        adjustBalance.execute(new AdjustBalanceCommand(
+                cmd.destinationAccountCbu(), new Money(cmd.principal(), currency)));
 
         eventPublisher.publish(new LoanCreatedEvent(
                 cmd.userId(),
-                cmd.destinationAccountId(),
+                cmd.destinationAccountCbu(),
                 new Money(cmd.principal(), currency),
                 cmd.name(),
                 LocalDate.now()
         ));
 
-        BigDecimal installmentAmount = calculateFrenchInstallment(cmd.principal(), cmd.interestRate(), cmd.totalInstallments());
+        BigDecimal installmentAmount = calculateFrenchInstallment(
+                cmd.principal(), cmd.interestRate(), cmd.totalInstallments());
 
         List<LoanInstallment> installments = new ArrayList<>();
         for (int i = 1; i <= cmd.totalInstallments(); i++) {

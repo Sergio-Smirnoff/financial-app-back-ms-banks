@@ -4,8 +4,6 @@ import com.financialapp.banks.application.card.command.*;
 import com.financialapp.banks.application.card.usecase.*;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.account.AccountId;
-import com.financialapp.banks.domain.model.card.CardId;
 import com.financialapp.banks.domain.model.card.CardInstallmentId;
 import com.financialapp.banks.web.dto.request.CardExpenseCreateRequest;
 import com.financialapp.banks.web.dto.request.CardExpenseImportRequest;
@@ -25,7 +23,7 @@ import java.util.Currency;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/banks/cards/{cardId}/installments")
+@RequestMapping("/api/v1/banks/cards/{cardNumber}/installments")
 @RequiredArgsConstructor
 @Tag(name = "Card Installments", description = "Management of card installments and expenses")
 public class CardInstallmentController {
@@ -41,9 +39,9 @@ public class CardInstallmentController {
     @Operation(summary = "List installments for a card")
     public ResponseEntity<ApiResponse<List<CardInstallmentResponse>>> list(
             @RequestHeader("X-User-Id") Long userId,
-            @PathVariable Long cardId) {
+            @PathVariable String cardNumber) {
         List<CardInstallmentResponse> result = listCardInstallmentsUseCase
-                .execute(new CardId(cardId), new UserId(userId))
+                .execute(cardNumber, new UserId(userId))
                 .stream().map(installmentMapper::toResponse).toList();
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
@@ -52,11 +50,11 @@ public class CardInstallmentController {
     @Operation(summary = "Create an expense with installments for a card")
     public ResponseEntity<ApiResponse<List<CardInstallmentResponse>>> createExpense(
             @RequestHeader("X-User-Id") Long userId,
-            @PathVariable Long cardId,
+            @PathVariable String cardNumber,
             @Valid @RequestBody CardExpenseCreateRequest request) {
         Money amount = new Money(request.totalAmount(), Currency.getInstance(request.currency()));
         List<CardInstallmentResponse> result = createCardExpenseUseCase.execute(new CreateCardExpenseCommand(
-                new CardId(cardId),
+                cardNumber,
                 new UserId(userId),
                 request.description(),
                 amount,
@@ -70,15 +68,15 @@ public class CardInstallmentController {
     @Operation(summary = "Mark an installment as paid from a specific account")
     public ResponseEntity<ApiResponse<CardInstallmentResponse>> pay(
             @RequestHeader("X-User-Id") Long userId,
-            @PathVariable Long cardId,
+            @PathVariable String cardNumber,
             @PathVariable Long installmentId,
-            @RequestParam Long accountId,
+            @RequestParam String accountCbu,
             @RequestParam(required = false) LocalDate paidDate) {
         var result = payCardInstallmentUseCase.execute(new PayCardInstallmentCommand(
-                new CardId(cardId),
+                cardNumber,
                 new CardInstallmentId(installmentId),
                 new UserId(userId),
-                new AccountId(accountId),
+                accountCbu,
                 paidDate
         ));
         return ResponseEntity.ok(ApiResponse.ok("Installment paid", installmentMapper.toResponse(result)));
@@ -87,9 +85,8 @@ public class CardInstallmentController {
     @PostMapping("/import")
     @Operation(summary = "Batch import card expenses from statements")
     public ResponseEntity<ApiResponse<BatchImportResponse>> importExpenses(
-            @PathVariable Long cardId,
+            @PathVariable String cardNumber,
             @RequestHeader("X-User-Id") Long userId,
-            @RequestParam(required = false, defaultValue = "true") boolean bypassBalance,
             @RequestBody CardExpenseImportRequest request) {
         List<ImportCardExpensesCommand.ImportedExpense> expenses = request.expenses().stream()
                 .map(e -> new ImportCardExpensesCommand.ImportedExpense(
@@ -97,12 +94,11 @@ public class CardInstallmentController {
                         new Money(e.amount(), Currency.getInstance(e.currency())),
                         e.date()))
                 .toList();
-        AccountId usdAccountId = request.usdAccountId() != null ? new AccountId(request.usdAccountId()) : null;
         var result = importCardExpensesUseCase.execute(new ImportCardExpensesCommand(
-                new CardId(cardId),
+                cardNumber,
                 new UserId(userId),
-                new AccountId(request.arsAccountId()),
-                usdAccountId,
+                request.arsAccountCbu(),
+                request.usdAccountCbu(),
                 expenses
         ));
         return ResponseEntity.ok(ApiResponse.ok("Import completed",
@@ -112,11 +108,11 @@ public class CardInstallmentController {
     @PostMapping("/duplicates-check")
     @Operation(summary = "Check for existing card installments to avoid duplicates")
     public ResponseEntity<ApiResponse<List<Integer>>> checkDuplicates(
-            @PathVariable Long cardId,
+            @PathVariable String cardNumber,
             @RequestBody List<CardExpenseCreateRequest> expenses) {
         List<CreateCardExpenseCommand> commands = expenses.stream()
                 .map(e -> new CreateCardExpenseCommand(
-                        new CardId(cardId),
+                        cardNumber,
                         null,
                         e.description(),
                         new Money(e.totalAmount(), Currency.getInstance(e.currency())),
@@ -124,6 +120,6 @@ public class CardInstallmentController {
                         e.firstDueDate()
                 )).toList();
         return ResponseEntity.ok(ApiResponse.ok(
-                checkDuplicateExpensesUseCase.execute(new CardId(cardId), commands)));
+                checkDuplicateExpensesUseCase.execute(cardNumber, commands)));
     }
 }

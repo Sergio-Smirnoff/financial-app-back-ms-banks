@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Builder
 public record CardResponse(
-        Long id,
         String bankName,
         Long userId,
         String displayName,

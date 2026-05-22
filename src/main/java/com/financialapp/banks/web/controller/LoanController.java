@@ -3,7 +3,6 @@ package com.financialapp.banks.web.controller;
 import com.financialapp.banks.application.loan.command.*;
 import com.financialapp.banks.application.loan.usecase.*;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.account.AccountId;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.domain.model.loan.AmortizationType;
 import com.financialapp.banks.domain.model.loan.LoanId;
@@ -58,7 +57,7 @@ public class LoanController {
         var loan = createLoanUseCase.execute(new CreateLoanCommand(
                 new UserId(userId),
                 BankName.valueOf(request.bankName()),
-                new AccountId(request.destinationAccountId()),
+                request.destinationAccountCbu(),
                 request.name(),
                 request.principal(),
                 request.interestRate(),
@@ -96,13 +95,13 @@ public class LoanController {
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id,
             @PathVariable Long installmentId,
-            @RequestParam Long accountId,
+            @RequestParam String accountCbu,
             @RequestParam(required = false) LocalDate paidDate) {
         var result = payLoanInstallmentUseCase.execute(new PayLoanInstallmentCommand(
                 new LoanId(id),
                 new LoanInstallmentId(installmentId),
                 new UserId(userId),
-                new AccountId(accountId),
+                accountCbu,
                 paidDate
         ));
         return ResponseEntity.ok(ApiResponse.ok("Installment paid", installmentMapper.toResponse(result)));

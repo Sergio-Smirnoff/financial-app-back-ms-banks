@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 
 @Builder
 public record AccountResponse(
-        Long id,
         String bankName,
         Long userId,
         String name,

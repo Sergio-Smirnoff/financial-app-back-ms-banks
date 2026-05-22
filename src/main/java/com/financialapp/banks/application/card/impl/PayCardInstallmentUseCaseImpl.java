@@ -8,7 +8,6 @@ import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.card.CardInstallment;
-import com.financialapp.banks.domain.model.card.CardInstallmentId;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.CardInstallmentRepository;
 import com.financialapp.banks.domain.repository.CardRepository;
@@ -32,13 +31,13 @@ public class PayCardInstallmentUseCaseImpl implements PayCardInstallmentUseCase 
     @Override
     @Transactional
     public CardInstallment execute(PayCardInstallmentCommand cmd) {
-        cardRepository.findByIdAndUserId(cmd.cardId(), cmd.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cmd.cardId().value()));
+        cardRepository.findByCardNumberAndUserId(cmd.cardNumber(), cmd.userId())
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cmd.cardNumber()));
 
         CardInstallment installment = installmentRepository.findById(cmd.installmentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Installment not found: " + cmd.installmentId().value()));
 
-        if (!installment.cardId().equals(cmd.cardId())) {
+        if (!installment.cardNumber().equals(cmd.cardNumber())) {
             throw new BusinessException("Installment does not belong to the specified card");
         }
         if (installment.paid()) {
@@ -46,12 +45,12 @@ public class PayCardInstallmentUseCaseImpl implements PayCardInstallmentUseCase 
         }
 
         adjustBalance.execute(new AdjustBalanceCommand(
-                    cmd.accountId(), new Money(installment.amount().amount().negate(), installment.amount().currency())));
+                cmd.accountCbu(), new Money(installment.amount().amount().negate(), installment.amount().currency())));
 
         LocalDate paidDate = cmd.paidDate() != null ? cmd.paidDate() : LocalDate.now();
         CardInstallment paid = new CardInstallment(
                 installment.id(),
-                installment.cardId(),
+                installment.cardNumber(),
                 installment.description(),
                 installment.totalAmount(),
                 installment.installmentNumber(),
@@ -67,7 +66,7 @@ public class PayCardInstallmentUseCaseImpl implements PayCardInstallmentUseCase 
 
         eventPublisher.publish(new CardInstallmentPaidEvent(
                 cmd.userId(),
-                cmd.accountId(),
+                cmd.accountCbu(),
                 new Money(saved.amount().amount().negate(), saved.amount().currency()),
                 saved.description(),
                 saved.installmentNumber(),

@@ -10,19 +10,18 @@ public class CardWebMapper {
     public CardResponse toResponse(Card card) {
         if (card == null) return null;
         String displayName = String.format("%s %s %s ••%s",
-                card.bankName().getDisplayName(),
+                card.bankName().name(),
                 card.details().brand(),
                 card.details().cardType(),
-                card.details().cardNumber());
+                card.cardNumber());
         return CardResponse.builder()
-                .id(card.id().value())
                 .bankName(card.bankName().name())
                 .userId(card.userId().value())
                 .displayName(displayName)
                 .brand(card.details().brand())
                 .cardType(card.details().cardType())
                 .behavior(card.details().behavior())
-                .last4Digits(card.details().cardNumber())
+                .last4Digits(card.cardNumber())
                 .expiringDate(card.details().expiringDate())
                 .closingDay(card.details().billing().closingDay())
                 .dueDay(card.details().billing().dueDay())

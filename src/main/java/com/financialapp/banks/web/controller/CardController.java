@@ -8,7 +8,6 @@ import com.financialapp.banks.application.card.usecase.GetCardUseCase;
 import com.financialapp.banks.application.card.usecase.ListCardsUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.BankName;
-import com.financialapp.banks.domain.model.card.CardId;
 import com.financialapp.banks.web.dto.request.CardRequest;
 import com.financialapp.banks.web.dto.response.ApiResponse;
 import com.financialapp.banks.web.dto.response.CardResponse;
@@ -46,13 +45,13 @@ public class CardController {
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{cardNumber}")
     @Operation(summary = "Get a single card")
     public ResponseEntity<ApiResponse<CardResponse>> get(
             @RequestHeader("X-User-Id") Long userId,
-            @PathVariable Long id) {
+            @PathVariable String cardNumber) {
         return ResponseEntity.ok(ApiResponse.ok(
-                cardMapper.toResponse(getCardUseCase.execute(new CardId(id), new UserId(userId)))));
+                cardMapper.toResponse(getCardUseCase.execute(cardNumber, new UserId(userId)))));
     }
 
     @PostMapping
@@ -75,12 +74,12 @@ public class CardController {
                 .body(ApiResponse.ok("Card created", cardMapper.toResponse(result)));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{cardNumber}")
     @Operation(summary = "Delete a card")
     public ResponseEntity<ApiResponse<Void>> delete(
             @RequestHeader("X-User-Id") Long userId,
-            @PathVariable Long id) {
-        deleteCardUseCase.execute(new DeleteCardCommand(new CardId(id), new UserId(userId)));
+            @PathVariable String cardNumber) {
+        deleteCardUseCase.execute(new DeleteCardCommand(cardNumber, new UserId(userId)));
         return ResponseEntity.ok(ApiResponse.ok("Card deleted", null));
     }
 }

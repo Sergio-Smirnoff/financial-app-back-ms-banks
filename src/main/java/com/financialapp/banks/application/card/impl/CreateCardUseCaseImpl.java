@@ -5,9 +5,11 @@ import com.financialapp.banks.application.card.usecase.CreateCardUseCase;
 import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.card.Card;
+import com.financialapp.banks.domain.model.card.CardBehavior;
 import com.financialapp.banks.domain.model.card.CardBilling;
 import com.financialapp.banks.domain.model.card.CardDetails;
-import com.financialapp.banks.domain.model.card.CardId;
+import com.financialapp.banks.domain.model.card.cardType.CreditCard;
+import com.financialapp.banks.domain.model.card.cardType.DebitCard;
 import com.financialapp.banks.domain.repository.BankRepository;
 import com.financialapp.banks.domain.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,21 +36,18 @@ public class CreateCardUseCaseImpl implements CreateCardUseCase {
             throw new BusinessException("A similar card with these 4 digits already exists for this bank");
         }
 
-        Card card = new Card(
-                new CardId(null),
-                cmd.userId(),
-                cmd.bankName(),
-                new CardDetails(
-                        cmd.brand(),
-                        cmd.cardType(),
-                        cmd.behavior(),
-                        cmd.number(),
-                        cmd.expiringDate(),
-                        new CardBilling(cmd.closingDay(), cmd.dueDay())
-                ),
-                LocalDateTime.now(),
-                LocalDateTime.now()
+        CardDetails details = new CardDetails(
+                cmd.brand(),
+                cmd.cardType(),
+                cmd.behavior(),
+                cmd.expiringDate(),
+                new CardBilling(cmd.closingDay(), cmd.dueDay())
         );
+
+        LocalDateTime now = LocalDateTime.now();
+        Card card = cmd.behavior() == CardBehavior.INSTANT_PAYMENT
+                ? new DebitCard(cmd.number(), cmd.userId(), cmd.bankName(), details, now, now)
+                : new CreditCard(cmd.number(), cmd.userId(), cmd.bankName(), details, now, now);
 
         return cardRepository.save(card);
     }

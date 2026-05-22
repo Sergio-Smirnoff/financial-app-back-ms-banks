@@ -7,11 +7,14 @@ import com.financialapp.banks.domain.event.LowBalanceEvent;
 import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
-import com.financialapp.banks.domain.model.account.AccountDetails;
 import com.financialapp.banks.domain.model.account.AccountType;
+import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
+import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
+import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.AccountRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,58 +34,60 @@ public class AdjustBalanceUseCaseImpl implements AdjustBalanceUseCase {
     @Override
     @Transactional
     public void execute(AdjustBalanceCommand cmd) {
-        Account account = accountRepository.findById(cmd.accountId())
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + cmd.accountId().value()));
+        Account account = accountRepository.findByCbu(cmd.accountCbu())
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + cmd.accountCbu()));
 
-        if (account.details().type() == AccountType.INVESTMENT) {
+        if (account.type() == AccountType.INVESTMENT) {
             throw new BusinessException("Cannot manually adjust balance of an investment account");
         }
 
         if (cmd.delta().currency() != null &&
-                !account.details().balance().currency().equals(cmd.delta().currency())) {
-            throw new BusinessException("Currency mismatch: account is " + account.details().balance().currency() +
+                !account.balance().currency().equals(cmd.delta().currency())) {
+            throw new BusinessException("Currency mismatch: account is " + account.balance().currency() +
                     " but operation is " + cmd.delta().currency());
         }
 
-        BigDecimal newBalance = account.details().balance().amount().add(cmd.delta().amount());
+        BigDecimal newBalance = account.balance().amount().add(cmd.delta().amount());
 
         if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessException("Insufficient funds in account: " + account.details().name());
+            throw new BusinessException("Insufficient funds in account: " + account.name());
         }
 
-        AccountDetails updatedDetails = new AccountDetails(
-                account.details().name(),
-                account.details().type(),
-                new Money(newBalance, account.details().balance().currency()),
-                account.details().isActive()
-        );
-        Account updated = new Account(
-                account.information(),
-                account.id(),
-                account.userId(),
-                account.bankName(),
-                updatedDetails,
-                account.createdAt(),
-                LocalDateTime.now()
-        );
+        Money updatedBalance = new Money(newBalance, account.balance().currency());
+        Account updated = buildAccount(account, updatedBalance);
         accountRepository.save(updated);
 
         if (newBalance.compareTo(LOW_BALANCE_THRESHOLD) < 0) {
             eventPublisher.publish(new LowBalanceEvent(
                     account.userId(),
-                    account.id(),
+                    account.cbu(),
                     account.bankName(),
-                    account.details().name(),
-                    account.details().balance()
+                    account.name(),
+                    account.balance()
             ));
         }
 
         eventPublisher.publish(new BalanceAdjustedEvent(
                 account.userId(),
-                account.id(),
+                account.cbu(),
                 account.bankName(),
-                account.details().name(),
+                account.name(),
                 cmd.delta()
         ));
+    }
+
+    private Account buildAccount(Account original, Money newBalance) {
+        LocalDateTime now = LocalDateTime.now();
+        return switch (original.type()) {
+            case CHECKING -> new CheckingAccount(original.cbu(), original.alias(), newBalance,
+                    original.userId(), original.bankName(), original.name(), original.isActive(),
+                    original.createdAt(), now);
+            case SAVINGS -> new SavingsAccount(original.cbu(), original.alias(), newBalance,
+                    original.userId(), original.bankName(), original.name(), original.isActive(),
+                    original.createdAt(), now);
+            case INVESTMENT -> new InvestmentAccount(original.cbu(), original.alias(), newBalance,
+                    original.userId(), original.bankName(), original.name(), original.isActive(),
+                    original.createdAt(), now);
+        };
     }
 }

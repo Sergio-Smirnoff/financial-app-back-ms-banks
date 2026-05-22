@@ -5,17 +5,17 @@ import com.financialapp.banks.application.account.usecase.CreateAccountUseCase;
 import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
-import com.financialapp.banks.domain.model.account.AccountDetails;
-import com.financialapp.banks.domain.model.account.AccountId;
-import com.financialapp.banks.domain.model.account.AccountInformation;
 import com.financialapp.banks.domain.model.account.AccountType;
+import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
+import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
+import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import com.financialapp.banks.domain.repository.BankRepository;
-import com.financialapp.banks.domain.common.model.Money;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 
 @Service
@@ -36,24 +36,20 @@ public class CreateAccountUseCaseImpl implements CreateAccountUseCase {
         }
 
         if (cmd.type() == AccountType.INVESTMENT &&
-                accountRepository.existsByBankNameAndTypeAndCurrency(cmd.bankName(), AccountType.INVESTMENT, cmd.initialBalance().currency())) {
+                accountRepository.existsByBankNameAndTypeAndCurrency(
+                        cmd.bankName(), AccountType.INVESTMENT, cmd.initialBalance().currency())) {
             throw new BusinessException("Investment account in " + cmd.initialBalance().currency() + " already exists for this bank");
         }
 
-        Account account = new Account(
-                new AccountInformation(cmd.cbu(), cmd.alias()),
-                new AccountId(null),
-                cmd.userId(),
-                cmd.bankName(),
-                new AccountDetails(
-                        cmd.name(),
-                        cmd.type(),
-                        new Money(cmd.initialBalance().amount(), cmd.initialBalance().currency()),
-                        true
-                ),
-                LocalDateTime.now(),
-                LocalDateTime.now()
-        );
+        LocalDateTime now = LocalDateTime.now();
+        Account account = switch (cmd.type()) {
+            case CHECKING -> new CheckingAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
+                    cmd.userId(), cmd.bankName(), cmd.name(), cmd.isActive() != null ? cmd.isActive() : true, now, now);
+            case SAVINGS -> new SavingsAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
+                    cmd.userId(), cmd.bankName(), cmd.name(), cmd.isActive() != null ? cmd.isActive() : true, now, now);
+            case INVESTMENT -> new InvestmentAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
+                    cmd.userId(), cmd.bankName(), cmd.name(), cmd.isActive() != null ? cmd.isActive() : true, now, now);
+        };
 
         return accountRepository.save(account);
     }

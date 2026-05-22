@@ -6,7 +6,6 @@ import com.financialapp.banks.application.card.command.PayCardInstallmentCommand
 import com.financialapp.banks.application.card.usecase.BatchImportResult;
 import com.financialapp.banks.application.card.usecase.ImportCardExpensesUseCase;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
-import com.financialapp.banks.domain.model.account.AccountId;
 import com.financialapp.banks.domain.model.card.CardInstallment;
 import com.financialapp.banks.domain.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,24 +27,23 @@ public class ImportCardExpensesUseCaseImpl implements ImportCardExpensesUseCase 
     @Override
     @Transactional
     public BatchImportResult execute(ImportCardExpensesCommand cmd) {
-        cardRepository.findByIdAndUserId(cmd.cardId(), cmd.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cmd.cardId().value()));
+        cardRepository.findByCardNumberAndUserId(cmd.cardNumber(), cmd.userId())
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cmd.cardNumber()));
 
         int imported = 0, skipped = 0;
         List<String> errors = new ArrayList<>();
 
         for (ImportCardExpensesCommand.ImportedExpense expense : cmd.expenses()) {
-            AccountId accountId = resolveAccount(expense.amount().currency(), cmd.arsAccountId(), cmd.usdAccountId());
-            if (accountId == null) {
+            String accountCbu = resolveAccountCbu(expense.amount().currency(), cmd.arsAccountCbu(), cmd.usdAccountCbu());
+            if (accountCbu == null) {
                 skipped++;
                 continue;
             }
             try {
                 List<CardInstallment> created = createExpense.execute(new CreateCardExpenseCommand(
-                        cmd.cardId(), cmd.userId(), expense.description(), expense.amount(), 1, expense.date()));
+                        cmd.cardNumber(), cmd.userId(), expense.description(), expense.amount(), 1, expense.date()));
                 payInstallment.execute(new PayCardInstallmentCommand(
-                        cmd.cardId(), created.get(0).id(), cmd.userId(), accountId,
-                        expense.date()));
+                        cmd.cardNumber(), created.get(0).id(), cmd.userId(), accountCbu, expense.date()));
                 imported++;
             } catch (Exception e) {
                 errors.add(expense.description() + ": " + e.getMessage());
@@ -55,10 +53,10 @@ public class ImportCardExpensesUseCaseImpl implements ImportCardExpensesUseCase 
         return new BatchImportResult(imported, skipped, errors);
     }
 
-    private AccountId resolveAccount(Currency currency, AccountId arsId, AccountId usdId) {
+    private String resolveAccountCbu(Currency currency, String arsCbu, String usdCbu) {
         return switch (currency.toString().toUpperCase()) {
-            case "ARS" -> arsId;
-            case "USD" -> usdId;
+            case "ARS" -> arsCbu;
+            case "USD" -> usdCbu;
             default -> null;
         };
     }

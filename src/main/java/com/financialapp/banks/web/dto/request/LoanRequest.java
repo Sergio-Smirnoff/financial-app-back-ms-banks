@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record LoanRequest(
-        @NotNull Long bankId,
-        @NotNull Long destinationAccountId,
+        @NotBlank String bankName,
+        @NotBlank String destinationAccountCbu,
         @NotBlank String name,
         @NotNull @DecimalMin("0.01") BigDecimal principal,
         @NotNull @DecimalMin("0.00") BigDecimal interestRate,
