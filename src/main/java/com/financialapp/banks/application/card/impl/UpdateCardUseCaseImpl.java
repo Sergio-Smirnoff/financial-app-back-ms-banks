@@ -2,6 +2,7 @@ package com.financialapp.banks.application.card.impl;
 
 import com.financialapp.banks.application.card.command.UpdateCardCommand;
 import com.financialapp.banks.application.card.usecase.UpdateCardUseCase;
+import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardBilling;
@@ -30,6 +31,9 @@ public class UpdateCardUseCaseImpl implements UpdateCardUseCase {
 
         CardDetails current = card.details();
         LocalDate newExpiry = cmd.expiringDate() != null ? cmd.expiringDate() : current.expiringDate();
+        if (cmd.expiringDate() != null && cmd.expiringDate().isBefore(LocalDate.now())) {
+            throw new BusinessException("Expiry date cannot be in the past");
+        }
         int newClosing = cmd.closingDay() != null ? cmd.closingDay() : current.billing().closingDay();
         int newDue = cmd.dueDay() != null ? cmd.dueDay() : current.billing().dueDay();
 

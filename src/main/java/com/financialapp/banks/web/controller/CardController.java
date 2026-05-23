@@ -84,7 +84,7 @@ public class CardController {
     public ResponseEntity<ApiResponse<CardResponse>> update(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cardNumber,
-            @RequestBody UpdateCardRequest request) {
+            @Valid @RequestBody UpdateCardRequest request) {
         Card result = updateCardUseCase.execute(new UpdateCardCommand(
                 cardNumber,
                 new UserId(userId),
