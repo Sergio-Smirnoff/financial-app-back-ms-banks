@@ -2,13 +2,17 @@ package com.financialapp.banks.web.controller;
 
 import com.financialapp.banks.application.card.command.CreateCardCommand;
 import com.financialapp.banks.application.card.command.DeleteCardCommand;
+import com.financialapp.banks.application.card.command.UpdateCardCommand;
 import com.financialapp.banks.application.card.usecase.CreateCardUseCase;
 import com.financialapp.banks.application.card.usecase.DeleteCardUseCase;
 import com.financialapp.banks.application.card.usecase.GetCardUseCase;
 import com.financialapp.banks.application.card.usecase.ListCardsUseCase;
+import com.financialapp.banks.application.card.usecase.UpdateCardUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.web.dto.request.CardRequest;
+import com.financialapp.banks.web.dto.request.UpdateCardRequest;
 import com.financialapp.banks.web.dto.response.ApiResponse;
 import com.financialapp.banks.web.dto.response.CardResponse;
 import com.financialapp.banks.web.mapper.CardWebMapper;
@@ -32,6 +36,7 @@ public class CardController {
     private final GetCardUseCase getCardUseCase;
     private final CreateCardUseCase createCardUseCase;
     private final DeleteCardUseCase deleteCardUseCase;
+    private final UpdateCardUseCase updateCardUseCase;
     private final CardWebMapper cardMapper;
 
     @GetMapping
@@ -72,6 +77,22 @@ public class CardController {
         ));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Card created", cardMapper.toResponse(result)));
+    }
+
+    @PutMapping("/{cardNumber}")
+    @Operation(summary = "Update card billing and expiry date")
+    public ResponseEntity<ApiResponse<CardResponse>> update(
+            @RequestHeader("X-User-Id") Long userId,
+            @PathVariable String cardNumber,
+            @RequestBody UpdateCardRequest request) {
+        Card result = updateCardUseCase.execute(new UpdateCardCommand(
+                cardNumber,
+                new UserId(userId),
+                request.expiringDate(),
+                request.closingDay(),
+                request.dueDay()
+        ));
+        return ResponseEntity.ok(ApiResponse.ok("Card updated", cardMapper.toResponse(result)));
     }
 
     @DeleteMapping("/{cardNumber}")
