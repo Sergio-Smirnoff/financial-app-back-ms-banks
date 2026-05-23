@@ -2,8 +2,10 @@ package com.financialapp.banks.infrastructure.scheduler;
 
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.card.Card;
+import com.financialapp.banks.domain.model.card.CardInstallment;
 import com.financialapp.banks.domain.model.loan.LoanInstallment;
 import com.financialapp.banks.domain.repository.AccountRepository;
+import com.financialapp.banks.domain.repository.CardInstallmentRepository;
 import com.financialapp.banks.domain.repository.CardRepository;
 import com.financialapp.banks.domain.repository.LoanInstallmentRepository;
 import com.financialapp.banks.domain.repository.LoanRepository;
@@ -27,8 +29,10 @@ public class BankAlertScheduler {
     private static final BigDecimal LOW_BALANCE_THRESHOLD = new BigDecimal("500.00");
     private static final int CARD_EXPIRY_WINDOW_DAYS = 30;
     private static final int LOAN_REMINDER_WINDOW_DAYS = 3;
+    private static final int CARD_INSTALLMENT_WINDOW_DAYS = 3;
 
     private final CardRepository cardRepository;
+    private final CardInstallmentRepository cardInstallmentRepository;
     private final LoanInstallmentRepository loanInstallmentRepository;
     private final LoanRepository loanRepository;
     private final AccountRepository accountRepository;
@@ -39,6 +43,7 @@ public class BankAlertScheduler {
         log.info("Running daily bank alerts scheduler...");
         checkCardExpirations();
         checkUpcomingLoanPayments();
+        checkUpcomingCardInstallments();
         checkLowBalances();
     }
 
@@ -101,6 +106,29 @@ public class BankAlertScheduler {
                     .metadata(String.format("{\"accountCbu\":\"%s\",\"bankName\":\"%s\"}",
                             account.cbu(), account.bankName()))
                     .build());
+        }
+    }
+
+    private void checkUpcomingCardInstallments() {
+        LocalDate today = LocalDate.now();
+        LocalDate limit = today.plusDays(CARD_INSTALLMENT_WINDOW_DAYS);
+        List<CardInstallment> upcoming = cardInstallmentRepository.findUpcomingUnpaid(today, limit);
+
+        log.info("Found {} card installment(s) due within {} days", upcoming.size(), CARD_INSTALLMENT_WINDOW_DAYS);
+        for (CardInstallment inst : upcoming) {
+            cardRepository.findByCardNumber(inst.cardNumber()).ifPresent(card ->
+                sendAlert(card.userId().value(), BankAlertEvent.builder()
+                        .userId(card.userId().value())
+                        .type("PAYMENT_DUE")
+                        .title("Card Installment Due")
+                        .message(String.format("Installment %d/%d for '%s' is due on %s (%.2f %s).",
+                                inst.installmentNumber(), inst.totalInstallments(),
+                                inst.description(), inst.dueDate(),
+                                inst.amount().amount(), inst.amount().currency().getCurrencyCode()))
+                        .metadata(String.format("{\"cardNumber\":\"%s\",\"installmentId\":%d}",
+                                inst.cardNumber(), inst.id().value()))
+                        .build())
+            );
         }
     }
 

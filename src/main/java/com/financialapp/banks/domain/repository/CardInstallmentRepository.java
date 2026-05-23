@@ -17,4 +17,5 @@ public interface CardInstallmentRepository extends InstallmentRepository<CardIns
     CardInstallment save(CardInstallment installment);
     List<CardInstallment> saveAll(List<CardInstallment> installments);
     List<CardInstallment> findUpcomingUnpaid(UserId userId, LocalDate from, LocalDate to);
+    List<CardInstallment> findUpcomingUnpaid(LocalDate from, LocalDate to);
 }

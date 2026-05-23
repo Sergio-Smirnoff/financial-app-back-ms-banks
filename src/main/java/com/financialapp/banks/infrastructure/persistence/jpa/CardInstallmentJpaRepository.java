@@ -16,4 +16,7 @@ public interface CardInstallmentJpaRepository extends JpaRepository<CardInstallm
 
     @Query("SELECT ci FROM CardInstallmentJpaEntity ci WHERE ci.card.userId = :userId AND ci.paid = false AND ci.dueDate BETWEEN :from AND :to")
     List<CardInstallmentJpaEntity> findUpcomingUnpaid(@Param("userId") Long userId, @Param("from") LocalDate from, @Param("to") LocalDate to);
+
+    @Query("SELECT ci FROM CardInstallmentJpaEntity ci WHERE ci.paid = false AND ci.dueDate BETWEEN :from AND :to")
+    List<CardInstallmentJpaEntity> findAllUpcomingUnpaid(@Param("from") LocalDate from, @Param("to") LocalDate to);
 }

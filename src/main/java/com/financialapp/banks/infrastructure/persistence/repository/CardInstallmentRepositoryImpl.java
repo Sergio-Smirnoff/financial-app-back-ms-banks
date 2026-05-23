@@ -83,6 +83,12 @@ public class CardInstallmentRepositoryImpl implements CardInstallmentRepository 
     }
 
     @Override
+    public List<CardInstallment> findUpcomingUnpaid(LocalDate from, LocalDate to) {
+        return jpaRepository.findAllUpcomingUnpaid(from, to)
+                .stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
     public List<CardInstallment> findUpcomingUnpaid(UserId userId, LocalDate from, LocalDate to) {
         return jpaRepository.findUpcomingUnpaid(userId.value(), from, to)
                 .stream().map(mapper::toDomain).toList();
