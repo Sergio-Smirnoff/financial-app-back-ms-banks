@@ -5,7 +5,7 @@ import com.financialapp.banks.application.account.usecase.DeleteAccountUseCase;
 import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
-import com.financialapp.banks.domain.model.account.AccountType;
+import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.port.InvestmentsPort;
 import com.financialapp.banks.domain.repository.AccountRepository;
 
@@ -30,7 +30,7 @@ public class DeleteAccountUseCaseImpl implements DeleteAccountUseCase {
         Account account = accountRepository.findByCbuAndBankName(command.cbu(), command.bankName())
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + command.cbu()));
 
-        if (account.type() == AccountType.INVESTMENT) {
+        if (account instanceof InvestmentAccount) {
             try {
                 int holdings = investmentsPort.countHoldings(account.cbu());
                 if (holdings > 0) {

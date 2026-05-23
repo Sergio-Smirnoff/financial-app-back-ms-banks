@@ -3,7 +3,6 @@ package com.financialapp.banks.domain.model.account.accountTypes;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.account.Account;
-import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.bank.BankName;
 
 import java.time.LocalDateTime;
@@ -17,5 +16,7 @@ public class InvestmentAccount extends Account {
     }
 
     @Override
-    public AccountType type() { return AccountType.INVESTMENT; }
+    public Account withBalance(Money newBalance, LocalDateTime updatedAt) {
+        return new InvestmentAccount(cbu, alias, newBalance, userId, bankName, name, isActive, createdAt, updatedAt);
+    }
 }

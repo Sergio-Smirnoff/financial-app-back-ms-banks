@@ -7,10 +7,7 @@ import com.financialapp.banks.domain.event.LowBalanceEvent;
 import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
-import com.financialapp.banks.domain.model.account.AccountType;
-import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
-import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.AccountRepository;
@@ -37,7 +34,7 @@ public class AdjustBalanceUseCaseImpl implements AdjustBalanceUseCase {
         Account account = accountRepository.findByCbu(cmd.accountCbu())
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + cmd.accountCbu()));
 
-        if (account.type() == AccountType.INVESTMENT) {
+        if (account instanceof InvestmentAccount) {
             throw new BusinessException("Cannot manually adjust balance of an investment account");
         }
 
@@ -54,7 +51,7 @@ public class AdjustBalanceUseCaseImpl implements AdjustBalanceUseCase {
         }
 
         Money updatedBalance = new Money(newBalance, account.balance().currency());
-        Account updated = buildAccount(account, updatedBalance);
+        Account updated = account.withBalance(updatedBalance, LocalDateTime.now());
         accountRepository.save(updated);
 
         if (newBalance.compareTo(LOW_BALANCE_THRESHOLD) < 0) {
@@ -74,20 +71,5 @@ public class AdjustBalanceUseCaseImpl implements AdjustBalanceUseCase {
                 account.name(),
                 cmd.delta()
         ));
-    }
-
-    private Account buildAccount(Account original, Money newBalance) {
-        LocalDateTime now = LocalDateTime.now();
-        return switch (original.type()) {
-            case CHECKING -> new CheckingAccount(original.cbu(), original.alias(), newBalance,
-                    original.userId(), original.bankName(), original.name(), original.isActive(),
-                    original.createdAt(), now);
-            case SAVINGS -> new SavingsAccount(original.cbu(), original.alias(), newBalance,
-                    original.userId(), original.bankName(), original.name(), original.isActive(),
-                    original.createdAt(), now);
-            case INVESTMENT -> new InvestmentAccount(original.cbu(), original.alias(), newBalance,
-                    original.userId(), original.bankName(), original.name(), original.isActive(),
-                    original.createdAt(), now);
-        };
     }
 }

@@ -14,8 +14,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByBankIdOrderByNameAsc(Long bankId);
     Optional<Account> findByIdAndUserId(Long id, Long userId);
     boolean existsByBankIdAndName(Long bankId, String name);
-    boolean existsByBankIdAndType(Long bankId, com.financialapp.banks.domain.model.account.AccountType type);
-    boolean existsByBankIdAndTypeAndCurrency(Long bankId, com.financialapp.banks.domain.model.account.AccountType type, String currency);
+    boolean existsByBankIdAndType(Long bankId, String type);
+    boolean existsByBankIdAndTypeAndCurrency(Long bankId, String type, String currency);
 
     @Query("SELECT a FROM Account a WHERE a.isActive = true AND a.balance < :threshold")
     List<Account> findLowBalanceAccounts(@Param("threshold") BigDecimal threshold);
@@ -26,6 +26,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
            "ORDER BY a.name ASC")
     List<Account> findFiltered(
             @Param("userId") Long userId,
-            @Param("type") com.financialapp.banks.domain.model.account.AccountType type,
+            @Param("type") String type,
             @Param("currency") String currency);
 }

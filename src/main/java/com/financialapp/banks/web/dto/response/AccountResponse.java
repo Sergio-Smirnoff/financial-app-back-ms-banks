@@ -1,6 +1,5 @@
 package com.financialapp.banks.web.dto.response;
 
-import com.financialapp.banks.domain.model.account.AccountType;
 import lombok.Builder;
 
 import java.math.BigDecimal;
@@ -11,7 +10,7 @@ public record AccountResponse(
         String bankName,
         Long userId,
         String name,
-        AccountType type,
+        String type,
         BigDecimal balance,
         String currency,
         String cbu,

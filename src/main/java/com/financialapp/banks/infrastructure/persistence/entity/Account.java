@@ -1,6 +1,5 @@
 package com.financialapp.banks.infrastructure.persistence.entity;
 
-import com.financialapp.banks.domain.model.account.AccountType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +19,12 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 100)
+    private String cbu;
+
+    @Column(nullable = false, length = 100)
+    private String alias;
+
     @Column(name = "bank_id", nullable = false)
     private Long bankId;
 
@@ -29,9 +34,8 @@ public class Account {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private AccountType type;
+    private String type;
 
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal balance;

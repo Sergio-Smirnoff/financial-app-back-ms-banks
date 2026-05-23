@@ -4,7 +4,6 @@ import com.financialapp.banks.application.account.command.*;
 import com.financialapp.banks.application.account.usecase.*;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.web.dto.request.AccountRequest;
 import com.financialapp.banks.web.dto.response.AccountResponse;
@@ -40,7 +39,7 @@ public class AccountController {
     @Operation(summary = "List all accounts for the current user")
     public ResponseEntity<ApiResponse<List<AccountResponse>>> list(
             @RequestHeader("X-User-Id") Long userId,
-            @RequestParam(required = false) AccountType type,
+            @RequestParam(required = false) String type,
             @RequestParam(required = false) String currency,
             @RequestParam(required = false) String bankName,
             @RequestParam(required = false) String name,

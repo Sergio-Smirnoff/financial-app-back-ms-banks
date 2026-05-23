@@ -42,5 +42,5 @@ public abstract class Account {
     public LocalDateTime createdAt() { return createdAt; }
     public LocalDateTime updatedAt() { return updatedAt; }
 
-    public abstract AccountType type();
+    public abstract Account withBalance(Money newBalance, LocalDateTime updatedAt);
 }
