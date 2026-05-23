@@ -1,7 +1,17 @@
 package com.financialapp.banks.domain.exception;
 
-public class ResourceNotFoundException extends RuntimeException {
+import java.util.Map;
+
+public class ResourceNotFoundException extends DomainException {
+
+    public ResourceNotFoundException(String resourceType, String identifier) {
+        super(DomainError.RESOURCE_NOT_FOUND,
+              resourceType + " '" + identifier + "' not found",
+              Map.of("resourceType", resourceType, "identifier", identifier));
+    }
+
+    // Legacy single-message constructor — kept for backward compat with existing throw sites (Task 7 will migrate these)
     public ResourceNotFoundException(String message) {
-        super(message);
+        super(DomainError.RESOURCE_NOT_FOUND, message);
     }
 }
