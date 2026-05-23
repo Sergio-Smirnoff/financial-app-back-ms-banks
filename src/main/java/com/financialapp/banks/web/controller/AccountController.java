@@ -5,8 +5,10 @@ import com.financialapp.banks.application.account.usecase.*;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.port.FinancesPort;
 import com.financialapp.banks.web.dto.request.AccountRequest;
 import com.financialapp.banks.web.dto.response.AccountResponse;
+import com.financialapp.banks.web.dto.response.AccountTransactionResponse;
 import com.financialapp.banks.web.dto.response.ApiResponse;
 import com.financialapp.banks.web.mapper.AccountWebMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Currency;
 import java.util.List;
 
@@ -33,6 +36,7 @@ public class AccountController {
     private final UpdateAccountUseCase updateAccountUseCase;
     private final DeleteAccountUseCase deleteAccountUseCase;
     private final AdjustBalanceUseCase adjustBalanceUseCase;
+    private final GetAccountTransactionsUseCase getTransactionsUseCase;
     private final AccountWebMapper accountMapper;
 
     @GetMapping
@@ -101,6 +105,33 @@ public class AccountController {
             @RequestParam String bankName) {
         deleteAccountUseCase.execute(new DeleteAccountCommand(cbu, BankName.valueOf(bankName)));
         return ResponseEntity.ok(ApiResponse.ok("Account deleted", null));
+    }
+
+    @GetMapping("/{cbu}/transactions")
+    @Operation(summary = "Get account transactions. Default: last 5. Use ?all=true or ?from=&to= for date filtering.")
+    public ResponseEntity<ApiResponse<List<AccountTransactionResponse>>> getTransactions(
+            @PathVariable String cbu,
+            @RequestParam(defaultValue = "false") boolean all,
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to) {
+
+        List<FinancesPort.TransactionSummary> transactions;
+        if (from != null && to != null) {
+            transactions = getTransactionsUseCase.getFiltered(cbu, from, to);
+        } else if (all) {
+            transactions = getTransactionsUseCase.getAll(cbu);
+        } else {
+            transactions = getTransactionsUseCase.getRecent(cbu, 5);
+        }
+
+        List<AccountTransactionResponse> response = transactions.stream()
+                .map(t -> new AccountTransactionResponse(
+                        t.transactionId(), t.accountCbu(),
+                        t.amount().amount(), t.amount().currency().getCurrencyCode(),
+                        t.description(), t.category(), t.subcategory(), t.date()))
+                .toList();
+
+        return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     @PostMapping("/{cbu}/balance/adjust")
