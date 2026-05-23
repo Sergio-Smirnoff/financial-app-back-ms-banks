@@ -6,6 +6,7 @@ import com.financialapp.banks.domain.model.loan.LoanInstallment;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import com.financialapp.banks.domain.repository.CardRepository;
 import com.financialapp.banks.domain.repository.LoanInstallmentRepository;
+import com.financialapp.banks.domain.repository.LoanRepository;
 import com.financialapp.banks.infrastructure.messaging.payload.BankAlertEvent;
 import com.financialapp.banks.infrastructure.messaging.payload.TransactionalKafkaEvent;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class BankAlertScheduler {
 
     private final CardRepository cardRepository;
     private final LoanInstallmentRepository loanInstallmentRepository;
+    private final LoanRepository loanRepository;
     private final AccountRepository accountRepository;
     private final ApplicationEventPublisher springPublisher;
 
@@ -69,14 +71,17 @@ public class BankAlertScheduler {
 
         log.info("Found {} loan installment(s) due within {} days", upcoming.size(), LOAN_REMINDER_WINDOW_DAYS);
         for (LoanInstallment inst : upcoming) {
-            sendAlert(null, BankAlertEvent.builder()
-                    .type("LOAN_REMINDER")
-                    .title("Loan Payment Due")
-                    .message(String.format("Installment #%d is due on %s.",
-                            inst.installmentNumber(), inst.dueDate()))
-                    .metadata(String.format("{\"loanId\":%d,\"installmentId\":%d}",
-                            inst.loanId().value(), inst.id().value()))
-                    .build());
+            loanRepository.findById(inst.loanId()).ifPresent(loan ->
+                sendAlert(loan.userId().value(), BankAlertEvent.builder()
+                        .userId(loan.userId().value())
+                        .type("LOAN_REMINDER")
+                        .title("Loan Payment Due")
+                        .message(String.format("Installment #%d for loan '%s' is due on %s.",
+                                inst.installmentNumber(), loan.name(), inst.dueDate()))
+                        .metadata(String.format("{\"loanId\":%d,\"installmentId\":%d}",
+                                inst.loanId().value(), inst.id().value()))
+                        .build())
+            );
         }
     }
 
