@@ -39,13 +39,14 @@ public class UpdateAccountUseCaseImpl implements UpdateAccountUseCase {
         Boolean newActive = cmd.isActive() != null ? cmd.isActive() : existing.isActive();
         LocalDateTime now = LocalDateTime.now();
 
-        Account updated = switch (existing.type()) {
-            case CHECKING -> new CheckingAccount(existing.cbu(), existing.alias(), newBalance,
+        Account updated = switch (existing) {
+            case CheckingAccount ignored -> new CheckingAccount(existing.cbu(), existing.alias(), newBalance,
                     existing.userId(), existing.bankName(), newName, newActive, existing.createdAt(), now);
-            case SAVINGS -> new SavingsAccount(existing.cbu(), existing.alias(), newBalance,
+            case SavingsAccount ignored -> new SavingsAccount(existing.cbu(), existing.alias(), newBalance,
                     existing.userId(), existing.bankName(), newName, newActive, existing.createdAt(), now);
-            case INVESTMENT -> new InvestmentAccount(existing.cbu(), existing.alias(), newBalance,
+            case InvestmentAccount ignored -> new InvestmentAccount(existing.cbu(), existing.alias(), newBalance,
                     existing.userId(), existing.bankName(), newName, newActive, existing.createdAt(), now);
+            default -> throw new IllegalStateException("Unknown account subtype: " + existing.getClass().getSimpleName());
         };
 
         return accountRepository.save(updated);

@@ -1,0 +1,70 @@
+package com.financialapp.banks.application.account;
+
+import com.financialapp.banks.application.account.command.CreateAccountCommand;
+import com.financialapp.banks.application.account.impl.CreateAccountUseCaseImpl;
+import com.financialapp.banks.domain.common.model.Money;
+import com.financialapp.banks.domain.common.model.UserId;
+import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.model.account.Account;
+import com.financialapp.banks.domain.model.account.AccountType;
+import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
+import com.financialapp.banks.domain.model.bank.Bank;
+import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.repository.AccountRepository;
+import com.financialapp.banks.domain.repository.BankRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.util.Currency;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class CreateAccountUseCaseImplTest {
+
+    @Mock BankRepository bankRepository;
+    @Mock AccountRepository accountRepository;
+    CreateAccountUseCaseImpl useCase;
+
+    @BeforeEach
+    void setUp() {
+        useCase = new CreateAccountUseCaseImpl(accountRepository, bankRepository);
+    }
+
+    private CreateAccountCommand command(String type) {
+        return new CreateAccountCommand(
+                new UserId(1L), BankName.GALICIA, "Savings", type,
+                new Money(new BigDecimal("100.00"), Currency.getInstance("USD")),
+                true, "1234567890123456789012", "alias");
+    }
+
+    @Test
+    void create_persistsSavingsAccount() {
+        when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.of(new Bank(BankName.GALICIA, null)));
+        when(accountRepository.existsByBankNameAndName(BankName.GALICIA, "Savings")).thenReturn(false);
+        when(accountRepository.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Account result = useCase.execute(command(AccountType.SAVINGS.name()));
+
+        assertThat(result).isInstanceOf(SavingsAccount.class);
+        assertThat(result.balance().amount()).isEqualByComparingTo("100.00");
+    }
+
+    @Test
+    void create_rejectsDuplicateName() {
+        when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.of(new Bank(BankName.GALICIA, null)));
+        when(accountRepository.existsByBankNameAndName(BankName.GALICIA, "Savings")).thenReturn(true);
+
+        assertThatThrownBy(() -> useCase.execute(command(AccountType.SAVINGS.name())))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("already exists");
+    }
+}

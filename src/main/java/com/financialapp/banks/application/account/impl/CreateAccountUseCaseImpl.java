@@ -22,10 +22,6 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class CreateAccountUseCaseImpl implements CreateAccountUseCase {
 
-    private static final String INVESTMENT = AccountType.INVESTMENT.name();
-    private static final String CHECKING = AccountType.CHECKING.name();
-    private static final String SAVINGS = AccountType.SAVINGS.name();
-
     private final AccountRepository accountRepository;
     private final BankRepository bankRepository;
 
@@ -39,20 +35,20 @@ public class CreateAccountUseCaseImpl implements CreateAccountUseCase {
             throw new BusinessException("Account '" + cmd.name() + "' already exists in this bank");
         }
 
-        if (INVESTMENT.equals(cmd.type()) &&
+        if (AccountType.INVESTMENT.name().equals(cmd.type()) &&
                 accountRepository.existsByBankNameAndTypeAndCurrency(
-                        cmd.bankName(), INVESTMENT, cmd.initialBalance().currency())) {
+                        cmd.bankName(), AccountType.INVESTMENT.name(), cmd.initialBalance().currency())) {
             throw new BusinessException("Investment account in " + cmd.initialBalance().currency() + " already exists for this bank");
         }
 
         LocalDateTime now = LocalDateTime.now();
         boolean isActive = cmd.isActive() != null ? cmd.isActive() : true;
         Account account = switch (cmd.type()) {
-            case CHECKING -> new CheckingAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
+            case "CHECKING" -> new CheckingAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
                     cmd.userId(), cmd.bankName(), cmd.name(), isActive, now, now);
-            case SAVINGS -> new SavingsAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
+            case "SAVINGS" -> new SavingsAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
                     cmd.userId(), cmd.bankName(), cmd.name(), isActive, now, now);
-            case INVESTMENT -> new InvestmentAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
+            case "INVESTMENT" -> new InvestmentAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
                     cmd.userId(), cmd.bankName(), cmd.name(), isActive, now, now);
             default -> throw new BusinessException("Unknown account type: " + cmd.type());
         };

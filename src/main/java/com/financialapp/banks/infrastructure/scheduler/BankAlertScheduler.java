@@ -1,15 +1,16 @@
 package com.financialapp.banks.infrastructure.scheduler;
 
-import com.financialapp.banks.domain.model.Card;
-import com.financialapp.banks.domain.model.Account;
-import com.financialapp.banks.domain.model.LoanInstallment;
-import com.financialapp.banks.infrastructure.persistence.CardRepository;
-import com.financialapp.banks.infrastructure.persistence.LoanInstallmentRepository;
-import com.financialapp.banks.infrastructure.persistence.AccountRepository;
-import com.financialapp.banks.application.event.BankAlertEvent;
-import com.financialapp.banks.infrastructure.event.BanksEventProducer;
+import com.financialapp.banks.domain.model.account.Account;
+import com.financialapp.banks.domain.model.card.Card;
+import com.financialapp.banks.domain.model.loan.LoanInstallment;
+import com.financialapp.banks.domain.repository.AccountRepository;
+import com.financialapp.banks.domain.repository.CardRepository;
+import com.financialapp.banks.domain.repository.LoanInstallmentRepository;
+import com.financialapp.banks.infrastructure.messaging.payload.BankAlertEvent;
+import com.financialapp.banks.infrastructure.messaging.payload.TransactionalKafkaEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +23,16 @@ import java.util.List;
 @Slf4j
 public class BankAlertScheduler {
 
+    private static final BigDecimal LOW_BALANCE_THRESHOLD = new BigDecimal("500.00");
+    private static final int CARD_EXPIRY_WINDOW_DAYS = 30;
+    private static final int LOAN_REMINDER_WINDOW_DAYS = 3;
+
     private final CardRepository cardRepository;
     private final LoanInstallmentRepository loanInstallmentRepository;
     private final AccountRepository accountRepository;
-    private final BanksEventProducer eventProducer;
+    private final ApplicationEventPublisher springPublisher;
 
-    @Scheduled(cron = "0 0 8 * * *") // Every day at 8 AM
+    @Scheduled(cron = "0 0 8 * * *")
     public void runDailyAlerts() {
         log.info("Running daily bank alerts scheduler...");
         checkCardExpirations();
@@ -37,59 +42,65 @@ public class BankAlertScheduler {
 
     private void checkCardExpirations() {
         LocalDate today = LocalDate.now();
-        LocalDate limit = today.plusDays(30);
+        LocalDate limit = today.plusDays(CARD_EXPIRY_WINDOW_DAYS);
         List<Card> expiring = cardRepository.findExpiringBetween(today, limit);
-        
-        log.info("Found {} card(s) expiring within 30 days", expiring.size());
-        for (Card card : expiring) {
-            Long bankId = card.getBankId();
 
-            eventProducer.sendBankAlert(BankAlertEvent.builder()
-                    .userId(card.getUserId())
+        log.info("Found {} card(s) expiring within {} days", expiring.size(), CARD_EXPIRY_WINDOW_DAYS);
+        for (Card card : expiring) {
+            String last4 = card.cardNumber().length() >= 4
+                    ? card.cardNumber().substring(card.cardNumber().length() - 4)
+                    : card.cardNumber();
+            sendAlert(card.userId().value(), BankAlertEvent.builder()
+                    .userId(card.userId().value())
                     .type("CARD_EXPIRING")
                     .title("Card Expiring Soon")
-                    .message(String.format("Your card ending in %s expires on %s.", 
-                            card.getLast4Digits(), card.getExpiringDate()))
-                    .metadata(String.format("{\"cardId\":%d,\"bankId\":%d}", card.getId(), bankId))
+                    .message(String.format("Your card ending in %s expires on %s.",
+                            last4, card.details().expiringDate()))
+                    .metadata(String.format("{\"cardNumber\":\"%s\",\"bankName\":\"%s\"}",
+                            card.cardNumber(), card.bankName()))
                     .build());
         }
     }
 
     private void checkUpcomingLoanPayments() {
         LocalDate today = LocalDate.now();
-        LocalDate limit = today.plusDays(3);
+        LocalDate limit = today.plusDays(LOAN_REMINDER_WINDOW_DAYS);
         List<LoanInstallment> upcoming = loanInstallmentRepository.findUpcomingUnpaid(today, limit);
 
-        log.info("Found {} loan installment(s) due within 3 days", upcoming.size());
+        log.info("Found {} loan installment(s) due within {} days", upcoming.size(), LOAN_REMINDER_WINDOW_DAYS);
         for (LoanInstallment inst : upcoming) {
-            Long bankId = inst.getLoan().getBankId();
-
-            eventProducer.sendBankAlert(BankAlertEvent.builder()
-                    .userId(inst.getLoan().getUserId())
+            sendAlert(null, BankAlertEvent.builder()
                     .type("LOAN_REMINDER")
                     .title("Loan Payment Due")
-                    .message(String.format("Installment #%d of your loan '%s' is due on %s.",
-                            inst.getInstallmentNumber(), inst.getLoan().getName(), inst.getDueDate()))
-                    .metadata(String.format("{\"loanId\":%d,\"installmentId\":%d,\"bankId\":%d}", 
-                            inst.getLoan().getId(), inst.getId(), bankId))
+                    .message(String.format("Installment #%d is due on %s.",
+                            inst.installmentNumber(), inst.dueDate()))
+                    .metadata(String.format("{\"loanId\":%d,\"installmentId\":%d}",
+                            inst.loanId().value(), inst.id().value()))
                     .build());
         }
     }
 
     private void checkLowBalances() {
-        BigDecimal threshold = new BigDecimal("500.00");
-        List<Account> lowBalanceAccounts = accountRepository.findLowBalanceAccounts(threshold);
+        List<Account> lowBalance = accountRepository.findLowBalance(LOW_BALANCE_THRESHOLD);
 
-        log.info("Found {} account(s) with balance below {}", lowBalanceAccounts.size(), threshold);
-        for (Account account : lowBalanceAccounts) {
-            eventProducer.sendBankAlert(BankAlertEvent.builder()
-                    .userId(account.getUserId())
+        log.info("Found {} account(s) with balance below {}", lowBalance.size(), LOW_BALANCE_THRESHOLD);
+        for (Account account : lowBalance) {
+            sendAlert(account.userId().value(), BankAlertEvent.builder()
+                    .userId(account.userId().value())
                     .type("LOW_BALANCE")
                     .title("Low Account Balance")
                     .message(String.format("Your account '%s' has a low balance of %s %s.",
-                            account.getName(), account.getBalance(), account.getCurrency()))
-                    .metadata(String.format("{\"accountId\":%d,\"bankId\":%d}", account.getId(), account.getBankId()))
+                            account.name(),
+                            account.balance().amount(),
+                            account.balance().currency().getCurrencyCode()))
+                    .metadata(String.format("{\"accountCbu\":\"%s\",\"bankName\":\"%s\"}",
+                            account.cbu(), account.bankName()))
                     .build());
         }
+    }
+
+    private void sendAlert(Long userId, BankAlertEvent payload) {
+        String key = userId != null ? userId.toString() : "scheduler";
+        springPublisher.publishEvent(new TransactionalKafkaEvent("bank-alerts", key, payload));
     }
 }

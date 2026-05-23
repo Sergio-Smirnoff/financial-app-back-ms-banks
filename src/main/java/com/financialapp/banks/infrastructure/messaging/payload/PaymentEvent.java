@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Builder
 public record PaymentEvent(
         Long userId,
-        Long accountId,
+        String accountCbu,
         Money amount,
         String description,
         LocalDate date

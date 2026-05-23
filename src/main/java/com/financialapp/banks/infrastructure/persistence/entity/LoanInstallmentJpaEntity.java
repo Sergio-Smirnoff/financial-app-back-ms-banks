@@ -14,14 +14,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LoanInstallment {
+public class LoanInstallmentJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "loan_id", nullable = false)
-    private Loan loan;
+    private LoanJpaEntity loan;
 
     @Column(name = "installment_number", nullable = false)
     private int installmentNumber;

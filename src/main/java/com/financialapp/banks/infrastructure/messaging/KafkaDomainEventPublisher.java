@@ -23,10 +23,9 @@ public class KafkaDomainEventPublisher implements DomainEventPublisher {
         switch (event) {
             case LoanCreatedEvent e -> sendPayment(
                     e.userId().value(),
-                    e.destinationAccountId().value(),
                     PaymentEvent.builder()
                             .userId(e.userId().value())
-                            .accountId(e.destinationAccountId().value())
+                            .accountCbu(e.destinationAccountCbu())
                             .amount(e.amount())
                             .description("Loan Deposit: " + e.loanName())
                             .date(e.date())
@@ -34,10 +33,9 @@ public class KafkaDomainEventPublisher implements DomainEventPublisher {
             );
             case LoanInstallmentPaidEvent e -> sendPayment(
                     e.userId().value(),
-                    e.accountId().value(),
                     PaymentEvent.builder()
                             .userId(e.userId().value())
-                            .accountId(e.accountId().value())
+                            .accountCbu(e.accountCbu())
                             .amount(e.amount())
                             .description("Loan Payment: " + e.loanName() + " (Installment " + e.installmentNumber() + ")")
                             .date(e.paidDate())
@@ -45,10 +43,9 @@ public class KafkaDomainEventPublisher implements DomainEventPublisher {
             );
             case CardInstallmentPaidEvent e -> sendPayment(
                     e.userId().value(),
-                    e.accountId().value(),
                     PaymentEvent.builder()
                             .userId(e.userId().value())
-                            .accountId(e.accountId().value())
+                            .accountCbu(e.accountCbu())
                             .amount(e.amount())
                             .description("Card Installment: " + e.description() +
                                     " (" + e.installmentNumber() + "/" + e.totalInstallments() + ")")
@@ -62,9 +59,9 @@ public class KafkaDomainEventPublisher implements DomainEventPublisher {
                             .type("LOW_BALANCE")
                             .title("Low Account Balance")
                             .message(String.format("Account '%s' has a low balance of %.2f %s.",
-                                    e.accountName(), e.balance(), e.currency()))
-                            .metadata(String.format("{\"accountId\":%d,\"bankName\":\"%s\",\"balance\":%.2f}",
-                                    e.accountId().value(), e.bankName(), e.balance()))
+                                    e.accountName(), e.balance().amount(), e.balance().currency().getCurrencyCode()))
+                            .metadata(String.format("{\"accountCbu\":\"%s\",\"bankName\":\"%s\",\"balance\":%.2f}",
+                                    e.accountCbu(), e.bankName(), e.balance().amount()))
                             .build()
             );
             case BalanceAdjustedEvent e -> {
@@ -80,8 +77,8 @@ public class KafkaDomainEventPublisher implements DomainEventPublisher {
                                         e.delta().currency().getCurrencyCode(),
                                         credit ? "credited to" : "debited from",
                                         e.accountName()))
-                                .metadata(String.format("{\"accountId\":%d,\"bankName\":\"%s\",\"amount\":%.2f}",
-                                        e.accountId().value(), e.bankName(), e.delta().amount().abs()))
+                                .metadata(String.format("{\"accountCbu\":\"%s\",\"bankName\":\"%s\",\"amount\":%.2f}",
+                                        e.accountCbu(), e.bankName(), e.delta().amount().abs()))
                                 .build()
                 );
             }
@@ -89,7 +86,7 @@ public class KafkaDomainEventPublisher implements DomainEventPublisher {
         }
     }
 
-    private void sendPayment(Long userId, Long accountId, PaymentEvent payload) {
+    private void sendPayment(Long userId, PaymentEvent payload) {
         log.info("Queuing payment event for user {}", userId);
         springPublisher.publishEvent(new TransactionalKafkaEvent("payment-events", userId.toString(), payload));
     }

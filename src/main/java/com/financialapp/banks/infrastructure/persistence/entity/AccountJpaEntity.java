@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Account {
+public class AccountJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +25,10 @@ public class Account {
     @Column(nullable = false, length = 100)
     private String alias;
 
-    @Column(name = "bank_id", nullable = false)
-    private Long bankId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bank_id", nullable = false)
+    private BankJpaEntity bank;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;

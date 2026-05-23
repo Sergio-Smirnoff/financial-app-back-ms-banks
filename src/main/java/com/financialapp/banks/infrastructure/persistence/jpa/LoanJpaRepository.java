@@ -1,6 +1,6 @@
 package com.financialapp.banks.infrastructure.persistence.jpa;
 
-import com.financialapp.banks.infrastructure.persistence.entity.Loan;
+import com.financialapp.banks.infrastructure.persistence.entity.LoanJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,14 +9,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface LoanRepository extends JpaRepository<Loan, Long> {
-    List<Loan> findByUserId(Long userId);
-    List<Loan> findByBankId(Long bankId);
-    Optional<Loan> findByIdAndUserId(Long id, Long userId);
+public interface LoanJpaRepository extends JpaRepository<LoanJpaEntity, Long> {
+    List<LoanJpaEntity> findByUserId(Long userId);
+    List<LoanJpaEntity> findByBankId(Long bankId);
+    Optional<LoanJpaEntity> findByIdAndUserId(Long id, Long userId);
 
     int countByBankId(Long bankId);
 
-    @Query("SELECT l FROM Loan l WHERE l.active = true AND " +
-           "(SELECT MIN(li.dueDate) FROM LoanInstallment li WHERE li.loan = l AND li.paid = false) BETWEEN :from AND :to")
-    List<Loan> findActiveWithUpcomingPayment(@Param("from") LocalDate from, @Param("to") LocalDate to);
+    @Query("SELECT l FROM LoanJpaEntity l WHERE l.active = true AND " +
+           "(SELECT MIN(li.dueDate) FROM LoanInstallmentJpaEntity li WHERE li.loan = l AND li.paid = false) BETWEEN :from AND :to")
+    List<LoanJpaEntity> findActiveWithUpcomingPayment(@Param("from") LocalDate from, @Param("to") LocalDate to);
 }

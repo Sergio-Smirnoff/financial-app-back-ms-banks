@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableCaching
 @ConfigurationPropertiesScan
-@EnableFeignClients(basePackages = "com.financialapp.banks.client")
+@EnableFeignClients(basePackages = "com.financialapp.banks.infrastructure.client")
 public class BanksApplication {
 
     public static void main(String[] args) {

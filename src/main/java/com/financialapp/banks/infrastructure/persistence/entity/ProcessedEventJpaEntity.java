@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProcessedEvent {
+public class ProcessedEventJpaEntity {
 
     @Id
     @Column(name = "event_id")

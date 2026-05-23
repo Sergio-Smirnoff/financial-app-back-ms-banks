@@ -6,7 +6,7 @@ import java.time.LocalDate;
 public record TransactionCreatedEvent(
         Long transactionId,
         Long userId,
-        Long accountId,
+        String accountCbu,
         BigDecimal amount,
         String currency,
         LocalDate timestamp

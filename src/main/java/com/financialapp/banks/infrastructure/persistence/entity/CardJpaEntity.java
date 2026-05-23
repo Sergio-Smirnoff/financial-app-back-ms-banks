@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Card {
+public class CardJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,8 +40,8 @@ public class Card {
     @Column(nullable = false, length = 20)
     private CardBehavior behavior;
 
-    @Column(name = "last_4_digits", nullable = false, length = 4)
-    private String last4Digits;
+    @Column(name = "card_number", nullable = false, length = 22)
+    private String cardNumber;
 
     @Column(name = "expiring_date", nullable = false)
     private LocalDate expiringDate;

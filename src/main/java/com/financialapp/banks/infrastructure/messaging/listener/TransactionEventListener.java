@@ -3,7 +3,6 @@ package com.financialapp.banks.infrastructure.messaging.listener;
 import com.financialapp.banks.application.account.command.AdjustBalanceCommand;
 import com.financialapp.banks.application.account.usecase.AdjustBalanceUseCase;
 import com.financialapp.banks.domain.common.model.Money;
-import com.financialapp.banks.domain.model.account.AccountId;
 import com.financialapp.banks.infrastructure.messaging.payload.TransactionCreatedEvent;
 import com.financialapp.banks.infrastructure.persistence.entity.ProcessedEventJpaEntity;
 import com.financialapp.banks.infrastructure.persistence.jpa.ProcessedEventJpaRepository;
@@ -26,8 +25,8 @@ public class TransactionEventListener {
     @KafkaListener(topics = "transaction.created", groupId = "banks-group")
     @Transactional
     public void handleTransactionCreated(TransactionCreatedEvent event) {
-        log.info("Received transaction.created event: id={}, accountId={}, amount={}",
-                event.transactionId(), event.accountId(), event.amount());
+        log.info("Received transaction.created event: id={}, accountCbu={}, amount={}",
+                event.transactionId(), event.accountCbu(), event.amount());
 
         if (processedEventRepository.existsById(event.transactionId())) {
             log.warn("Event already processed: {}. Skipping.", event.transactionId());
@@ -37,7 +36,7 @@ public class TransactionEventListener {
         try {
             Currency currency = event.currency() != null ? Currency.getInstance(event.currency()) : null;
             adjustBalanceUseCase.execute(new AdjustBalanceCommand(
-                    new AccountId(event.accountId()),
+                    event.accountCbu(),
                     new Money(event.amount(), currency)
             ));
 

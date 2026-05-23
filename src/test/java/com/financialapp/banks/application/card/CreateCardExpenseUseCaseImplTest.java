@@ -1,0 +1,86 @@
+package com.financialapp.banks.application.card;
+
+import com.financialapp.banks.application.card.command.CreateCardExpenseCommand;
+import com.financialapp.banks.application.card.impl.CreateCardExpenseUseCaseImpl;
+import com.financialapp.banks.domain.common.model.Money;
+import com.financialapp.banks.domain.common.model.UserId;
+import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.card.CardBehavior;
+import com.financialapp.banks.domain.model.card.CardBilling;
+import com.financialapp.banks.domain.model.card.CardBrand;
+import com.financialapp.banks.domain.model.card.CardDetails;
+import com.financialapp.banks.domain.model.card.CardInstallment;
+import com.financialapp.banks.domain.model.card.CardType;
+import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
+import com.financialapp.banks.domain.model.card.cardPaymentMethod.DebitCard;
+import com.financialapp.banks.domain.repository.CardInstallmentRepository;
+import com.financialapp.banks.domain.repository.CardRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Currency;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class CreateCardExpenseUseCaseImplTest {
+
+    @Mock CardInstallmentRepository installmentRepository;
+    @Mock CardRepository cardRepository;
+    CreateCardExpenseUseCaseImpl useCase;
+
+    @BeforeEach
+    void setUp() {
+        useCase = new CreateCardExpenseUseCaseImpl(installmentRepository, cardRepository);
+    }
+
+    private CreditCard creditCard() {
+        CardDetails details = new CardDetails(CardBrand.VISA, CardType.PLATINUM,
+                CardBehavior.CREDIT, LocalDate.now().plusYears(2), new CardBilling(20, 10));
+        return new CreditCard("1234", new UserId(1L), BankName.GALICIA, details,
+                LocalDateTime.now(), LocalDateTime.now());
+    }
+
+    @Test
+    void create_generatesMultipleInstallments() {
+        when(cardRepository.findByCardNumberAndUserId("1234", new UserId(1L))).thenReturn(Optional.of(creditCard()));
+        when(installmentRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+
+        List<CardInstallment> result = useCase.execute(new CreateCardExpenseCommand(
+                "1234", new UserId(1L), "New Mac",
+                new Money(new BigDecimal("3000"), Currency.getInstance("USD")),
+                3, LocalDate.of(2026, 5, 1)));
+
+        assertThat(result).hasSize(3);
+        assertThat(result.get(0).amount().amount()).isEqualByComparingTo("1000.00");
+        assertThat(result.get(0).dueDate()).isEqualTo(LocalDate.of(2026, 5, 1));
+        assertThat(result.get(2).dueDate()).isEqualTo(LocalDate.of(2026, 7, 1));
+    }
+
+    @Test
+    void create_rejectsInstantPaymentCard() {
+        CardDetails details = new CardDetails(CardBrand.VISA, CardType.STANDARD,
+                CardBehavior.INSTANT_PAYMENT, LocalDate.now().plusYears(2), new CardBilling(20, 10));
+        DebitCard debit = new DebitCard("1234", new UserId(1L), BankName.GALICIA, details,
+                LocalDateTime.now(), LocalDateTime.now());
+        when(cardRepository.findByCardNumberAndUserId("1234", new UserId(1L))).thenReturn(Optional.of(debit));
+
+        assertThatThrownBy(() -> useCase.execute(new CreateCardExpenseCommand(
+                "1234", new UserId(1L), "Coffee",
+                new Money(BigDecimal.TEN, Currency.getInstance("USD")), 1, LocalDate.now())))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("do not support installment-based expenses");
+    }
+}
