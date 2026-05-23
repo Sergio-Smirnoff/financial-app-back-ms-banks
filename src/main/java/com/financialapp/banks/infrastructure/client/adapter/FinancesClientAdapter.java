@@ -48,7 +48,8 @@ public class FinancesClientAdapter implements FinancesPort {
                             d.date()))
                     .toList();
         } catch (Exception e) {
-            log.warn("Failed to fetch transactions for accountCbu={}: {}", accountCbu, e.getMessage());
+            log.warn("Failed to fetch transactions for accountCbu={} (limit={}, from={}, to={}): {}",
+                    accountCbu, limit, from, to, e.getMessage());
             return List.of();
         }
     }

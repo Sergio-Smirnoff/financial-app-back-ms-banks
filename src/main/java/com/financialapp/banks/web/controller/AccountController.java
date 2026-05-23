@@ -2,10 +2,10 @@ package com.financialapp.banks.web.controller;
 
 import com.financialapp.banks.application.account.command.*;
 import com.financialapp.banks.application.account.usecase.*;
+import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.BankName;
-import com.financialapp.banks.domain.port.FinancesPort;
 import com.financialapp.banks.web.dto.request.AccountRequest;
 import com.financialapp.banks.web.dto.response.AccountResponse;
 import com.financialapp.banks.web.dto.response.AccountTransactionResponse;
@@ -115,14 +115,13 @@ public class AccountController {
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to) {
 
-        List<FinancesPort.TransactionSummary> transactions;
-        if (from != null && to != null) {
-            transactions = getTransactionsUseCase.getFiltered(cbu, from, to);
-        } else if (all) {
-            transactions = getTransactionsUseCase.getAll(cbu);
-        } else {
-            transactions = getTransactionsUseCase.getRecent(cbu, 5);
+        if (from != null && to != null && from.isAfter(to)) {
+            throw new BusinessException("'from' date must not be after 'to' date");
         }
+
+        var transactions = from != null && to != null
+                ? getTransactionsUseCase.getFiltered(cbu, from, to)
+                : all ? getTransactionsUseCase.getAll(cbu) : getTransactionsUseCase.getRecent(cbu, 5);
 
         List<AccountTransactionResponse> response = transactions.stream()
                 .map(t -> new AccountTransactionResponse(
