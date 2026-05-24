@@ -9,9 +9,4 @@ public class ResourceNotFoundException extends DomainException {
               resourceType + " '" + identifier + "' not found",
               Map.of("resourceType", resourceType, "identifier", identifier));
     }
-
-    // Legacy single-message constructor — kept for backward compat with existing throw sites (Task 7 will migrate these)
-    public ResourceNotFoundException(String message) {
-        super(DomainError.RESOURCE_NOT_FOUND, message);
-    }
 }

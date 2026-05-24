@@ -23,7 +23,7 @@ public class ListCardInstallmentsUseCaseImpl implements ListCardInstallmentsUseC
     @Transactional(readOnly = true)
     public List<CardInstallment> execute(String cardNumber, UserId userId) {
         cardRepository.findByCardNumberAndUserId(cardNumber, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cardNumber));
+                .orElseThrow(() -> new ResourceNotFoundException("Card", cardNumber));
         return installmentRepository.findByCardNumber(cardNumber);
     }
 }
