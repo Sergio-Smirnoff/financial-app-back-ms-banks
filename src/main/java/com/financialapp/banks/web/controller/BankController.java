@@ -6,6 +6,7 @@ import com.financialapp.banks.application.bank.command.UpdateBankCommand;
 import com.financialapp.banks.application.bank.usecase.*;
 import com.financialapp.banks.application.account.command.FilterAccountCommand;
 import com.financialapp.banks.application.account.usecase.ListAccountsUseCase;
+import com.financialapp.banks.application.bank.usecase.ListAvailableBanksUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.Bank;
 import com.financialapp.banks.domain.model.bank.BankName;
@@ -13,6 +14,7 @@ import com.financialapp.banks.domain.model.bank.Logo;
 import com.financialapp.banks.web.dto.request.BankRequest;
 import com.financialapp.banks.web.dto.response.AccountResponse;
 import com.financialapp.banks.web.dto.response.ApiResponse;
+import com.financialapp.banks.web.dto.response.AvailableBankResponse;
 import com.financialapp.banks.web.dto.response.BankResponse;
 import com.financialapp.banks.web.mapper.AccountWebMapper;
 import com.financialapp.banks.web.mapper.BankWebMapper;
@@ -38,6 +40,7 @@ public class BankController {
     private final UpdateBankUseCase updateBankUseCase;
     private final DeleteBankUseCase deleteBankUseCase;
     private final ListAccountsUseCase listAccountsUseCase;
+    private final ListAvailableBanksUseCase listAvailableBanksUseCase;
     private final AccountWebMapper accountMapper;
     private final BankWebMapper bankMapper;
 
@@ -55,6 +58,12 @@ public class BankController {
                 .filter(b -> !b.accounts().isEmpty())
                 .toList();
         return ResponseEntity.ok(ApiResponse.ok(responses));
+    }
+
+    @GetMapping("/available")
+    @Operation(summary = "List all available bank names (catalog)")
+    public ResponseEntity<ApiResponse<List<AvailableBankResponse>>> available() {
+        return ResponseEntity.ok(ApiResponse.ok(listAvailableBanksUseCase.execute()));
     }
 
     @GetMapping("/{name}")

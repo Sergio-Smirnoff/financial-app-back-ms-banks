@@ -50,4 +50,15 @@ class BankControllerIT {
             .andExpect(jsonPath("$.code").value("resource_not_found"))
             .andExpect(jsonPath("$.status").value(404));
     }
+
+    @Test
+    void availableBanks_returnsAllEnumValues() throws Exception {
+        mockMvc.perform(get("/api/v1/banks/available")
+                        .header("X-Internal-Token", "test-token"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(13))
+                .andExpect(jsonPath("$.data[?(@.name == 'GALICIA')].displayName").value("Galicia"))
+                .andExpect(jsonPath("$.data[?(@.name == 'SANTANDER')].displayName").value("Santander"));
+    }
 }
