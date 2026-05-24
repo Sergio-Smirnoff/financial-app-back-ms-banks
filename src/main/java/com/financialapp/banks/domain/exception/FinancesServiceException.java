@@ -1,7 +1,5 @@
-package com.financialapp.banks.infrastructure.exception;
+package com.financialapp.banks.domain.exception;
 
-import com.financialapp.banks.domain.exception.DomainError;
-import com.financialapp.banks.domain.exception.DomainException;
 import java.util.Map;
 
 public class FinancesServiceException extends DomainException {

@@ -3,7 +3,7 @@ package com.financialapp.banks.infrastructure.client.adapter;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.port.FinancesPort;
 import com.financialapp.banks.infrastructure.client.FinancesFeignClient;
-import com.financialapp.banks.infrastructure.exception.FinancesServiceException;
+import com.financialapp.banks.domain.exception.InfrastructureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -50,7 +50,7 @@ public class FinancesClientAdapter implements FinancesPort {
                     .toList();
         } catch (Exception e) {
             log.error("ms-finances call failed [fetchTransactions] for accountCbu={}: {}", accountCbu, e.getMessage(), e);
-            throw new FinancesServiceException("fetchTransactions", e.getMessage());
+            throw new InfrastructureException("ms-finances: " + e.getMessage());
         }
     }
 }

@@ -1,6 +1,8 @@
 package com.financialapp.banks.application.account.impl;
 
 import com.financialapp.banks.application.account.usecase.GetAccountTransactionsUseCase;
+import com.financialapp.banks.domain.exception.FinancesServiceException;
+import com.financialapp.banks.domain.exception.InfrastructureException;
 import com.financialapp.banks.domain.port.FinancesPort;
 import com.financialapp.banks.domain.port.FinancesPort.TransactionSummary;
 import lombok.RequiredArgsConstructor;
@@ -17,16 +19,28 @@ public class GetAccountTransactionsUseCaseImpl implements GetAccountTransactions
 
     @Override
     public List<TransactionSummary> getRecent(String accountCbu, int limit) {
-        return financesPort.getRecentTransactions(accountCbu, limit);
+        try {
+            return financesPort.getRecentTransactions(accountCbu, limit);
+        } catch (InfrastructureException e) {
+            throw new FinancesServiceException("getRecentTransactions", e.getMessage());
+        }
     }
 
     @Override
     public List<TransactionSummary> getAll(String accountCbu) {
-        return financesPort.getAllTransactions(accountCbu);
+        try {
+            return financesPort.getAllTransactions(accountCbu);
+        } catch (InfrastructureException e) {
+            throw new FinancesServiceException("getAllTransactions", e.getMessage());
+        }
     }
 
     @Override
     public List<TransactionSummary> getFiltered(String accountCbu, LocalDate from, LocalDate to) {
-        return financesPort.getFilteredTransactions(accountCbu, from, to);
+        try {
+            return financesPort.getFilteredTransactions(accountCbu, from, to);
+        } catch (InfrastructureException e) {
+            throw new FinancesServiceException("getFilteredTransactions", e.getMessage());
+        }
     }
 }

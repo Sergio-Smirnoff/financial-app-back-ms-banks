@@ -5,7 +5,7 @@ import com.financialapp.banks.application.account.usecase.GetAccountTransactions
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.port.FinancesPort.TransactionSummary;
-import com.financialapp.banks.infrastructure.exception.FinancesServiceException;
+import com.financialapp.banks.domain.exception.FinancesServiceException;
 import com.financialapp.banks.web.dto.request.AccountRequest;
 import com.financialapp.banks.web.dto.request.BankRequest;
 import org.junit.jupiter.api.BeforeEach;
