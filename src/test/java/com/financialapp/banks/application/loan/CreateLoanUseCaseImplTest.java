@@ -5,8 +5,8 @@ import com.financialapp.banks.application.loan.command.CreateLoanCommand;
 import com.financialapp.banks.application.loan.impl.CreateLoanUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import com.financialapp.banks.domain.exception.loan.LoanAccountMismatchException;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
 import com.financialapp.banks.domain.model.bank.Bank;
 import com.financialapp.banks.domain.model.bank.BankName;
@@ -100,8 +100,7 @@ class CreateLoanUseCaseImplTest {
         assertThatThrownBy(() -> useCase.execute(new CreateLoanCommand(new UserId(1L), BankName.GALICIA,
                 "1234567890123456789012", "Car Loan", new BigDecimal("100"), new BigDecimal("12"),
                 1, LocalDate.now(), AmortizationType.FRENCH)))
-                .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("does not belong");
+                .isInstanceOf(LoanAccountMismatchException.class);
     }
 
     @Test

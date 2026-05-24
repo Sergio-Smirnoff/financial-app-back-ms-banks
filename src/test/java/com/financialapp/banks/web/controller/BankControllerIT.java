@@ -40,4 +40,14 @@ class BankControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name").value("GALICIA"));
     }
+
+    @Test
+    void getBank_notFound_returns404WithCode() throws Exception {
+        mockMvc.perform(get("/api/v1/banks/{name}", "SANTANDER")
+                .header("X-User-Id", "1")
+                .header("X-Internal-Token", "test-token"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.code").value("resource_not_found"))
+            .andExpect(jsonPath("$.status").value(404));
+    }
 }

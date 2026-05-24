@@ -19,6 +19,6 @@ public class GetCardUseCaseImpl implements GetCardUseCase {
     @Transactional(readOnly = true)
     public Card execute(String cardNumber, UserId userId) {
         return cardRepository.findByCardNumberAndUserId(cardNumber, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cardNumber));
+                .orElseThrow(() -> new ResourceNotFoundException("Card", cardNumber));
     }
 }

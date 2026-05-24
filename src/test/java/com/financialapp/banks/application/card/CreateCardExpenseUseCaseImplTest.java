@@ -4,7 +4,7 @@ import com.financialapp.banks.application.card.command.CreateCardExpenseCommand;
 import com.financialapp.banks.application.card.impl.CreateCardExpenseUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.exception.card.CardInstallmentNotSupportedException;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.domain.model.card.CardBehavior;
 import com.financialapp.banks.domain.model.card.CardBilling;
@@ -80,7 +80,6 @@ class CreateCardExpenseUseCaseImplTest {
         assertThatThrownBy(() -> useCase.execute(new CreateCardExpenseCommand(
                 "1234", new UserId(1L), "Coffee",
                 new Money(BigDecimal.TEN, Currency.getInstance("USD")), 1, LocalDate.now())))
-                .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("do not support installment-based expenses");
+                .isInstanceOf(CardInstallmentNotSupportedException.class);
     }
 }

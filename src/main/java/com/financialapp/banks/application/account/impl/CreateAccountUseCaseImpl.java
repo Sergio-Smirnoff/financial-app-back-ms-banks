@@ -2,8 +2,9 @@ package com.financialapp.banks.application.account.impl;
 
 import com.financialapp.banks.application.account.command.CreateAccountCommand;
 import com.financialapp.banks.application.account.usecase.CreateAccountUseCase;
-import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import com.financialapp.banks.domain.exception.account.AccountInvalidTypeException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
@@ -29,16 +30,16 @@ public class CreateAccountUseCaseImpl implements CreateAccountUseCase {
     @Transactional
     public Account execute(CreateAccountCommand cmd) {
         bankRepository.findByName(cmd.bankName())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + cmd.bankName()));
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", cmd.bankName().getDisplayName()));
 
         if (accountRepository.existsByBankNameAndName(cmd.bankName(), cmd.name())) {
-            throw new BusinessException("Account '" + cmd.name() + "' already exists in this bank");
+            throw new ResourceAlreadyExistsException("Account", cmd.name() + " in " + cmd.bankName().getDisplayName());
         }
 
         if (AccountType.INVESTMENT.name().equals(cmd.type()) &&
                 accountRepository.existsByBankNameAndTypeAndCurrency(
                         cmd.bankName(), AccountType.INVESTMENT.name(), cmd.initialBalance().currency())) {
-            throw new BusinessException("Investment account in " + cmd.initialBalance().currency() + " already exists for this bank");
+            throw new ResourceAlreadyExistsException("InvestmentAccount", cmd.initialBalance().currency() + " in " + cmd.bankName().getDisplayName());
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -50,7 +51,7 @@ public class CreateAccountUseCaseImpl implements CreateAccountUseCase {
                     cmd.userId(), cmd.bankName(), cmd.name(), isActive, now, now);
             case "INVESTMENT" -> new InvestmentAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
                     cmd.userId(), cmd.bankName(), cmd.name(), isActive, now, now);
-            default -> throw new BusinessException("Unknown account type: " + cmd.type());
+            default -> throw new AccountInvalidTypeException(cmd.type());
         };
 
         return accountRepository.save(account);

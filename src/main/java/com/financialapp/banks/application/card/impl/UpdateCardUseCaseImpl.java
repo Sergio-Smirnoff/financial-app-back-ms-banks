@@ -2,8 +2,9 @@ package com.financialapp.banks.application.card.impl;
 
 import com.financialapp.banks.application.card.command.UpdateCardCommand;
 import com.financialapp.banks.application.card.usecase.UpdateCardUseCase;
-import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import com.financialapp.banks.domain.exception.card.CardExpiredException;
+import com.financialapp.banks.domain.exception.card.CardInvalidTypeException;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardBilling;
 import com.financialapp.banks.domain.model.card.CardDetails;
@@ -27,12 +28,12 @@ public class UpdateCardUseCaseImpl implements UpdateCardUseCase {
     @Transactional
     public Card execute(UpdateCardCommand cmd) {
         Card card = cardRepository.findByCardNumberAndUserId(cmd.cardNumber(), cmd.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cmd.cardNumber()));
+                .orElseThrow(() -> new ResourceNotFoundException("Card", cmd.cardNumber()));
 
         CardDetails current = card.details();
         LocalDate newExpiry = cmd.expiringDate() != null ? cmd.expiringDate() : current.expiringDate();
         if (cmd.expiringDate() != null && cmd.expiringDate().isBefore(LocalDate.now())) {
-            throw new BusinessException("Expiry date cannot be in the past");
+            throw new CardExpiredException(cmd.cardNumber(), cmd.expiringDate().toString());
         }
         int newClosing = cmd.closingDay() != null ? cmd.closingDay() : current.billing().closingDay();
         int newDue = cmd.dueDay() != null ? cmd.dueDay() : current.billing().dueDay();
@@ -49,7 +50,7 @@ public class UpdateCardUseCaseImpl implements UpdateCardUseCase {
                     updated, c.createdAt(), LocalDateTime.now());
             case DebitCard d -> new DebitCard(d.cardNumber(), d.userId(), d.bankName(),
                     updated, d.createdAt(), LocalDateTime.now());
-            default -> throw new IllegalStateException("Unknown card type: " + card.getClass());
+            default -> throw new CardInvalidTypeException(card.getClass().getSimpleName());
         };
 
         return cardRepository.save(updatedCard);

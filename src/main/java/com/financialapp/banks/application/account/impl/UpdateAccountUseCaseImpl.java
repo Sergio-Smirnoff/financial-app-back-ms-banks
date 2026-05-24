@@ -2,8 +2,9 @@ package com.financialapp.banks.application.account.impl;
 
 import com.financialapp.banks.application.account.command.UpdateAccountCommand;
 import com.financialapp.banks.application.account.usecase.UpdateAccountUseCase;
-import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import com.financialapp.banks.domain.exception.account.AccountInvalidTypeException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
@@ -27,11 +28,11 @@ public class UpdateAccountUseCaseImpl implements UpdateAccountUseCase {
     @Transactional
     public Account execute(UpdateAccountCommand cmd) {
         Account existing = accountRepository.findByCbu(cmd.cbu())
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + cmd.cbu()));
+                .orElseThrow(() -> new ResourceNotFoundException("Account", cmd.cbu()));
 
         if (cmd.name() != null && !existing.name().equals(cmd.name()) &&
                 accountRepository.existsByBankNameAndName(existing.bankName(), cmd.name())) {
-            throw new BusinessException("Account '" + cmd.name() + "' already exists in this bank");
+            throw new ResourceAlreadyExistsException("Account", cmd.name() + " in bank");
         }
 
         String newName = cmd.name() != null ? cmd.name() : existing.name();
@@ -46,7 +47,7 @@ public class UpdateAccountUseCaseImpl implements UpdateAccountUseCase {
                     existing.userId(), existing.bankName(), newName, newActive, existing.createdAt(), now);
             case InvestmentAccount ignored -> new InvestmentAccount(existing.cbu(), existing.alias(), newBalance,
                     existing.userId(), existing.bankName(), newName, newActive, existing.createdAt(), now);
-            default -> throw new IllegalStateException("Unknown account subtype: " + existing.getClass().getSimpleName());
+            default -> throw new AccountInvalidTypeException(existing.getClass().getSimpleName());
         };
 
         return accountRepository.save(updated);

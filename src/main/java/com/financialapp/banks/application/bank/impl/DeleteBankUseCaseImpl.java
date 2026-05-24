@@ -2,7 +2,8 @@ package com.financialapp.banks.application.bank.impl;
 
 import com.financialapp.banks.application.bank.command.DeleteBankCommand;
 import com.financialapp.banks.application.bank.usecase.DeleteBankUseCase;
-import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.exception.DomainError;
+import com.financialapp.banks.domain.exception.ResourceConflictException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.bank.Bank;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -26,12 +28,15 @@ public class DeleteBankUseCaseImpl implements DeleteBankUseCase {
     @Transactional
     public void execute(DeleteBankCommand command) {
         Bank bank = bankRepository.findByName(command.name())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + command.name()));
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", command.name().getDisplayName()));
 
         List<Account> accounts = accountRepository.findByBankName(bank.name());
-        boolean hasActiveAccounts = accounts.stream().anyMatch(a -> Boolean.TRUE.equals(a.isActive()));
-        if (hasActiveAccounts) {
-            throw new BusinessException("Cannot delete bank with active accounts. Deactivate or delete all accounts first.");
+        long activeCount = accounts.stream().filter(a -> Boolean.TRUE.equals(a.isActive())).count();
+        if (activeCount > 0) {
+            throw new ResourceConflictException(
+                DomainError.BANK_HAS_ACTIVE_ACCOUNTS,
+                "Cannot delete bank '" + command.name().getDisplayName() + "' — it has " + activeCount + " active account(s)",
+                Map.of("bankName", command.name().getDisplayName(), "activeAccounts", activeCount));
         }
 
         bankRepository.delete(bank.name());

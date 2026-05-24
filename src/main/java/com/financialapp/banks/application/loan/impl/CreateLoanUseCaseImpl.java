@@ -5,8 +5,8 @@ import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
 import com.financialapp.banks.application.loan.command.CreateLoanCommand;
 import com.financialapp.banks.application.loan.usecase.CreateLoanUseCase;
 import com.financialapp.banks.domain.common.model.Money;
-import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import com.financialapp.banks.domain.exception.loan.LoanAccountMismatchException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.model.loan.LoanId;
@@ -45,13 +45,13 @@ public class CreateLoanUseCaseImpl implements CreateLoanUseCase {
     @Transactional
     public Loan execute(CreateLoanCommand cmd) {
         bankRepository.findByName(cmd.bankName())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + cmd.bankName()));
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", cmd.bankName().getDisplayName()));
 
         Account dest = accountRepository.findByCbu(cmd.destinationAccountCbu())
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + cmd.destinationAccountCbu()));
+                .orElseThrow(() -> new ResourceNotFoundException("Account", cmd.destinationAccountCbu()));
 
         if (!dest.bankName().equals(cmd.bankName())) {
-            throw new BusinessException("Destination account does not belong to the selected bank");
+            throw new LoanAccountMismatchException(cmd.destinationAccountCbu(), cmd.bankName().getDisplayName());
         }
 
         Currency currency = dest.balance().currency();

@@ -2,8 +2,10 @@ package com.financialapp.banks.application.card.impl;
 
 import com.financialapp.banks.application.card.command.DeleteCardCommand;
 import com.financialapp.banks.application.card.usecase.DeleteCardUseCase;
-import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.exception.DomainError;
+import com.financialapp.banks.domain.exception.ResourceConflictException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import java.util.Map;
 import com.financialapp.banks.domain.repository.CardInstallmentRepository;
 import com.financialapp.banks.domain.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +23,13 @@ public class DeleteCardUseCaseImpl implements DeleteCardUseCase {
     @Transactional
     public void execute(DeleteCardCommand command) {
         cardRepository.findByCardNumberAndUserId(command.cardNumber(), command.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + command.cardNumber()));
+                .orElseThrow(() -> new ResourceNotFoundException("Card", command.cardNumber()));
 
         if (installmentRepository.existsByCardNumberAndUnpaid(command.cardNumber())) {
-            throw new BusinessException("Cannot delete card with unpaid installments. Pay them first.");
+            throw new ResourceConflictException(
+                DomainError.CARD_NOT_DELETABLE,
+                "Cannot delete card '" + command.cardNumber() + "' — it has unpaid installments",
+                Map.of("cardNumber", command.cardNumber()));
         }
 
         cardRepository.delete(command.cardNumber());

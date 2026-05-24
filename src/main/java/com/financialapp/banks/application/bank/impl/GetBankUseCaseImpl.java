@@ -19,6 +19,6 @@ public class GetBankUseCaseImpl implements GetBankUseCase {
     @Transactional(readOnly = true)
     public Bank execute(BankName name) {
         return bankRepository.findByName(name)
-                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + name));
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", name.getDisplayName()));
     }
 }

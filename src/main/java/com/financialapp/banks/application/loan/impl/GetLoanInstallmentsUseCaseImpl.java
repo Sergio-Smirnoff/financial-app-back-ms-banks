@@ -24,7 +24,7 @@ public class GetLoanInstallmentsUseCaseImpl implements GetLoanInstallmentsUseCas
     @Transactional(readOnly = true)
     public List<LoanInstallment> execute(LoanId loanId, UserId userId) {
         loanRepository.findByIdAndUserId(loanId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Loan not found: " + loanId.value()));
+                .orElseThrow(() -> new ResourceNotFoundException("Loan", loanId.value().toString()));
         return installmentRepository.findByLoanId(loanId);
     }
 }

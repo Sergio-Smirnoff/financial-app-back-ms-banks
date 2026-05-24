@@ -4,7 +4,7 @@ import com.financialapp.banks.application.account.command.CreateAccountCommand;
 import com.financialapp.banks.application.account.impl.CreateAccountUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
@@ -64,7 +64,7 @@ class CreateAccountUseCaseImplTest {
         when(accountRepository.existsByBankNameAndName(BankName.GALICIA, "Savings")).thenReturn(true);
 
         assertThatThrownBy(() -> useCase.execute(command(AccountType.SAVINGS.name())))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(ResourceAlreadyExistsException.class)
                 .hasMessageContaining("already exists");
     }
 }

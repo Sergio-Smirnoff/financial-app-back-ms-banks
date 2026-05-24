@@ -5,6 +5,7 @@ import com.financialapp.banks.application.account.usecase.GetAccountTransactions
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.port.FinancesPort.TransactionSummary;
+import com.financialapp.banks.infrastructure.exception.FinancesServiceException;
 import com.financialapp.banks.web.dto.request.AccountRequest;
 import com.financialapp.banks.web.dto.request.BankRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -113,5 +114,38 @@ class AccountControllerIT {
                         .header("X-User-Id", "1")
                         .header("X-Internal-Token", "test-token"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getAccount_notFound_returns404WithCode() throws Exception {
+        mockMvc.perform(get("/api/v1/banks/accounts/{cbu}", "0000000000000000000000")
+                .header("X-User-Id", "1")
+                .header("X-Internal-Token", "test-token"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.code").value("resource_not_found"))
+            .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    void getTransactions_invalidDateRange_returns400WithCode() throws Exception {
+        mockMvc.perform(get("/api/v1/banks/accounts/{cbu}/transactions", "CBU1")
+                .header("X-User-Id", "1")
+                .header("X-Internal-Token", "test-token")
+                .param("from", "2024-12-01")
+                .param("to", "2024-01-01"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("invalid_date_range"));
+    }
+
+    @Test
+    void getTransactions_serviceUnavailable_returns500WithCode() throws Exception {
+        when(getTransactionsUseCase.getRecent(eq("CBU1"), eq(5)))
+                .thenThrow(new FinancesServiceException("fetchTransactions", "connection refused"));
+
+        mockMvc.perform(get("/api/v1/banks/accounts/CBU1/transactions")
+                        .header("X-User-Id", "1")
+                        .header("X-Internal-Token", "test-token"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("finances_service_unavailable"));
     }
 }

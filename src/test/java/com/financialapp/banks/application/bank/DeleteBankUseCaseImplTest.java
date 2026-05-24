@@ -2,7 +2,7 @@ package com.financialapp.banks.application.bank;
 
 import com.financialapp.banks.application.bank.command.DeleteBankCommand;
 import com.financialapp.banks.application.bank.impl.DeleteBankUseCaseImpl;
-import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.exception.ResourceConflictException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
@@ -63,7 +63,7 @@ class DeleteBankUseCaseImplTest {
         when(accountRepository.findByBankName(BankName.GALICIA)).thenReturn(List.of(account));
 
         assertThatThrownBy(() -> useCase.execute(new DeleteBankCommand(BankName.GALICIA)))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(ResourceConflictException.class)
                 .hasMessageContaining("Cannot delete bank");
     }
 

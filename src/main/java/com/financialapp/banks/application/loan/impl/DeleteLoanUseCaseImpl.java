@@ -18,7 +18,7 @@ public class DeleteLoanUseCaseImpl implements DeleteLoanUseCase {
     @Transactional
     public void execute(DeleteLoanCommand command) {
         loanRepository.findByIdAndUserId(command.id(), command.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("Loan not found: " + command.id().value()));
+                .orElseThrow(() -> new ResourceNotFoundException("Loan", command.id().value().toString()));
         loanRepository.delete(command.id());
     }
 }

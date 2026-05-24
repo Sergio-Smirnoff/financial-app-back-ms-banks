@@ -1,8 +1,6 @@
 package com.financialapp.banks.web.error;
 
-import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.DomainException;
-import com.financialapp.banks.web.dto.response.ApiResponse;
 import com.financialapp.banks.web.dto.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -36,13 +34,6 @@ public class GlobalExceptionHandler {
             .details(ex.getDetails())
             .build();
         return ResponseEntity.status(ex.getError().getHttpStatus()).body(body);
-    }
-
-    // Kept temporarily — remove in Task 7 once all throws are migrated
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiResponse<Void>> handleLegacyBusiness(BusinessException ex) {
-        log.warn("Legacy BusinessException (migrate to DomainException): {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

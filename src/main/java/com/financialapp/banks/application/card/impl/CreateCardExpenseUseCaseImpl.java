@@ -3,8 +3,8 @@ package com.financialapp.banks.application.card.impl;
 import com.financialapp.banks.application.card.command.CreateCardExpenseCommand;
 import com.financialapp.banks.application.card.usecase.CreateCardExpenseUseCase;
 import com.financialapp.banks.domain.common.model.Money;
-import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import com.financialapp.banks.domain.exception.card.CardInstallmentNotSupportedException;
 import com.financialapp.banks.domain.model.card.CardBehavior;
 import com.financialapp.banks.domain.model.card.CardInstallment;
 import com.financialapp.banks.domain.model.card.CardInstallmentId;
@@ -31,10 +31,10 @@ public class CreateCardExpenseUseCaseImpl implements CreateCardExpenseUseCase {
     @Transactional
     public List<CardInstallment> execute(CreateCardExpenseCommand cmd) {
         var card = cardRepository.findByCardNumberAndUserId(cmd.cardNumber(), cmd.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cmd.cardNumber()));
+                .orElseThrow(() -> new ResourceNotFoundException("Card", cmd.cardNumber()));
 
         if (card.details().behavior() == CardBehavior.INSTANT_PAYMENT) {
-            throw new BusinessException("Instant payment cards do not support installment-based expenses");
+            throw new CardInstallmentNotSupportedException(cmd.cardNumber());
         }
 
         BigDecimal perInstallment = cmd.amount().amount()

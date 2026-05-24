@@ -2,7 +2,7 @@ package com.financialapp.banks.web.controller;
 
 import com.financialapp.banks.application.account.command.*;
 import com.financialapp.banks.application.account.usecase.*;
-import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.exception.account.InvalidDateRangeException;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.BankName;
@@ -116,7 +116,7 @@ public class AccountController {
             @RequestParam(required = false) LocalDate to) {
 
         if (from != null && to != null && from.isAfter(to)) {
-            throw new BusinessException("'from' date must not be after 'to' date");
+            throw new InvalidDateRangeException(from.toString(), to.toString());
         }
 
         var transactions = from != null && to != null

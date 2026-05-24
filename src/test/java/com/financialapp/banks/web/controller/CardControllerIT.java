@@ -40,6 +40,16 @@ class CardControllerIT {
     }
 
     @Test
+    void getCard_notFound_returns404WithCode() throws Exception {
+        mockMvc.perform(get("/api/v1/banks/cards/{cardNumber}", "9999999999999999")
+                .header("X-User-Id", "1")
+                .header("X-Internal-Token", "test-token"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.code").value("resource_not_found"))
+            .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
     void createCard_then_listIncludesIt() throws Exception {
         CardRequest req = new CardRequest("GALICIA", CardBrand.VISA, CardType.PLATINUM,
                 CardBehavior.CREDIT, "1234", LocalDate.now().plusYears(2), 20, 10);

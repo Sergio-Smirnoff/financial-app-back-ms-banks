@@ -2,7 +2,7 @@ package com.financialapp.banks.application.card.impl;
 
 import com.financialapp.banks.application.card.command.CreateCardCommand;
 import com.financialapp.banks.application.card.usecase.CreateCardUseCase;
-import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardBehavior;
@@ -29,11 +29,11 @@ public class CreateCardUseCaseImpl implements CreateCardUseCase {
     @Transactional
     public Card execute(CreateCardCommand cmd) {
         bankRepository.findByName(cmd.bankName())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + cmd.bankName()));
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", cmd.bankName().getDisplayName()));
 
         if (cardRepository.existsByBankNameAndBrandAndTypeAndCardNumber(
                 cmd.bankName(), cmd.brand(), cmd.cardType(), cmd.number())) {
-            throw new BusinessException("A similar card with these 4 digits already exists for this bank");
+            throw new ResourceAlreadyExistsException("Card", cmd.number() + " at " + cmd.bankName().getDisplayName());
         }
 
         CardDetails details = new CardDetails(

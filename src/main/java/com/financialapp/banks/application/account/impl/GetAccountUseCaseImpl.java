@@ -19,6 +19,6 @@ public class GetAccountUseCaseImpl implements GetAccountUseCase {
     @Transactional(readOnly = true)
     public Account execute(String cbu) {
         return accountRepository.findByCbu(cbu)
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + cbu));
+                .orElseThrow(() -> new ResourceNotFoundException("Account", cbu));
     }
 }

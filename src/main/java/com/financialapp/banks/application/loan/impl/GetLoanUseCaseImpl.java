@@ -20,6 +20,6 @@ public class GetLoanUseCaseImpl implements GetLoanUseCase {
     @Transactional(readOnly = true)
     public Loan execute(LoanId id, UserId userId) {
         return loanRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Loan not found: " + id.value()));
+                .orElseThrow(() -> new ResourceNotFoundException("Loan", id.value().toString()));
     }
 }

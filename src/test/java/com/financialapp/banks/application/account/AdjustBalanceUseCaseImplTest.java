@@ -4,8 +4,10 @@ import com.financialapp.banks.application.account.command.AdjustBalanceCommand;
 import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.exception.DomainException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import com.financialapp.banks.domain.exception.account.AccountInsufficientFundsException;
+import com.financialapp.banks.domain.exception.account.AccountInvestmentRestrictionException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
@@ -73,7 +75,7 @@ class AdjustBalanceUseCaseImplTest {
 
         assertThatThrownBy(() -> useCase.execute(new AdjustBalanceCommand(acc.cbu(),
                 new Money(BigDecimal.ONE, Currency.getInstance("USD")))))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(AccountInvestmentRestrictionException.class)
                 .hasMessageContaining("investment account");
     }
 
@@ -84,7 +86,7 @@ class AdjustBalanceUseCaseImplTest {
 
         assertThatThrownBy(() -> useCase.execute(new AdjustBalanceCommand(acc.cbu(),
                 new Money(new BigDecimal("-50.00"), Currency.getInstance("USD")))))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(AccountInsufficientFundsException.class)
                 .hasMessageContaining("Insufficient funds");
     }
 

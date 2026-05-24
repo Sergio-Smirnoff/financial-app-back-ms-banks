@@ -4,8 +4,10 @@ import com.financialapp.banks.application.account.command.AdjustBalanceCommand;
 import com.financialapp.banks.application.account.usecase.AdjustBalanceUseCase;
 import com.financialapp.banks.domain.event.BalanceAdjustedEvent;
 import com.financialapp.banks.domain.event.LowBalanceEvent;
-import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import com.financialapp.banks.domain.exception.account.AccountCurrencyMismatchException;
+import com.financialapp.banks.domain.exception.account.AccountInsufficientFundsException;
+import com.financialapp.banks.domain.exception.account.AccountInvestmentRestrictionException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.common.model.Money;
@@ -32,22 +34,26 @@ public class AdjustBalanceUseCaseImpl implements AdjustBalanceUseCase {
     @Transactional
     public void execute(AdjustBalanceCommand cmd) {
         Account account = accountRepository.findByCbu(cmd.accountCbu())
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + cmd.accountCbu()));
+                .orElseThrow(() -> new ResourceNotFoundException("Account", cmd.accountCbu()));
 
         if (account instanceof InvestmentAccount) {
-            throw new BusinessException("Cannot manually adjust balance of an investment account");
+            throw new AccountInvestmentRestrictionException(cmd.accountCbu());
         }
 
         if (cmd.delta().currency() != null &&
                 !account.balance().currency().equals(cmd.delta().currency())) {
-            throw new BusinessException("Currency mismatch: account is " + account.balance().currency() +
-                    " but operation is " + cmd.delta().currency());
+            throw new AccountCurrencyMismatchException(
+                account.balance().currency().getCurrencyCode(),
+                cmd.delta().currency().getCurrencyCode());
         }
 
         BigDecimal newBalance = account.balance().amount().add(cmd.delta().amount());
 
         if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessException("Insufficient funds in account: " + account.name());
+            throw new AccountInsufficientFundsException(
+                cmd.accountCbu(),
+                account.balance(),
+                new Money(cmd.delta().amount().negate(), account.balance().currency()));
         }
 
         Money updatedBalance = new Money(newBalance, account.balance().currency());

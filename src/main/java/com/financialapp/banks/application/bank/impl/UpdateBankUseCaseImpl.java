@@ -19,7 +19,7 @@ public class UpdateBankUseCaseImpl implements UpdateBankUseCase {
     @Transactional
     public Bank execute(UpdateBankCommand command) {
         Bank existing = bankRepository.findByName(command.name())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + command.name()));
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", command.name().getDisplayName()));
         Bank updated = new Bank(existing.name(), command.logo());
         return bankRepository.save(updated);
     }

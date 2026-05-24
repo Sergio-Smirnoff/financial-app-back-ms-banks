@@ -2,7 +2,7 @@ package com.financialapp.banks.application.bank;
 
 import com.financialapp.banks.application.bank.command.CreateBankCommand;
 import com.financialapp.banks.application.bank.impl.CreateBankUseCaseImpl;
-import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.model.bank.Bank;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.domain.model.bank.Logo;
@@ -45,7 +45,7 @@ class CreateBankUseCaseImplTest {
         when(bankRepository.existsByName(BankName.GALICIA)).thenReturn(true);
 
         assertThatThrownBy(() -> useCase.execute(new CreateBankCommand(BankName.GALICIA, null)))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(ResourceAlreadyExistsException.class)
                 .hasMessageContaining("already exists");
     }
 }

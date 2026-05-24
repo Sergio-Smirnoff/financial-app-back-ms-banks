@@ -5,8 +5,9 @@ import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
 import com.financialapp.banks.application.card.command.PayCardInstallmentCommand;
 import com.financialapp.banks.application.card.usecase.PayCardInstallmentUseCase;
 import com.financialapp.banks.domain.common.model.Money;
-import com.financialapp.banks.domain.exception.BusinessException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import com.financialapp.banks.domain.exception.card.CardInstallmentAlreadyPaidException;
+import com.financialapp.banks.domain.exception.card.CardInstallmentMismatchException;
 import com.financialapp.banks.domain.model.card.CardInstallment;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.CardInstallmentRepository;
@@ -32,16 +33,16 @@ public class PayCardInstallmentUseCaseImpl implements PayCardInstallmentUseCase 
     @Transactional
     public CardInstallment execute(PayCardInstallmentCommand cmd) {
         cardRepository.findByCardNumberAndUserId(cmd.cardNumber(), cmd.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cmd.cardNumber()));
+                .orElseThrow(() -> new ResourceNotFoundException("Card", cmd.cardNumber()));
 
         CardInstallment installment = installmentRepository.findById(cmd.installmentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Installment not found: " + cmd.installmentId().value()));
+                .orElseThrow(() -> new ResourceNotFoundException("CardInstallment", cmd.installmentId().value().toString()));
 
         if (!installment.cardNumber().equals(cmd.cardNumber())) {
-            throw new BusinessException("Installment does not belong to the specified card");
+            throw new CardInstallmentMismatchException(cmd.installmentId().value().toString(), cmd.cardNumber());
         }
         if (installment.paid()) {
-            throw new BusinessException("Installment is already paid");
+            throw new CardInstallmentAlreadyPaidException(cmd.installmentId().value().toString());
         }
 
         adjustBalance.execute(new AdjustBalanceCommand(

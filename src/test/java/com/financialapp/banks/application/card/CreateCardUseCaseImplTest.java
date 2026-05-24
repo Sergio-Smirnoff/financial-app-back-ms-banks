@@ -3,7 +3,7 @@ package com.financialapp.banks.application.card;
 import com.financialapp.banks.application.card.command.CreateCardCommand;
 import com.financialapp.banks.application.card.impl.CreateCardUseCaseImpl;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.exception.BusinessException;
+import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.bank.Bank;
 import com.financialapp.banks.domain.model.bank.BankName;
@@ -76,7 +76,7 @@ class CreateCardUseCaseImplTest {
         when(cardRepository.existsByBankNameAndBrandAndTypeAndCardNumber(any(), any(), any(), any())).thenReturn(true);
 
         assertThatThrownBy(() -> useCase.execute(command(CardBehavior.CREDIT)))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(ResourceAlreadyExistsException.class)
                 .hasMessageContaining("already exists");
     }
 
