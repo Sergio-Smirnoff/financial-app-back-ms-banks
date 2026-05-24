@@ -5,6 +5,7 @@ import com.financialapp.banks.application.account.usecase.DeleteAccountUseCase;
 import com.financialapp.banks.domain.exception.DomainError;
 import com.financialapp.banks.domain.exception.DomainException;
 import com.financialapp.banks.domain.exception.InfrastructureException;
+import com.financialapp.banks.domain.exception.InvestmentsServiceException;
 import com.financialapp.banks.domain.exception.ResourceConflictException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
@@ -13,7 +14,6 @@ import com.financialapp.banks.domain.port.InvestmentsPort;
 import com.financialapp.banks.domain.repository.AccountRepository;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +22,6 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class DeleteAccountUseCaseImpl implements DeleteAccountUseCase {
 
     private final AccountRepository accountRepository;
@@ -43,11 +42,10 @@ public class DeleteAccountUseCaseImpl implements DeleteAccountUseCase {
                         "Cannot delete account '" + command.cbu() + "': investment account has active holdings",
                         Map.of("cbu", command.cbu(), "reason", "active holdings"));
                 }
+            } catch (InfrastructureException e) {
+                throw new InvestmentsServiceException("checkHoldings", e.getMessage());
             } catch (DomainException e) {
                 throw e;
-            } catch (Exception e) {
-                log.error("Failed to check holdings for account {}: {}", command.cbu(), e.getMessage());
-                throw new InfrastructureException("Safety check failed: could not verify active holdings. Try again later.");
             }
         } else if (account.balance().amount().compareTo(BigDecimal.ZERO) != 0) {
             throw new ResourceConflictException(

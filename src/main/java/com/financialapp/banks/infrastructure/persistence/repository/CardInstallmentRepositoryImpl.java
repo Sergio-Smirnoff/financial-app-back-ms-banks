@@ -67,7 +67,7 @@ public class CardInstallmentRepositoryImpl implements CardInstallmentRepository 
     @Transactional
     public CardInstallment save(CardInstallment installment) {
         CardJpaEntity card = cardJpaRepository.findByCardNumber(installment.cardNumber())
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + installment.cardNumber()));
+                .orElseThrow(() -> new ResourceNotFoundException("Card", installment.cardNumber()));
         var entity = installment.id() != null
                 ? jpaRepository.findById(installment.id().value())
                         .map(existing -> mapper.merge(existing, installment, card))

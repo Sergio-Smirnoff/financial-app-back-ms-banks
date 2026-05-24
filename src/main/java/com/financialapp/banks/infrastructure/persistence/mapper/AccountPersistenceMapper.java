@@ -7,6 +7,7 @@ import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
+import com.financialapp.banks.domain.exception.InfrastructureException;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.infrastructure.persistence.entity.AccountJpaEntity;
 import com.financialapp.banks.infrastructure.persistence.entity.BankJpaEntity;
@@ -72,6 +73,6 @@ public class AccountPersistenceMapper {
         if (account instanceof CheckingAccount) return AccountType.CHECKING.name();
         if (account instanceof SavingsAccount) return AccountType.SAVINGS.name();
         if (account instanceof InvestmentAccount) return AccountType.INVESTMENT.name();
-        throw new IllegalStateException("Unknown account subtype: " + account.getClass().getSimpleName());
+        throw new InfrastructureException("Unknown account subtype: " + account.getClass().getSimpleName());
     }
 }

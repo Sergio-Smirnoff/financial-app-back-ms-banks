@@ -82,12 +82,12 @@ public class LoanRepositoryImpl implements LoanRepository {
 
     private Loan loadDomain(LoanJpaEntity entity) {
         BankJpaEntity bank = bankJpaRepository.findById(entity.getBankId())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank not found for loan: " + entity.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", entity.getId().toString()));
         return mapper.toDomain(entity, bank);
     }
 
     private BankJpaEntity requireBank(BankName name) {
         return bankJpaRepository.findByName(name.name())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + name));
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", name.getDisplayName()));
     }
 }

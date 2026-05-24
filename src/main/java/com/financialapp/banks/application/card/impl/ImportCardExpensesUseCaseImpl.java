@@ -28,7 +28,7 @@ public class ImportCardExpensesUseCaseImpl implements ImportCardExpensesUseCase 
     @Transactional
     public BatchImportResult execute(ImportCardExpensesCommand cmd) {
         cardRepository.findByCardNumberAndUserId(cmd.cardNumber(), cmd.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cmd.cardNumber()));
+                .orElseThrow(() -> new ResourceNotFoundException("Card", cmd.cardNumber()));
 
         int imported = 0, skipped = 0;
         List<String> errors = new ArrayList<>();

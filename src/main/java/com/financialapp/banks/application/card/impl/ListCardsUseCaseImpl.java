@@ -25,7 +25,7 @@ public class ListCardsUseCaseImpl implements ListCardsUseCase {
     public List<Card> execute(UserId userId, BankName bankName) {
         if (bankName != null) {
             bankRepository.findByName(bankName)
-                    .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + bankName));
+                    .orElseThrow(() -> new ResourceNotFoundException("Bank", bankName.getDisplayName()));
             return cardRepository.findByBankName(bankName);
         }
         return cardRepository.findByUserId(userId);

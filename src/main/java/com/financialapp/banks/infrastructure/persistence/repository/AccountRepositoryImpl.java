@@ -36,7 +36,7 @@ public class AccountRepositoryImpl implements AccountRepository {
     @Override
     public List<Account> findByBankName(BankName bankName) {
         BankJpaEntity bank = bankJpaRepository.findByName(bankName.name())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + bankName));
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", bankName.getDisplayName()));
         return accountJpaRepository.findByBank_IdOrderByNameAsc(bank.getId())
                 .stream().map(mapper::toDomain).toList();
     }
@@ -95,7 +95,7 @@ public class AccountRepositoryImpl implements AccountRepository {
     @Transactional
     public Account save(Account account) {
         BankJpaEntity bank = bankJpaRepository.findByName(account.bankName().name())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank not found: " + account.bankName()));
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", account.bankName().getDisplayName()));
 
         AccountJpaEntity entity = accountJpaRepository.findByCbu(account.cbu())
                 .map(existing -> mapper.merge(existing, account, bank))
