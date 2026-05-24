@@ -89,7 +89,7 @@ public class CardRepositoryImpl implements CardRepository {
 
     private Card loadDomain(CardJpaEntity entity) {
         BankJpaEntity bank = bankJpaRepository.findById(entity.getBankId())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank", entity.getCardNumber()));
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", entity.getBankId().toString()));
         return mapper.toDomain(entity, bank);
     }
 
