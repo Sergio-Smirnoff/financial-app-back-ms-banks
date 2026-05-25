@@ -44,7 +44,7 @@ public class CardController {
     public ResponseEntity<ApiResponse<List<CardResponse>>> list(
             @RequestHeader("X-User-Id") Long userId,
             @RequestParam(required = false) String bankName) {
-        BankName bank = bankName != null ? BankName.valueOf(bankName) : null;
+        BankName bank = bankName != null ? BankName.fromString(bankName) : null;
         List<CardResponse> result = listCardsUseCase.execute(new UserId(userId), bank)
                 .stream().map(cardMapper::toResponse).toList();
         return ResponseEntity.ok(ApiResponse.ok(result));
@@ -66,7 +66,7 @@ public class CardController {
             @Valid @RequestBody CardRequest request) {
         var result = createCardUseCase.execute(new CreateCardCommand(
                 new UserId(userId),
-                BankName.valueOf(request.bankName()),
+                BankName.fromString(request.bankName()),
                 request.brand(),
                 request.cardType(),
                 request.behavior(),

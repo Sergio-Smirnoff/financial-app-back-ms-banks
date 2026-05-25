@@ -43,7 +43,7 @@ public class LoanController {
     public ResponseEntity<ApiResponse<List<LoanResponse>>> list(
             @RequestHeader("X-User-Id") Long userId,
             @RequestParam(required = false) String bankName) {
-        BankName bank = bankName != null ? BankName.valueOf(bankName) : null;
+        BankName bank = bankName != null ? BankName.fromString(bankName) : null;
         List<LoanResponse> result = listLoansUseCase.execute(new UserId(userId), bank)
                 .stream().map(loanMapper::toResponse).toList();
         return ResponseEntity.ok(ApiResponse.ok(result));
@@ -56,7 +56,7 @@ public class LoanController {
             @Valid @RequestBody LoanRequest request) {
         var loan = createLoanUseCase.execute(new CreateLoanCommand(
                 new UserId(userId),
-                BankName.valueOf(request.bankName()),
+                BankName.fromString(request.bankName()),
                 request.destinationAccountCbu(),
                 request.name(),
                 request.principal(),

@@ -49,7 +49,7 @@ public class AccountController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false, defaultValue = "false") boolean hideEmpty) {
         Currency cur = currency != null ? Currency.getInstance(currency) : null;
-        BankName bank = bankName != null ? BankName.valueOf(bankName) : null;
+        BankName bank = bankName != null ? BankName.fromString(bankName) : null;
         List<AccountResponse> result = listAccountsUseCase.execute(
                 new FilterAccountCommand(new UserId(userId), type, cur, bank, name, hideEmpty))
                 .stream().map(accountMapper::toResponse).toList();
@@ -73,7 +73,7 @@ public class AccountController {
         Money initialBalance = new Money(request.balance(), Currency.getInstance(request.currency()));
         var result = createAccountUseCase.execute(new CreateAccountCommand(
                 new UserId(userId),
-                BankName.valueOf(request.bankName()),
+                BankName.fromString(request.bankName()),
                 request.name(),
                 request.type(),
                 initialBalance,
@@ -103,7 +103,7 @@ public class AccountController {
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cbu,
             @RequestParam String bankName) {
-        deleteAccountUseCase.execute(new DeleteAccountCommand(cbu, BankName.valueOf(bankName)));
+        deleteAccountUseCase.execute(new DeleteAccountCommand(cbu, BankName.fromString(bankName)));
         return ResponseEntity.ok(ApiResponse.ok("Account deleted", null));
     }
 
