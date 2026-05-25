@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
 
     private static final Map<String, String> CONSTRAINT_MESSAGES = Map.of(
         "uq_accounts_bank_name", "An account with this name already exists in the selected bank",
-        "uq_banks_user_name", "A bank with this name already exists for your user",
+        "uq_banks_name", "A bank with this name already exists",
         "uq_cards_account_brand_type_last4", "This card is already registered for this account"
     );
 
