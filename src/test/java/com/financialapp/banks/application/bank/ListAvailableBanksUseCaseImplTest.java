@@ -26,12 +26,13 @@ class ListAvailableBanksUseCaseImplTest {
     }
 
     @Test
-    void execute_includesDisplayName() {
+    void execute_includesDisplayNameAndNullLogo() {
         List<AvailableBankResponse> result = useCase.execute();
 
         AvailableBankResponse galicia = result.stream()
                 .filter(b -> b.name().equals("GALICIA"))
                 .findFirst().orElseThrow();
         assertThat(galicia.displayName()).isEqualTo("Galicia");
+        assertThat(galicia.logoUrl()).isNull();
     }
 }

@@ -14,7 +14,7 @@ public class ListAvailableBanksUseCaseImpl implements ListAvailableBanksUseCase 
     @Override
     public List<AvailableBankResponse> execute() {
         return Arrays.stream(BankName.values())
-                .map(b -> new AvailableBankResponse(b.name(), b.getDisplayName()))
+                .map(b -> new AvailableBankResponse(b.name(), b.getDisplayName(), b.getLogoUrl()))
                 .toList();
     }
 }
