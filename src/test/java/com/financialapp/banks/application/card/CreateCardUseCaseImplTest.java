@@ -21,12 +21,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,25 +45,25 @@ class CreateCardUseCaseImplTest {
     private CreateCardCommand command(CardBehavior behavior) {
         return new CreateCardCommand(new UserId(1L), BankName.GALICIA,
                 CardBrand.VISA, CardType.PLATINUM, behavior,
-                "1234", LocalDate.now().plusYears(2), 20, 10);
+                "1234567890123456", YearMonth.now().plusYears(2), 20, 10);
     }
 
     @Test
     void create_persistsCreditCard() {
         when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.of(new Bank(BankName.GALICIA, null)));
-        when(cardRepository.existsByBankNameAndBrandAndTypeAndCardNumber(any(), any(), any(), any())).thenReturn(false);
+        when(cardRepository.findByCardNumber(any())).thenReturn(Optional.empty());
         when(cardRepository.save(any(Card.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Card result = useCase.execute(command(CardBehavior.CREDIT));
 
         assertThat(result).isInstanceOf(CreditCard.class);
-        assertThat(result.cardNumber()).isEqualTo("1234");
+        assertThat(result.cardNumber().value()).isEqualTo("1234567890123456");
     }
 
     @Test
     void create_persistsDebitCardForInstantPayment() {
         when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.of(new Bank(BankName.GALICIA, null)));
-        when(cardRepository.existsByBankNameAndBrandAndTypeAndCardNumber(any(), any(), any(), any())).thenReturn(false);
+        when(cardRepository.findByCardNumber(any())).thenReturn(Optional.empty());
         when(cardRepository.save(any(Card.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Card result = useCase.execute(command(CardBehavior.INSTANT_PAYMENT));
@@ -73,7 +74,7 @@ class CreateCardUseCaseImplTest {
     @Test
     void create_rejectsDuplicate() {
         when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.of(new Bank(BankName.GALICIA, null)));
-        when(cardRepository.existsByBankNameAndBrandAndTypeAndCardNumber(any(), any(), any(), any())).thenReturn(true);
+        when(cardRepository.findByCardNumber(any())).thenReturn(Optional.of(mock(Card.class)));
 
         assertThatThrownBy(() -> useCase.execute(command(CardBehavior.CREDIT)))
                 .isInstanceOf(ResourceAlreadyExistsException.class)

@@ -2,10 +2,12 @@ package com.financialapp.banks.web.error;
 
 import com.financialapp.banks.domain.exception.DomainException;
 import com.financialapp.banks.web.dto.response.ErrorResponse;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,7 +23,7 @@ public class GlobalExceptionHandler {
     private static final Map<String, String> CONSTRAINT_MESSAGES = Map.of(
         "uq_accounts_bank_name", "An account with this name already exists in the selected bank",
         "uq_banks_name", "A bank with this name already exists",
-        "uq_cards_account_brand_type_last4", "This card is already registered for this account"
+        "idx_cards_card_number", "A card with this number already exists"
     );
 
     @ExceptionHandler(DomainException.class)
@@ -44,6 +46,25 @@ public class GlobalExceptionHandler {
             .status(400).code("validation_error")
             .message("Request validation failed")
             .details(Map.of("fields", fields))
+            .build();
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
+        ErrorResponse body = ErrorResponse.builder()
+            .status(400).code("validation_error")
+            .message(ex.getMessage())
+            .build();
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException ex) {
+        log.warn("Malformed request body: {}", ex.getMostSpecificCause().getMessage());
+        ErrorResponse body = ErrorResponse.builder()
+            .status(400).code("malformed_request")
+            .message("Malformed or invalid request body")
             .build();
         return ResponseEntity.badRequest().body(body);
     }

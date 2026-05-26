@@ -39,7 +39,7 @@ class CreateAccountUseCaseImplTest {
         useCase = new CreateAccountUseCaseImpl(accountRepository, bankRepository);
     }
 
-    private CreateAccountCommand command(String type) {
+    private CreateAccountCommand command(AccountType type) {
         return new CreateAccountCommand(
                 new UserId(1L), BankName.GALICIA, "Savings", type,
                 new Money(new BigDecimal("100.00"), Currency.getInstance("USD")),
@@ -52,7 +52,7 @@ class CreateAccountUseCaseImplTest {
         when(accountRepository.existsByBankNameAndName(BankName.GALICIA, "Savings")).thenReturn(false);
         when(accountRepository.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Account result = useCase.execute(command(AccountType.SAVINGS.name()));
+        Account result = useCase.execute(command(AccountType.SAVINGS));
 
         assertThat(result).isInstanceOf(SavingsAccount.class);
         assertThat(result.balance().amount()).isEqualByComparingTo("100.00");
@@ -63,7 +63,7 @@ class CreateAccountUseCaseImplTest {
         when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.of(new Bank(BankName.GALICIA, null)));
         when(accountRepository.existsByBankNameAndName(BankName.GALICIA, "Savings")).thenReturn(true);
 
-        assertThatThrownBy(() -> useCase.execute(command(AccountType.SAVINGS.name())))
+        assertThatThrownBy(() -> useCase.execute(command(AccountType.SAVINGS)))
                 .isInstanceOf(ResourceAlreadyExistsException.class)
                 .hasMessageContaining("already exists");
     }

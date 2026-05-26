@@ -14,7 +14,6 @@ public interface AccountRepository {
     List<Account> findByBankName(BankName bankName);
     int countByBankName(BankName bankName);
     Optional<Account> findByCbu(String cbu);
-    Optional<Account> findByCbuAndBankName(String cbu, BankName bankName);
     Optional<Account> findByAliasAndBankName(String alias, BankName bankName);
     boolean existsByBankNameAndName(BankName bankName, String name);
     boolean existsByBankNameAndTypeAndCurrency(BankName bankName, String type, Currency currency);

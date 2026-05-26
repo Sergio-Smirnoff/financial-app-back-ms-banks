@@ -54,9 +54,7 @@ public class BankAlertScheduler {
 
         log.info("Found {} card(s) expiring within {} days", expiring.size(), CARD_EXPIRY_WINDOW_DAYS);
         for (Card card : expiring) {
-            String last4 = card.cardNumber().length() >= 4
-                    ? card.cardNumber().substring(card.cardNumber().length() - 4)
-                    : card.cardNumber();
+            String last4 = card.cardNumber().last4();
             sendAlert(card.userId().value(), BankAlertEvent.builder()
                     .userId(card.userId().value())
                     .type("CARD_EXPIRING")
@@ -64,7 +62,7 @@ public class BankAlertScheduler {
                     .message(String.format("Your card ending in %s expires on %s.",
                             last4, card.details().expiringDate()))
                     .metadata(String.format("{\"cardNumber\":\"%s\",\"bankName\":\"%s\"}",
-                            card.cardNumber(), card.bankName()))
+                            card.cardNumber().value(), card.bankName()))
                     .build());
         }
     }

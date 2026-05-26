@@ -75,7 +75,7 @@ public class CardRepositoryImpl implements CardRepository {
     @Transactional
     public Card save(Card card) {
         BankJpaEntity bank = requireBank(card.bankName());
-        CardJpaEntity entity = cardJpaRepository.findByCardNumber(card.cardNumber())
+        CardJpaEntity entity = cardJpaRepository.findByCardNumber(card.cardNumber().value())
                 .map(existing -> mapper.merge(existing, card, bank))
                 .orElseGet(() -> mapper.toJpa(card, bank));
         return mapper.toDomain(cardJpaRepository.save(entity), bank);

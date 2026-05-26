@@ -7,14 +7,14 @@ import java.time.LocalDateTime;
 
 public abstract class Card {
 
-    protected final String cardNumber;
+    protected final CardNumber cardNumber;
     protected final UserId userId;
     protected final BankName bankName;
     protected final CardDetails details;
     protected final LocalDateTime createdAt;
     protected final LocalDateTime updatedAt;
 
-    protected Card(String cardNumber, UserId userId, BankName bankName,
+    protected Card(CardNumber cardNumber, UserId userId, BankName bankName,
                    CardDetails details, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.cardNumber = cardNumber;
         this.userId = userId;
@@ -24,7 +24,7 @@ public abstract class Card {
         this.updatedAt = updatedAt;
     }
 
-    public String cardNumber() { return cardNumber; }
+    public CardNumber cardNumber() { return cardNumber; }
     public UserId userId() { return userId; }
     public BankName bankName() { return bankName; }
     public CardDetails details() { return details; }

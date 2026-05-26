@@ -14,7 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.YearMonth;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -41,7 +41,7 @@ class CardControllerIT {
     @Test
     void createCard_then_listIncludesIt() throws Exception {
         CardRequest req = new CardRequest("GALICIA", CardBrand.VISA, CardType.PLATINUM,
-                CardBehavior.CREDIT, "1234", LocalDate.now().plusYears(2), 20, 10);
+                CardBehavior.CREDIT, "1234567890123456", YearMonth.now().plusYears(2), 20, 10);
 
         mockMvc.perform(post("/api/v1/banks/cards")
                         .header("X-User-Id", "1")
@@ -49,10 +49,49 @@ class CardControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.last4Digits").value("1234"));
+                .andExpect(jsonPath("$.data.cardNumber").value("1234567890123456"));
 
         mockMvc.perform(get("/api/v1/banks/cards").header("X-User-Id", "1").header("X-Internal-Token", "test-token"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].last4Digits").value("1234"));
+                .andExpect(jsonPath("$.data[0].cardNumber").value("1234567890123456"));
+    }
+
+    @Test
+    void createCard_acceptsMmYyExpiryString() throws Exception {
+        String body = """
+                {"bankName":"GALICIA","brand":"VISA","cardType":"STANDARD","behavior":"CREDIT",
+                 "cardNumber":"4387269571327193","expiringDate":"08/30","closingDay":15,"dueDay":5}
+                """;
+
+        mockMvc.perform(post("/api/v1/banks/cards")
+                        .header("X-User-Id", "1")
+                        .header("X-Internal-Token", "test-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.expiringDate").value("08/30"));
+    }
+
+    @Test
+    void createCard_rejectsNon16DigitNumber() throws Exception {
+        CardRequest req = new CardRequest("GALICIA", CardBrand.VISA, CardType.PLATINUM,
+                CardBehavior.CREDIT, "1234", YearMonth.now().plusYears(2), 20, 10);
+
+        mockMvc.perform(post("/api/v1/banks/cards")
+                        .header("X-User-Id", "1")
+                        .header("X-Internal-Token", "test-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("validation_error"));
+    }
+
+    @Test
+    void getCard_rejectsNon16DigitPathVar() throws Exception {
+        mockMvc.perform(get("/api/v1/banks/cards/{cardNumber}", "12ab")
+                .header("X-User-Id", "1")
+                .header("X-Internal-Token", "test-token"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("validation_error"));
     }
 }

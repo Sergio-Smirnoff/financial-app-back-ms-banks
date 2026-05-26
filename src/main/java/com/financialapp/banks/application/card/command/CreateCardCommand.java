@@ -6,7 +6,7 @@ import com.financialapp.banks.domain.model.card.CardBehavior;
 import com.financialapp.banks.domain.model.card.CardBrand;
 import com.financialapp.banks.domain.model.card.CardType;
 
-import java.time.LocalDate;
+import java.time.YearMonth;
 
 public record CreateCardCommand(
     UserId userId,
@@ -15,7 +15,7 @@ public record CreateCardCommand(
     CardType cardType,
     CardBehavior behavior,
     String number,
-    LocalDate expiringDate,
+    YearMonth expiringDate,
     int closingDay,
     int dueDay
 ) {}

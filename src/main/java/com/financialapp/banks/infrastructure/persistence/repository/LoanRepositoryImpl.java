@@ -66,7 +66,7 @@ public class LoanRepositoryImpl implements LoanRepository {
     @Transactional
     public Loan save(Loan loan) {
         BankJpaEntity bank = requireBank(loan.bankName());
-        LoanJpaEntity entity = loan.id() != null
+        LoanJpaEntity entity = loan.id() != null && loan.id().value() != null
                 ? loanJpaRepository.findById(loan.id().value())
                         .map(existing -> mapper.merge(existing, loan, bank))
                         .orElseGet(() -> mapper.toJpa(loan, bank))

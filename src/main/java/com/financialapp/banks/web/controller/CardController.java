@@ -19,9 +19,11 @@ import com.financialapp.banks.web.mapper.CardWebMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,8 +31,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/banks/cards")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "Cards", description = "User cards management")
 public class CardController {
+
+    private static final String CARD_NUMBER_REGEX = "^\\d{16}$";
+    private static final String CARD_NUMBER_MESSAGE = "Card number must be exactly 16 digits";
 
     private final ListCardsUseCase listCardsUseCase;
     private final GetCardUseCase getCardUseCase;
@@ -54,7 +60,7 @@ public class CardController {
     @Operation(summary = "Get a single card")
     public ResponseEntity<ApiResponse<CardResponse>> get(
             @RequestHeader("X-User-Id") Long userId,
-            @PathVariable String cardNumber) {
+            @PathVariable @Pattern(regexp = CARD_NUMBER_REGEX, message = CARD_NUMBER_MESSAGE) String cardNumber) {
         return ResponseEntity.ok(ApiResponse.ok(
                 cardMapper.toResponse(getCardUseCase.execute(cardNumber, new UserId(userId)))));
     }
@@ -70,7 +76,7 @@ public class CardController {
                 request.brand(),
                 request.cardType(),
                 request.behavior(),
-                request.last4Digits(),
+                request.cardNumber(),
                 request.expiringDate(),
                 request.closingDay(),
                 request.dueDay()
@@ -79,7 +85,7 @@ public class CardController {
                 .body(ApiResponse.created("Card created", cardMapper.toResponse(result)));
     }
 
-    @PutMapping("/{cardNumber}")
+    @PatchMapping("/{cardNumber}")
     @Operation(summary = "Update card billing and expiry date")
     public ResponseEntity<ApiResponse<CardResponse>> update(
             @RequestHeader("X-User-Id") Long userId,

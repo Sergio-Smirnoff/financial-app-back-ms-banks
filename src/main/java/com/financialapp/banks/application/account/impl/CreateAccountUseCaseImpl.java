@@ -4,7 +4,6 @@ import com.financialapp.banks.application.account.command.CreateAccountCommand;
 import com.financialapp.banks.application.account.usecase.CreateAccountUseCase;
 import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
-import com.financialapp.banks.domain.exception.account.AccountInvalidTypeException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
@@ -36,7 +35,7 @@ public class CreateAccountUseCaseImpl implements CreateAccountUseCase {
             throw new ResourceAlreadyExistsException("Account", cmd.name() + " in " + cmd.bankName().getDisplayName());
         }
 
-        if (AccountType.INVESTMENT.name().equals(cmd.type()) &&
+        if (cmd.type() == AccountType.INVESTMENT &&
                 accountRepository.existsByBankNameAndTypeAndCurrency(
                         cmd.bankName(), AccountType.INVESTMENT.name(), cmd.initialBalance().currency())) {
             throw new ResourceAlreadyExistsException("InvestmentAccount", cmd.initialBalance().currency() + " in " + cmd.bankName().getDisplayName());
@@ -45,13 +44,12 @@ public class CreateAccountUseCaseImpl implements CreateAccountUseCase {
         LocalDateTime now = LocalDateTime.now();
         boolean isActive = cmd.isActive() != null ? cmd.isActive() : true;
         Account account = switch (cmd.type()) {
-            case "CHECKING" -> new CheckingAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
+            case CHECKING -> new CheckingAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
                     cmd.userId(), cmd.bankName(), cmd.name(), isActive, now, now);
-            case "SAVINGS" -> new SavingsAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
+            case SAVINGS -> new SavingsAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
                     cmd.userId(), cmd.bankName(), cmd.name(), isActive, now, now);
-            case "INVESTMENT" -> new InvestmentAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
+            case INVESTMENT -> new InvestmentAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
                     cmd.userId(), cmd.bankName(), cmd.name(), isActive, now, now);
-            default -> throw new AccountInvalidTypeException(cmd.type());
         };
 
         return accountRepository.save(account);

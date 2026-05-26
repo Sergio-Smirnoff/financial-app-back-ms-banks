@@ -37,6 +37,8 @@ public enum DomainError {
     // Request validation
     INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST, "invalid_date_range"),
     UNSUPPORTED_BANK(HttpStatus.BAD_REQUEST, "unsupported_bank"),
+    INVALID_CURRENCY(HttpStatus.BAD_REQUEST, "invalid_currency"),
+    INVALID_CARD_NUMBER(HttpStatus.BAD_REQUEST, "invalid_card_number"),
 
     // Infrastructure
     FINANCES_SERVICE_UNAVAILABLE(HttpStatus.INTERNAL_SERVER_ERROR, "finances_service_unavailable"),

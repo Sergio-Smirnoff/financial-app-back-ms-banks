@@ -13,7 +13,6 @@ public interface AccountJpaRepository extends JpaRepository<AccountJpaEntity, Lo
     List<AccountJpaEntity> findByUserIdOrderByNameAsc(Long userId);
     List<AccountJpaEntity> findByBank_IdOrderByNameAsc(Long bankId);
     Optional<AccountJpaEntity> findByCbu(String cbu);
-    Optional<AccountJpaEntity> findByCbuAndBank_Name(String cbu, String bankName);
     Optional<AccountJpaEntity> findByAliasAndBank_Name(String alias, String bankName);
     boolean existsByBank_NameAndName(String bankName, String name);
     boolean existsByBank_NameAndTypeAndCurrency(String bankName, String type, String currency);
@@ -25,7 +24,7 @@ public interface AccountJpaRepository extends JpaRepository<AccountJpaEntity, Lo
 
     @Query("SELECT a FROM AccountJpaEntity a WHERE a.userId = :userId " +
            "AND (:type IS NULL OR a.type = :type) " +
-           "AND (:currency IS NULL OR UPPER(a.currency) = UPPER(:currency)) " +
+           "AND (:currency IS NULL OR a.currency = :currency) " +
            "AND (:bankName IS NULL OR a.bank.name = :bankName) " +
            "AND (:name IS NULL OR a.name = :name) " +
            "AND (:hideEmpty = false OR a.balance > 0) " +

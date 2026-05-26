@@ -8,6 +8,7 @@ import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardBehavior;
 import com.financialapp.banks.domain.model.card.CardBilling;
 import com.financialapp.banks.domain.model.card.CardDetails;
+import com.financialapp.banks.domain.model.card.CardNumber;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.DebitCard;
 import com.financialapp.banks.domain.repository.BankRepository;
@@ -31,9 +32,8 @@ public class CreateCardUseCaseImpl implements CreateCardUseCase {
         bankRepository.findByName(cmd.bankName())
                 .orElseThrow(() -> new ResourceNotFoundException("Bank", cmd.bankName().getDisplayName()));
 
-        if (cardRepository.existsByBankNameAndBrandAndTypeAndCardNumber(
-                cmd.bankName(), cmd.brand(), cmd.cardType(), cmd.number())) {
-            throw new ResourceAlreadyExistsException("Card", cmd.number() + " at " + cmd.bankName().getDisplayName());
+        if (cardRepository.findByCardNumber(cmd.number()).isPresent()) {
+            throw new ResourceAlreadyExistsException("Card", cmd.number());
         }
 
         CardDetails details = new CardDetails(
@@ -45,9 +45,10 @@ public class CreateCardUseCaseImpl implements CreateCardUseCase {
         );
 
         LocalDateTime now = LocalDateTime.now();
+        CardNumber cardNumber = CardNumber.of(cmd.number());
         Card card = cmd.behavior() == CardBehavior.INSTANT_PAYMENT
-                ? new DebitCard(cmd.number(), cmd.userId(), cmd.bankName(), details, now, now)
-                : new CreditCard(cmd.number(), cmd.userId(), cmd.bankName(), details, now, now);
+                ? new DebitCard(cardNumber, cmd.userId(), cmd.bankName(), details, now, now)
+                : new CreditCard(cardNumber, cmd.userId(), cmd.bankName(), details, now, now);
 
         return cardRepository.save(card);
     }

@@ -52,7 +52,7 @@ public class CardInstallmentController {
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cardNumber,
             @Valid @RequestBody CardExpenseCreateRequest request) {
-        Money amount = new Money(request.totalAmount(), Currency.getInstance(request.currency()));
+        Money amount = Money.of(request.totalAmount(), request.currency());
         List<CardInstallmentResponse> result = createCardExpenseUseCase.execute(new CreateCardExpenseCommand(
                 cardNumber,
                 new UserId(userId),
@@ -108,18 +108,20 @@ public class CardInstallmentController {
     @PostMapping("/duplicates-check")
     @Operation(summary = "Check for existing card installments to avoid duplicates")
     public ResponseEntity<ApiResponse<List<Integer>>> checkDuplicates(
+            @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cardNumber,
             @RequestBody List<CardExpenseCreateRequest> expenses) {
+        UserId user = new UserId(userId);
         List<CreateCardExpenseCommand> commands = expenses.stream()
                 .map(e -> new CreateCardExpenseCommand(
                         cardNumber,
-                        null,
+                        user,
                         e.description(),
                         new Money(e.totalAmount(), Currency.getInstance(e.currency())),
                         e.totalInstallments(),
                         e.firstDueDate()
                 )).toList();
         return ResponseEntity.ok(ApiResponse.ok(
-                checkDuplicateExpensesUseCase.execute(cardNumber, commands)));
+                checkDuplicateExpensesUseCase.execute(cardNumber, user, commands)));
     }
 }

@@ -1,16 +1,14 @@
 package com.financialapp.banks.web.dto.request;
 
+import com.financialapp.banks.domain.model.account.AccountType;
 import jakarta.validation.constraints.*;
-
-import java.math.BigDecimal;
 
 public record AccountRequest(
         @NotBlank @Size(max = 100) String bankName,
         @NotBlank @Size(max = 100) String name,
-        @NotBlank @Pattern(regexp = "CHECKING|SAVINGS|INVESTMENT") String type,
-        @NotNull @DecimalMin("0.0") BigDecimal balance,
-        @NotBlank @Size(min = 3, max = 3) String currency,
+        @NotNull AccountType type,
+        @NotBlank @Pattern(regexp = "[A-Za-z]{3}", message = "currency must be a 3-letter ISO 4217 code") String currency,
         Boolean isActive,
-        @NotBlank String cbu,
+        @NotBlank @Pattern(regexp = "\\d{22}", message = "cbu must be exactly 22 digits") String cbu,
         String alias
 ) {}

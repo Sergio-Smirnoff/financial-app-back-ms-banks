@@ -13,7 +13,7 @@ public class CardWebMapper {
                 card.bankName().name(),
                 card.details().brand(),
                 card.details().cardType(),
-                card.cardNumber());
+                card.cardNumber().last4());
         return CardResponse.builder()
                 .bankName(card.bankName().name())
                 .userId(card.userId().value())
@@ -21,7 +21,7 @@ public class CardWebMapper {
                 .brand(card.details().brand())
                 .cardType(card.details().cardType())
                 .behavior(card.details().behavior())
-                .last4Digits(card.cardNumber())
+                .cardNumber(card.cardNumber().value())
                 .expiringDate(card.details().expiringDate())
                 .closingDay(card.details().billing().closingDay())
                 .dueDay(card.details().billing().dueDay())

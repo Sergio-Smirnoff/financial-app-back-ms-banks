@@ -50,23 +50,23 @@ class DeleteAccountUseCaseImplTest {
 
     @Test
     void execute_wrapsInfrastructureExceptionAsInvestmentsServiceException() {
-        when(accountRepository.findByCbuAndBankName(CBU, BANK_NAME))
+        when(accountRepository.findByCbu(CBU))
                 .thenReturn(Optional.of(investmentAccount()));
         when(investmentsPort.countHoldings(CBU))
                 .thenThrow(new InfrastructureException("ms-investments: timeout"));
 
-        assertThatThrownBy(() -> useCase.execute(new DeleteAccountCommand(CBU, BANK_NAME)))
+        assertThatThrownBy(() -> useCase.execute(new DeleteAccountCommand(CBU)))
                 .isInstanceOf(InvestmentsServiceException.class)
                 .isNotInstanceOf(InfrastructureException.class);
     }
 
     @Test
     void execute_deletesAccountWhenNoHoldings() {
-        when(accountRepository.findByCbuAndBankName(CBU, BANK_NAME))
+        when(accountRepository.findByCbu(CBU))
                 .thenReturn(Optional.of(investmentAccount()));
         when(investmentsPort.countHoldings(CBU)).thenReturn(0);
 
-        useCase.execute(new DeleteAccountCommand(CBU, BANK_NAME));
+        useCase.execute(new DeleteAccountCommand(CBU));
 
         verify(accountRepository).delete(CBU);
     }

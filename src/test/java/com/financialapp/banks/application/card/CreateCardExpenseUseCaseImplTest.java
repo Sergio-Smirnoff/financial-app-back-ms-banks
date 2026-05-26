@@ -11,6 +11,7 @@ import com.financialapp.banks.domain.model.card.CardBilling;
 import com.financialapp.banks.domain.model.card.CardBrand;
 import com.financialapp.banks.domain.model.card.CardDetails;
 import com.financialapp.banks.domain.model.card.CardInstallment;
+import com.financialapp.banks.domain.model.card.CardNumber;
 import com.financialapp.banks.domain.model.card.CardType;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.DebitCard;
@@ -25,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
@@ -48,8 +50,8 @@ class CreateCardExpenseUseCaseImplTest {
 
     private CreditCard creditCard() {
         CardDetails details = new CardDetails(CardBrand.VISA, CardType.PLATINUM,
-                CardBehavior.CREDIT, LocalDate.now().plusYears(2), new CardBilling(20, 10));
-        return new CreditCard("1234", new UserId(1L), BankName.GALICIA, details,
+                CardBehavior.CREDIT, YearMonth.now().plusYears(2), new CardBilling(20, 10));
+        return new CreditCard(CardNumber.of("1234567890123456"), new UserId(1L), BankName.GALICIA, details,
                 LocalDateTime.now(), LocalDateTime.now());
     }
 
@@ -72,8 +74,8 @@ class CreateCardExpenseUseCaseImplTest {
     @Test
     void create_rejectsInstantPaymentCard() {
         CardDetails details = new CardDetails(CardBrand.VISA, CardType.STANDARD,
-                CardBehavior.INSTANT_PAYMENT, LocalDate.now().plusYears(2), new CardBilling(20, 10));
-        DebitCard debit = new DebitCard("1234", new UserId(1L), BankName.GALICIA, details,
+                CardBehavior.INSTANT_PAYMENT, YearMonth.now().plusYears(2), new CardBilling(20, 10));
+        DebitCard debit = new DebitCard(CardNumber.of("1234567890123456"), new UserId(1L), BankName.GALICIA, details,
                 LocalDateTime.now(), LocalDateTime.now());
         when(cardRepository.findByCardNumberAndUserId("1234", new UserId(1L))).thenReturn(Optional.of(debit));
 

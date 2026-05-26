@@ -7,6 +7,7 @@ import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.web.dto.request.AccountRequest;
+import com.financialapp.banks.web.dto.request.UpdateAccountRequest;
 import com.financialapp.banks.web.dto.response.AccountResponse;
 import com.financialapp.banks.web.dto.response.AccountTransactionResponse;
 import com.financialapp.banks.web.dto.response.ApiResponse;
@@ -48,7 +49,7 @@ public class AccountController {
             @RequestParam(required = false) String bankName,
             @RequestParam(required = false) String name,
             @RequestParam(required = false, defaultValue = "false") boolean hideEmpty) {
-        Currency cur = currency != null ? Currency.getInstance(currency) : null;
+        Currency cur = currency != null ? Money.parseCurrency(currency) : null;
         BankName bank = bankName != null ? BankName.fromString(bankName) : null;
         List<AccountResponse> result = listAccountsUseCase.execute(
                 new FilterAccountCommand(new UserId(userId), type, cur, bank, name, hideEmpty))
@@ -70,7 +71,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse<AccountResponse>> create(
             @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody AccountRequest request) {
-        Money initialBalance = new Money(request.balance(), Currency.getInstance(request.currency()));
+        Money initialBalance = Money.of(BigDecimal.ZERO, request.currency());
         var result = createAccountUseCase.execute(new CreateAccountCommand(
                 new UserId(userId),
                 BankName.fromString(request.bankName()),
@@ -85,13 +86,15 @@ public class AccountController {
                 .body(ApiResponse.created("Account created", accountMapper.toResponse(result)));
     }
 
-    @PutMapping("/{cbu}")
+    @PatchMapping("/{cbu}")
     @Operation(summary = "Update an account")
     public ResponseEntity<ApiResponse<AccountResponse>> update(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cbu,
-            @Valid @RequestBody AccountRequest request) {
-        Money balance = new Money(request.balance(), Currency.getInstance(request.currency()));
+            @Valid @RequestBody UpdateAccountRequest request) {
+        Money balance = request.balance() != null && request.currency() != null
+                ? Money.of(request.balance(), request.currency())
+                : null;
         var result = updateAccountUseCase.execute(new UpdateAccountCommand(
                 cbu, request.name(), balance, request.isActive()));
         return ResponseEntity.ok(ApiResponse.ok(accountMapper.toResponse(result)));
@@ -101,9 +104,8 @@ public class AccountController {
     @Operation(summary = "Delete an account")
     public ResponseEntity<ApiResponse<Void>> delete(
             @RequestHeader("X-User-Id") Long userId,
-            @PathVariable String cbu,
-            @RequestParam String bankName) {
-        deleteAccountUseCase.execute(new DeleteAccountCommand(cbu, BankName.fromString(bankName)));
+            @PathVariable String cbu) {
+        deleteAccountUseCase.execute(new DeleteAccountCommand(cbu));
         return ResponseEntity.ok(ApiResponse.ok("Account deleted", null));
     }
 
@@ -139,7 +141,7 @@ public class AccountController {
             @PathVariable String cbu,
             @RequestParam BigDecimal delta,
             @RequestParam String currency) {
-        adjustBalanceUseCase.execute(new AdjustBalanceCommand(cbu, new Money(delta, Currency.getInstance(currency))));
+        adjustBalanceUseCase.execute(new AdjustBalanceCommand(cbu, Money.of(delta, currency)));
         return ResponseEntity.ok(ApiResponse.ok("Balance adjusted", null));
     }
 }

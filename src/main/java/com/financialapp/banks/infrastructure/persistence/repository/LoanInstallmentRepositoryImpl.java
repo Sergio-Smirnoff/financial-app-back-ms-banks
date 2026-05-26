@@ -72,7 +72,7 @@ public class LoanInstallmentRepositoryImpl implements LoanInstallmentRepository 
     public LoanInstallment save(LoanInstallment installment) {
         LoanJpaEntity loan = loanJpaRepository.findById(installment.loanId().value())
                 .orElseThrow(() -> new ResourceNotFoundException("Loan", installment.loanId().value().toString()));
-        var entity = installment.id() != null
+        var entity = installment.id() != null && installment.id().value() != null
                 ? jpaRepository.findById(installment.id().value())
                         .map(existing -> mapper.merge(existing, installment, loan))
                         .orElseGet(() -> mapper.toJpa(installment, loan))

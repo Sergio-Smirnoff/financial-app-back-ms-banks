@@ -52,11 +52,6 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     @Override
-    public Optional<Account> findByCbuAndBankName(String cbu, BankName bankName) {
-        return accountJpaRepository.findByCbuAndBank_Name(cbu, bankName.name()).map(mapper::toDomain);
-    }
-
-    @Override
     public Optional<Account> findByAliasAndBankName(String alias, BankName bankName) {
         return accountJpaRepository.findByAliasAndBank_Name(alias, bankName.name()).map(mapper::toDomain);
     }

@@ -15,8 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 
 @Service
 @RequiredArgsConstructor
@@ -31,8 +31,8 @@ public class UpdateCardUseCaseImpl implements UpdateCardUseCase {
                 .orElseThrow(() -> new ResourceNotFoundException("Card", cmd.cardNumber()));
 
         CardDetails current = card.details();
-        LocalDate newExpiry = cmd.expiringDate() != null ? cmd.expiringDate() : current.expiringDate();
-        if (cmd.expiringDate() != null && cmd.expiringDate().isBefore(LocalDate.now())) {
+        YearMonth newExpiry = cmd.expiringDate() != null ? cmd.expiringDate() : current.expiringDate();
+        if (cmd.expiringDate() != null && cmd.expiringDate().isBefore(YearMonth.now())) {
             throw new CardExpiredException(cmd.cardNumber(), cmd.expiringDate().toString());
         }
         int newClosing = cmd.closingDay() != null ? cmd.closingDay() : current.billing().closingDay();

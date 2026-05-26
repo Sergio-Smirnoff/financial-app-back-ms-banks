@@ -30,7 +30,7 @@ public class DeleteAccountUseCaseImpl implements DeleteAccountUseCase {
     @Override
     @Transactional
     public void execute(DeleteAccountCommand command) {
-        Account account = accountRepository.findByCbuAndBankName(command.cbu(), command.bankName())
+        Account account = accountRepository.findByCbu(command.cbu())
                 .orElseThrow(() -> new ResourceNotFoundException("Account", command.cbu()));
 
         if (account instanceof InvestmentAccount) {
