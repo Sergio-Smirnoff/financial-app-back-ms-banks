@@ -21,9 +21,6 @@ public class BankJpaEntity {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(name = "logo_url", length = 500)
-    private String logoUrl;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

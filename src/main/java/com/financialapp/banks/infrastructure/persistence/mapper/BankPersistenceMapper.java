@@ -11,20 +11,7 @@ public class BankPersistenceMapper {
 
     public Bank toDomain(BankJpaEntity entity) {
         if (entity == null) return null;
-        return new Bank(BankName.valueOf(entity.getName()), new Logo(entity.getLogoUrl()));
-    }
-
-    public BankJpaEntity toJpa(Bank bank) {
-        if (bank == null) return null;
-        return BankJpaEntity.builder()
-                .name(bank.name().name())
-                .logoUrl(bank.logo() != null ? bank.logo().url() : null)
-                .build();
-    }
-
-    public BankJpaEntity merge(BankJpaEntity existing, Bank bank) {
-        existing.setName(bank.name().name());
-        existing.setLogoUrl(bank.logo() != null ? bank.logo().url() : null);
-        return existing;
+        BankName name = BankName.valueOf(entity.getName());
+        return new Bank(name, new Logo(name.getLogoUrl()));
     }
 }

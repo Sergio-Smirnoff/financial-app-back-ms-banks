@@ -7,8 +7,6 @@ import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.port.FinancesPort.TransactionSummary;
 import com.financialapp.banks.domain.exception.FinancesServiceException;
 import com.financialapp.banks.web.dto.request.AccountRequest;
-import com.financialapp.banks.web.dto.request.BankRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -38,15 +36,6 @@ class AccountControllerIT {
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
     @MockBean GetAccountTransactionsUseCase getTransactionsUseCase;
-
-    @BeforeEach
-    void seedBank() throws Exception {
-        mockMvc.perform(post("/api/v1/banks")
-                .header("X-User-Id", "1")
-                .header("X-Internal-Token", "test-token")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new BankRequest("GALICIA", null))));
-    }
 
     @Test
     void createAccount_then_getByCbu() throws Exception {

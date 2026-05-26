@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.financialapp.banks.domain.model.card.CardBehavior;
 import com.financialapp.banks.domain.model.card.CardBrand;
 import com.financialapp.banks.domain.model.card.CardType;
-import com.financialapp.banks.web.dto.request.BankRequest;
 import com.financialapp.banks.web.dto.request.CardRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,15 +27,6 @@ class CardControllerIT {
 
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
-
-    @BeforeEach
-    void seedBank() throws Exception {
-        mockMvc.perform(post("/api/v1/banks")
-                .header("X-User-Id", "1")
-                .header("X-Internal-Token", "test-token")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new BankRequest("GALICIA", null))));
-    }
 
     @Test
     void getCard_notFound_returns404WithCode() throws Exception {
