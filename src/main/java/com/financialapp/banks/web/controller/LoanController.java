@@ -66,7 +66,7 @@ public class LoanController {
                 AmortizationType.FRENCH
         ));
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Loan created", loanMapper.toResponse(loan)));
+                .body(ApiResponse.created("Loan created", loanMapper.toResponse(loan)));
     }
 
     @DeleteMapping("/{id}")

@@ -76,7 +76,7 @@ public class CardController {
                 request.dueDay()
         ));
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Card created", cardMapper.toResponse(result)));
+                .body(ApiResponse.created("Card created", cardMapper.toResponse(result)));
     }
 
     @PutMapping("/{cardNumber}")

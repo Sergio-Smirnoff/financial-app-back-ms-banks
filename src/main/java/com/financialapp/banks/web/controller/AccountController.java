@@ -82,7 +82,7 @@ public class AccountController {
                 request.alias()
         ));
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Account created", accountMapper.toResponse(result)));
+                .body(ApiResponse.created("Account created", accountMapper.toResponse(result)));
     }
 
     @PutMapping("/{cbu}")
