@@ -26,16 +26,23 @@ public class GlobalExceptionHandler {
         "idx_cards_card_number", "A card with this number already exists"
     );
 
+    private final ErrorCategoryHttpMapper httpMapper;
+
+    public GlobalExceptionHandler(ErrorCategoryHttpMapper httpMapper) {
+        this.httpMapper = httpMapper;
+    }
+
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ErrorResponse> handleDomain(DomainException ex) {
         log.warn("Domain error [{}]: {}", ex.getError().getCode(), ex.getMessage());
+        HttpStatus status = httpMapper.toHttpStatus(ex.getError().getCategory());
         ErrorResponse body = ErrorResponse.builder()
-            .status(ex.getError().getHttpStatus().value())
+            .status(status.value())
             .code(ex.getError().getCode())
             .message(ex.getMessage())
             .details(ex.getDetails())
             .build();
-        return ResponseEntity.status(ex.getError().getHttpStatus()).body(body);
+        return ResponseEntity.status(status).body(body);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

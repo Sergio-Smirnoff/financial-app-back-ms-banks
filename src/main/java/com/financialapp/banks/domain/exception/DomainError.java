@@ -1,58 +1,48 @@
 package com.financialapp.banks.domain.exception;
 
-import org.springframework.http.HttpStatus;
-
 public enum DomainError {
 
-    // Generic not-found (replaces 6 specific not-found exceptions)
-    RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "resource_not_found"),
+    RESOURCE_NOT_FOUND(ErrorCategory.NOT_FOUND, "resource_not_found"),
 
-    // Generic already-exists (replaces 4 specific already-exists exceptions)
-    RESOURCE_ALREADY_EXISTS(HttpStatus.CONFLICT, "resource_already_exists"),
+    RESOURCE_ALREADY_EXISTS(ErrorCategory.CONFLICT, "resource_already_exists"),
 
-    // Conflict: resource has dependencies preventing deletion
-    BANK_HAS_ACTIVE_ACCOUNTS(HttpStatus.CONFLICT, "bank_has_active_accounts"),
-    ACCOUNT_NOT_DELETABLE(HttpStatus.CONFLICT, "account_not_deletable"),
-    CARD_NOT_DELETABLE(HttpStatus.CONFLICT, "card_not_deletable"),
+    BANK_HAS_ACTIVE_ACCOUNTS(ErrorCategory.CONFLICT, "bank_has_active_accounts"),
+    ACCOUNT_NOT_DELETABLE(ErrorCategory.CONFLICT, "account_not_deletable"),
+    CARD_NOT_DELETABLE(ErrorCategory.CONFLICT, "card_not_deletable"),
 
-    // Account business rules
-    ACCOUNT_INSUFFICIENT_FUNDS(HttpStatus.UNPROCESSABLE_ENTITY, "account_insufficient_funds"),
-    ACCOUNT_CURRENCY_MISMATCH(HttpStatus.UNPROCESSABLE_ENTITY, "account_currency_mismatch"),
-    ACCOUNT_INVESTMENT_RESTRICTION(HttpStatus.UNPROCESSABLE_ENTITY, "account_investment_restriction"),
-    ACCOUNT_INVALID_TYPE(HttpStatus.UNPROCESSABLE_ENTITY, "account_invalid_type"),
+    ACCOUNT_INSUFFICIENT_FUNDS(ErrorCategory.UNPROCESSABLE, "account_insufficient_funds"),
+    ACCOUNT_CURRENCY_MISMATCH(ErrorCategory.UNPROCESSABLE, "account_currency_mismatch"),
+    ACCOUNT_INVESTMENT_RESTRICTION(ErrorCategory.UNPROCESSABLE, "account_investment_restriction"),
+    ACCOUNT_INVALID_TYPE(ErrorCategory.UNPROCESSABLE, "account_invalid_type"),
 
-    // Card business rules
-    CARD_EXPIRED(HttpStatus.UNPROCESSABLE_ENTITY, "card_expired"),
-    CARD_INSTALLMENT_ALREADY_PAID(HttpStatus.CONFLICT, "card_installment_already_paid"),
-    CARD_INSTALLMENT_MISMATCH(HttpStatus.UNPROCESSABLE_ENTITY, "card_installment_mismatch"),
-    CARD_INSTALLMENT_NOT_SUPPORTED(HttpStatus.UNPROCESSABLE_ENTITY, "card_installment_not_supported"),
-    CARD_INVALID_TYPE(HttpStatus.UNPROCESSABLE_ENTITY, "card_invalid_type"),
+    CARD_EXPIRED(ErrorCategory.UNPROCESSABLE, "card_expired"),
+    CARD_INSTALLMENT_ALREADY_PAID(ErrorCategory.CONFLICT, "card_installment_already_paid"),
+    CARD_INSTALLMENT_MISMATCH(ErrorCategory.UNPROCESSABLE, "card_installment_mismatch"),
+    CARD_INSTALLMENT_NOT_SUPPORTED(ErrorCategory.UNPROCESSABLE, "card_installment_not_supported"),
+    CARD_INVALID_TYPE(ErrorCategory.UNPROCESSABLE, "card_invalid_type"),
 
-    // Loan business rules
-    LOAN_ALREADY_CLOSED(HttpStatus.CONFLICT, "loan_already_closed"),
-    LOAN_ACCOUNT_MISMATCH(HttpStatus.UNPROCESSABLE_ENTITY, "loan_account_mismatch"),
-    LOAN_INSTALLMENT_ALREADY_PAID(HttpStatus.CONFLICT, "loan_installment_already_paid"),
-    LOAN_INSTALLMENT_MISMATCH(HttpStatus.UNPROCESSABLE_ENTITY, "loan_installment_mismatch"),
+    LOAN_ALREADY_CLOSED(ErrorCategory.CONFLICT, "loan_already_closed"),
+    LOAN_ACCOUNT_MISMATCH(ErrorCategory.UNPROCESSABLE, "loan_account_mismatch"),
+    LOAN_INSTALLMENT_ALREADY_PAID(ErrorCategory.CONFLICT, "loan_installment_already_paid"),
+    LOAN_INSTALLMENT_MISMATCH(ErrorCategory.UNPROCESSABLE, "loan_installment_mismatch"),
 
-    // Request validation
-    INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST, "invalid_date_range"),
-    UNSUPPORTED_BANK(HttpStatus.BAD_REQUEST, "unsupported_bank"),
-    INVALID_CURRENCY(HttpStatus.BAD_REQUEST, "invalid_currency"),
-    INVALID_CARD_NUMBER(HttpStatus.BAD_REQUEST, "invalid_card_number"),
+    INVALID_DATE_RANGE(ErrorCategory.BAD_REQUEST, "invalid_date_range"),
+    UNSUPPORTED_BANK(ErrorCategory.BAD_REQUEST, "unsupported_bank"),
+    INVALID_CURRENCY(ErrorCategory.BAD_REQUEST, "invalid_currency"),
+    INVALID_CARD_NUMBER(ErrorCategory.BAD_REQUEST, "invalid_card_number"),
 
-    // Infrastructure
-    FINANCES_SERVICE_UNAVAILABLE(HttpStatus.INTERNAL_SERVER_ERROR, "finances_service_unavailable"),
-    INVESTMENTS_SERVICE_UNAVAILABLE(HttpStatus.INTERNAL_SERVER_ERROR, "investments_service_unavailable"),
-    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "internal_error");
+    FINANCES_SERVICE_UNAVAILABLE(ErrorCategory.INTERNAL, "finances_service_unavailable"),
+    INVESTMENTS_SERVICE_UNAVAILABLE(ErrorCategory.INTERNAL, "investments_service_unavailable"),
+    INTERNAL_ERROR(ErrorCategory.INTERNAL, "internal_error");
 
-    private final HttpStatus httpStatus;
+    private final ErrorCategory category;
     private final String code;
 
-    DomainError(HttpStatus httpStatus, String code) {
-        this.httpStatus = httpStatus;
+    DomainError(ErrorCategory category, String code) {
+        this.category = category;
         this.code = code;
     }
 
-    public HttpStatus getHttpStatus() { return httpStatus; }
+    public ErrorCategory getCategory() { return category; }
     public String getCode() { return code; }
 }
