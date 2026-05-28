@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.upcoming.impl;
 
-import com.financialapp.banks.application.upcoming.usecase.GetUpcomingPaymentsUseCase;
-import com.financialapp.banks.application.upcoming.usecase.UpcomingPayment;
+import com.financialapp.banks.domain.usecase.upcoming.GetUpcomingPaymentsUseCase;
+import com.financialapp.banks.domain.usecase.upcoming.UpcomingPayment;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.card.CardInstallment;
 import com.financialapp.banks.domain.model.loan.LoanInstallment;

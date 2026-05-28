@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.account;
 
-import com.financialapp.banks.application.account.command.AdjustBalanceCommand;
+import com.financialapp.banks.domain.usecase.account.command.AdjustBalanceCommand;
 import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;

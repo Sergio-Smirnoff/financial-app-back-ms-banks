@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.catalog.impl;
 
-import com.financialapp.banks.application.catalog.usecase.GetBankingCatalogUseCase;
+import com.financialapp.banks.domain.usecase.catalog.GetBankingCatalogUseCase;
 import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.card.CardBehavior;
 import com.financialapp.banks.domain.model.card.CardBrand;

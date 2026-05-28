@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.card.impl;
 
-import com.financialapp.banks.application.card.usecase.ListCardsUseCase;
+import com.financialapp.banks.domain.usecase.card.ListCardsUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.bank.BankName;

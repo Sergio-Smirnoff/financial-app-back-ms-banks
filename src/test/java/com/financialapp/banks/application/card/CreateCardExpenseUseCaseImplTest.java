@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.card;
 
-import com.financialapp.banks.application.card.command.CreateCardExpenseCommand;
+import com.financialapp.banks.domain.usecase.card.command.CreateCardExpenseCommand;
 import com.financialapp.banks.application.card.impl.CreateCardExpenseUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;

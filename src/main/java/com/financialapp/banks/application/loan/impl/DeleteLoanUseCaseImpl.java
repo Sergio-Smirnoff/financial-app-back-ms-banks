@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.loan.impl;
 
-import com.financialapp.banks.application.loan.command.DeleteLoanCommand;
-import com.financialapp.banks.application.loan.usecase.DeleteLoanUseCase;
+import com.financialapp.banks.domain.usecase.loan.command.DeleteLoanCommand;
+import com.financialapp.banks.domain.usecase.loan.DeleteLoanUseCase;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.repository.LoanRepository;
 import lombok.RequiredArgsConstructor;

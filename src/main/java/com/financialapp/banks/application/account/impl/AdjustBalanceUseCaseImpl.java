@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.account.impl;
 
-import com.financialapp.banks.application.account.command.AdjustBalanceCommand;
-import com.financialapp.banks.application.account.usecase.AdjustBalanceUseCase;
+import com.financialapp.banks.domain.usecase.account.command.AdjustBalanceCommand;
+import com.financialapp.banks.domain.usecase.account.AdjustBalanceUseCase;
 import com.financialapp.banks.domain.event.BalanceAdjustedEvent;
 import com.financialapp.banks.domain.event.LowBalanceEvent;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;

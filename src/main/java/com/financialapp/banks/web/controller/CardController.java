@@ -1,13 +1,13 @@
 package com.financialapp.banks.web.controller;
 
-import com.financialapp.banks.application.card.command.CreateCardCommand;
-import com.financialapp.banks.application.card.command.DeleteCardCommand;
-import com.financialapp.banks.application.card.command.UpdateCardCommand;
-import com.financialapp.banks.application.card.usecase.CreateCardUseCase;
-import com.financialapp.banks.application.card.usecase.DeleteCardUseCase;
-import com.financialapp.banks.application.card.usecase.GetCardUseCase;
-import com.financialapp.banks.application.card.usecase.ListCardsUseCase;
-import com.financialapp.banks.application.card.usecase.UpdateCardUseCase;
+import com.financialapp.banks.domain.usecase.card.command.CreateCardCommand;
+import com.financialapp.banks.domain.usecase.card.command.DeleteCardCommand;
+import com.financialapp.banks.domain.usecase.card.command.UpdateCardCommand;
+import com.financialapp.banks.domain.usecase.card.CreateCardUseCase;
+import com.financialapp.banks.domain.usecase.card.DeleteCardUseCase;
+import com.financialapp.banks.domain.usecase.card.GetCardUseCase;
+import com.financialapp.banks.domain.usecase.card.ListCardsUseCase;
+import com.financialapp.banks.domain.usecase.card.UpdateCardUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.domain.model.card.Card;

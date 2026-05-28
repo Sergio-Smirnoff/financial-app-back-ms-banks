@@ -1,9 +1,9 @@
 package com.financialapp.banks.application.loan.impl;
 
-import com.financialapp.banks.application.account.command.AdjustBalanceCommand;
+import com.financialapp.banks.domain.usecase.account.command.AdjustBalanceCommand;
 import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
-import com.financialapp.banks.application.loan.command.PayLoanInstallmentCommand;
-import com.financialapp.banks.application.loan.usecase.PayLoanInstallmentUseCase;
+import com.financialapp.banks.domain.usecase.loan.command.PayLoanInstallmentCommand;
+import com.financialapp.banks.domain.usecase.loan.PayLoanInstallmentUseCase;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.loan.LoanAlreadyClosedException;
 import com.financialapp.banks.domain.exception.loan.LoanInstallmentAlreadyPaidException;

@@ -1,7 +1,7 @@
 package com.financialapp.banks.web.controller;
 
-import com.financialapp.banks.application.loan.command.*;
-import com.financialapp.banks.application.loan.usecase.*;
+import com.financialapp.banks.domain.usecase.loan.command.*;
+import com.financialapp.banks.domain.usecase.loan.*;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.domain.model.loan.AmortizationType;

@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.account;
 
-import com.financialapp.banks.application.account.command.CreateAccountCommand;
+import com.financialapp.banks.domain.usecase.account.command.CreateAccountCommand;
 import com.financialapp.banks.application.account.impl.CreateAccountUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;

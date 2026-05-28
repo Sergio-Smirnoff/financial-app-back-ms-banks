@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.account.impl;
 
-import com.financialapp.banks.application.account.command.CreateAccountCommand;
-import com.financialapp.banks.application.account.usecase.CreateAccountUseCase;
+import com.financialapp.banks.domain.usecase.account.command.CreateAccountCommand;
+import com.financialapp.banks.domain.usecase.account.CreateAccountUseCase;
 import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;

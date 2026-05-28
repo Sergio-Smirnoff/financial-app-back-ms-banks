@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.account.impl;
 
-import com.financialapp.banks.application.account.command.FilterAccountCommand;
-import com.financialapp.banks.application.account.usecase.ListAccountsUseCase;
+import com.financialapp.banks.domain.usecase.account.command.FilterAccountCommand;
+import com.financialapp.banks.domain.usecase.account.ListAccountsUseCase;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.repository.AccountRepository;
 

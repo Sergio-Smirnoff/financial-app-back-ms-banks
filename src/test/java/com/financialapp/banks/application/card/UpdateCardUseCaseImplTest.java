@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.card;
 
-import com.financialapp.banks.application.card.command.UpdateCardCommand;
+import com.financialapp.banks.domain.usecase.card.command.UpdateCardCommand;
 import com.financialapp.banks.application.card.impl.UpdateCardUseCaseImpl;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;

@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.account.impl;
 
-import com.financialapp.banks.application.account.usecase.GetAccountTransactionsUseCase;
+import com.financialapp.banks.domain.usecase.account.GetAccountTransactionsUseCase;
 import com.financialapp.banks.domain.exception.FinancesServiceException;
 import com.financialapp.banks.domain.exception.InfrastructureException;
 import com.financialapp.banks.domain.port.FinancesPort;

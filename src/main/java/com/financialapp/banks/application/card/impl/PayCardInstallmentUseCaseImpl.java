@@ -1,9 +1,9 @@
 package com.financialapp.banks.application.card.impl;
 
-import com.financialapp.banks.application.account.command.AdjustBalanceCommand;
+import com.financialapp.banks.domain.usecase.account.command.AdjustBalanceCommand;
 import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
-import com.financialapp.banks.application.card.command.PayCardInstallmentCommand;
-import com.financialapp.banks.application.card.usecase.PayCardInstallmentUseCase;
+import com.financialapp.banks.domain.usecase.card.command.PayCardInstallmentCommand;
+import com.financialapp.banks.domain.usecase.card.PayCardInstallmentUseCase;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.card.CardInstallmentAlreadyPaidException;

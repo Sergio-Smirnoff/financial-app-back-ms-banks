@@ -1,7 +1,7 @@
 package com.financialapp.banks.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.financialapp.banks.application.account.usecase.GetAccountTransactionsUseCase;
+import com.financialapp.banks.domain.usecase.account.GetAccountTransactionsUseCase;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.port.FinancesPort.TransactionSummary;

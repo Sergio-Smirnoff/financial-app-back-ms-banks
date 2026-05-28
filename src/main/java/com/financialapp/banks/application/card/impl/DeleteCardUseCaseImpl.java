@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.card.impl;
 
-import com.financialapp.banks.application.card.command.DeleteCardCommand;
-import com.financialapp.banks.application.card.usecase.DeleteCardUseCase;
+import com.financialapp.banks.domain.usecase.card.command.DeleteCardCommand;
+import com.financialapp.banks.domain.usecase.card.DeleteCardUseCase;
 import com.financialapp.banks.domain.exception.DomainError;
 import com.financialapp.banks.domain.exception.ResourceConflictException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;

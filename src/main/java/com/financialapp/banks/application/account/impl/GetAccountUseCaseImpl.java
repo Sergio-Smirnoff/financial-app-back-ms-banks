@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.account.impl;
 
-import com.financialapp.banks.application.account.usecase.GetAccountUseCase;
+import com.financialapp.banks.domain.usecase.account.GetAccountUseCase;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.repository.AccountRepository;

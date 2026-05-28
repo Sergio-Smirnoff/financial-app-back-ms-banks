@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.account.impl;
 
-import com.financialapp.banks.application.account.command.UpdateAccountCommand;
-import com.financialapp.banks.application.account.usecase.UpdateAccountUseCase;
+import com.financialapp.banks.domain.usecase.account.command.UpdateAccountCommand;
+import com.financialapp.banks.domain.usecase.account.UpdateAccountUseCase;
 import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.account.AccountInvalidTypeException;

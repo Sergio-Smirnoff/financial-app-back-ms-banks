@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.loan;
 
 import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
-import com.financialapp.banks.application.loan.command.CreateLoanCommand;
+import com.financialapp.banks.domain.usecase.loan.command.CreateLoanCommand;
 import com.financialapp.banks.application.loan.impl.CreateLoanUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;

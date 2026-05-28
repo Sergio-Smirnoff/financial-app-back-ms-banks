@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.loan.impl;
 
-import com.financialapp.banks.application.loan.usecase.GetLoanInstallmentsUseCase;
+import com.financialapp.banks.domain.usecase.loan.GetLoanInstallmentsUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.loan.LoanId;

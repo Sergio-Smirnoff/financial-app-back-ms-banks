@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.card;
 
-import com.financialapp.banks.application.card.command.CreateCardCommand;
+import com.financialapp.banks.domain.usecase.card.command.CreateCardCommand;
 import com.financialapp.banks.application.card.impl.CreateCardUseCaseImpl;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;

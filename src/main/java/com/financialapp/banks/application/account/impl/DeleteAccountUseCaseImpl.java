@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.account.impl;
 
-import com.financialapp.banks.application.account.command.DeleteAccountCommand;
-import com.financialapp.banks.application.account.usecase.DeleteAccountUseCase;
+import com.financialapp.banks.domain.usecase.account.command.DeleteAccountCommand;
+import com.financialapp.banks.domain.usecase.account.DeleteAccountUseCase;
 import com.financialapp.banks.domain.exception.DomainError;
 import com.financialapp.banks.domain.exception.DomainException;
 import com.financialapp.banks.domain.exception.InfrastructureException;

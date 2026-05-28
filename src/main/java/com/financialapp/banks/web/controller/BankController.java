@@ -1,10 +1,10 @@
 package com.financialapp.banks.web.controller;
 
-import com.financialapp.banks.application.bank.usecase.ListAvailableBanksUseCase;
-import com.financialapp.banks.application.bank.usecase.ListBanksUseCase;
-import com.financialapp.banks.application.bank.usecase.GetBankUseCase;
-import com.financialapp.banks.application.account.command.FilterAccountCommand;
-import com.financialapp.banks.application.account.usecase.ListAccountsUseCase;
+import com.financialapp.banks.domain.usecase.bank.ListAvailableBanksUseCase;
+import com.financialapp.banks.domain.usecase.bank.ListBanksUseCase;
+import com.financialapp.banks.domain.usecase.bank.GetBankUseCase;
+import com.financialapp.banks.domain.usecase.account.command.FilterAccountCommand;
+import com.financialapp.banks.domain.usecase.account.ListAccountsUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.Bank;
 import com.financialapp.banks.domain.model.bank.BankName;

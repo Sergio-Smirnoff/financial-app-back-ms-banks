@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.bank.impl;
 
-import com.financialapp.banks.application.bank.usecase.BankWithAccounts;
-import com.financialapp.banks.application.bank.usecase.ListBanksUseCase;
+import com.financialapp.banks.domain.usecase.bank.BankWithAccounts;
+import com.financialapp.banks.domain.usecase.bank.ListBanksUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.bank.Bank;

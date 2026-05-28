@@ -1,7 +1,7 @@
 package com.financialapp.banks.web.controller;
 
-import com.financialapp.banks.application.card.command.*;
-import com.financialapp.banks.application.card.usecase.*;
+import com.financialapp.banks.domain.usecase.card.command.*;
+import com.financialapp.banks.domain.usecase.card.*;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.card.CardInstallmentId;

@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.card.impl;
 
-import com.financialapp.banks.application.card.command.CreateCardExpenseCommand;
-import com.financialapp.banks.application.card.usecase.CreateCardExpenseUseCase;
+import com.financialapp.banks.domain.usecase.card.command.CreateCardExpenseCommand;
+import com.financialapp.banks.domain.usecase.card.CreateCardExpenseUseCase;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.card.CardInstallmentNotSupportedException;

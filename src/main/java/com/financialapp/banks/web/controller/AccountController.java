@@ -1,7 +1,7 @@
 package com.financialapp.banks.web.controller;
 
-import com.financialapp.banks.application.account.command.*;
-import com.financialapp.banks.application.account.usecase.*;
+import com.financialapp.banks.domain.usecase.account.command.*;
+import com.financialapp.banks.domain.usecase.account.*;
 import com.financialapp.banks.domain.exception.account.InvalidDateRangeException;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;

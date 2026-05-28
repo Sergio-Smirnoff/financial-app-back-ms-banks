@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.bank.impl;
 
-import com.financialapp.banks.application.bank.usecase.ListAvailableBanksUseCase;
+import com.financialapp.banks.domain.usecase.bank.ListAvailableBanksUseCase;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.web.dto.response.AvailableBankResponse;
 import org.springframework.stereotype.Service;

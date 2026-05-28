@@ -1,7 +1,7 @@
 package com.financialapp.banks.infrastructure.messaging.listener;
 
-import com.financialapp.banks.application.account.command.AdjustBalanceCommand;
-import com.financialapp.banks.application.account.usecase.AdjustBalanceUseCase;
+import com.financialapp.banks.domain.usecase.account.command.AdjustBalanceCommand;
+import com.financialapp.banks.domain.usecase.account.AdjustBalanceUseCase;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.infrastructure.messaging.payload.TransactionCreatedEvent;
 import com.financialapp.banks.infrastructure.persistence.entity.ProcessedEventJpaEntity;

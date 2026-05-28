@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.loan.impl;
 
-import com.financialapp.banks.application.loan.usecase.ListLoansUseCase;
+import com.financialapp.banks.domain.usecase.loan.ListLoansUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.domain.model.loan.Loan;

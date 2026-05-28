@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.card.impl;
 
-import com.financialapp.banks.application.card.command.UpdateCardCommand;
-import com.financialapp.banks.application.card.usecase.UpdateCardUseCase;
+import com.financialapp.banks.domain.usecase.card.command.UpdateCardCommand;
+import com.financialapp.banks.domain.usecase.card.UpdateCardUseCase;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.card.CardExpiredException;
 import com.financialapp.banks.domain.exception.card.CardInvalidTypeException;

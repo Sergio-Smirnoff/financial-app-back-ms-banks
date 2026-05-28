@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.account;
 
-import com.financialapp.banks.application.account.command.DeleteAccountCommand;
+import com.financialapp.banks.domain.usecase.account.command.DeleteAccountCommand;
 import com.financialapp.banks.application.account.impl.DeleteAccountUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
