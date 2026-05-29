@@ -1,9 +1,9 @@
 package com.financialapp.banks.domain.usecase.bank;
 
-import com.financialapp.banks.web.dto.response.AvailableBankResponse;
+import com.financialapp.banks.domain.model.bank.BankName;
 
 import java.util.List;
 
 public interface ListAvailableBanksUseCase {
-    List<AvailableBankResponse> execute();
+    List<BankName> execute();
 }

@@ -49,7 +49,10 @@ public class BankController {
     @GetMapping("/available")
     @Operation(summary = "List all available bank names (catalog)")
     public ResponseEntity<ApiResponse<List<AvailableBankResponse>>> available() {
-        return ResponseEntity.ok(ApiResponse.ok(listAvailableBanksUseCase.execute()));
+        return ResponseEntity.ok(ApiResponse.ok(
+                listAvailableBanksUseCase.execute().stream()
+                        .map(bankMapper::toAvailableBank)
+                        .toList()));
     }
 
     @GetMapping("/{name}")

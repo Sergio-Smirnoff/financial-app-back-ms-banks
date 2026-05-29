@@ -1,7 +1,9 @@
 package com.financialapp.banks.web.mapper;
 
 import com.financialapp.banks.domain.model.bank.Bank;
+import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.web.dto.response.AccountResponse;
+import com.financialapp.banks.web.dto.response.AvailableBankResponse;
 import com.financialapp.banks.web.dto.response.BankResponse;
 import org.springframework.stereotype.Component;
 
@@ -27,5 +29,9 @@ public class BankWebMapper {
                 .totalBalances(totalBalances)
                 .accountsCount(accounts.size())
                 .build();
+    }
+
+    public AvailableBankResponse toAvailableBank(BankName bank) {
+        return new AvailableBankResponse(bank.name(), bank.getDisplayName(), bank.getLogoUrl());
     }
 }
