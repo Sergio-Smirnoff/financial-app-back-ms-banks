@@ -23,9 +23,9 @@ public class BankWebMapper {
                 .collect(Collectors.groupingBy(
                         AccountResponse::currency,
                         Collectors.reducing(BigDecimal.ZERO,
-                                a -> new BigDecimal(a.balance()), BigDecimal::add)));
+                                account -> new BigDecimal(account.balance()), BigDecimal::add)));
         Map<String, String> totalBalances = summed.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toPlainString()));
+                .collect(Collectors.toMap(Map.Entry::getKey, currencyTotal -> currencyTotal.getValue().toPlainString()));
         return BankResponse.builder()
                 .name(bank.name().name())
                 .logoUrl(bank.logo() != null ? bank.logo().url() : null)
@@ -35,12 +35,12 @@ public class BankWebMapper {
                 .build();
     }
 
-    public AvailableBankResponse toAvailableBank(BankName bank) {
-        return new AvailableBankResponse(bank.name(), bank.getDisplayName(), bank.getLogoUrl());
+    public AvailableBankResponse toAvailableBank(BankName bankName) {
+        return new AvailableBankResponse(bankName.name(), bankName.getDisplayName(), bankName.getLogoUrl());
     }
 
-    public BankingCatalogResponse toCatalogResponse(BankingCatalog c) {
+    public BankingCatalogResponse toCatalogResponse(BankingCatalog catalog) {
         return new BankingCatalogResponse(
-                c.accountTypes(), c.cardTypes(), c.cardBrands(), c.cardBehaviors());
+                catalog.accountTypes(), catalog.cardTypes(), catalog.cardBrands(), catalog.cardBehaviors());
     }
 }

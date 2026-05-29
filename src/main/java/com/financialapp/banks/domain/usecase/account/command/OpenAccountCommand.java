@@ -5,7 +5,7 @@ import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.domain.common.model.Money;
 
-public record CreateAccountCommand(
+public record OpenAccountCommand(
     UserId userId,
     BankName bankName,
     String name,

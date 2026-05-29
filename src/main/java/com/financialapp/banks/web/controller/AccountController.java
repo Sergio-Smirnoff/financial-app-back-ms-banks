@@ -33,9 +33,9 @@ public class AccountController {
 
     private final ListAccountsUseCase listAccountsUseCase;
     private final GetAccountUseCase getAccountUseCase;
-    private final CreateAccountUseCase createAccountUseCase;
+    private final OpenAccountUseCase openAccountUseCase;
     private final UpdateAccountUseCase updateAccountUseCase;
-    private final DeleteAccountUseCase deleteAccountUseCase;
+    private final CloseAccountUseCase closeAccountUseCase;
     private final AdjustBalanceUseCase adjustBalanceUseCase;
     private final GetAccountTransactionsUseCase getTransactionsUseCase;
     private final AccountWebMapper accountMapper;
@@ -72,7 +72,7 @@ public class AccountController {
             @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody AccountRequest request) {
         Money initialBalance = Money.of(BigDecimal.ZERO, request.currency());
-        var result = createAccountUseCase.execute(new CreateAccountCommand(
+        var result = openAccountUseCase.execute(new OpenAccountCommand(
                 new UserId(userId),
                 BankName.fromString(request.bankName()),
                 request.name(),
@@ -103,7 +103,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse<Void>> delete(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cbu) {
-        deleteAccountUseCase.execute(new DeleteAccountCommand(cbu));
+        closeAccountUseCase.execute(new CloseAccountCommand(cbu));
         return ResponseEntity.ok(ApiResponse.ok("Account deleted", null));
     }
 
@@ -124,10 +124,10 @@ public class AccountController {
                 : all ? getTransactionsUseCase.getAll(cbu) : getTransactionsUseCase.getRecent(cbu, 5);
 
         List<AccountTransactionResponse> response = transactions.stream()
-                .map(t -> new AccountTransactionResponse(
-                        t.transactionId(), t.accountCbu(),
-                        t.amount().amount().toPlainString(), t.amount().currency().getCurrencyCode(),
-                        t.description(), t.category(), t.subcategory(), t.date()))
+                .map(transaction -> new AccountTransactionResponse(
+                        transaction.transactionId(), transaction.accountCbu(),
+                        transaction.amount().amount().toPlainString(), transaction.amount().currency().getCurrencyCode(),
+                        transaction.description(), transaction.category(), transaction.subcategory(), transaction.date()))
                 .toList();
 
         return ResponseEntity.ok(ApiResponse.ok(response));

@@ -30,10 +30,10 @@ public class ListBanksUseCaseImpl implements ListBanksUseCase {
                 .collect(Collectors.groupingBy(Account::bankName));
 
         return byBank.entrySet().stream()
-                .map(e -> new BankWithAccounts(
-                        new Bank(e.getKey(), new Logo(e.getKey().getLogoUrl())),
-                        e.getValue()))
-                .sorted(Comparator.comparing(b -> b.bank().name().getDisplayName()))
+                .map(bankEntry -> new BankWithAccounts(
+                        new Bank(bankEntry.getKey(), new Logo(bankEntry.getKey().getLogoUrl())),
+                        bankEntry.getValue()))
+                .sorted(Comparator.comparing(bankWithAccounts -> bankWithAccounts.bank().name().getDisplayName()))
                 .toList();
     }
 }

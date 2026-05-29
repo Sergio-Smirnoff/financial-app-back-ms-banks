@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.card.impl;
 
-import com.financialapp.banks.domain.usecase.card.command.DeleteCardCommand;
-import com.financialapp.banks.domain.usecase.card.DeleteCardUseCase;
+import com.financialapp.banks.domain.usecase.card.command.CancelCardCommand;
+import com.financialapp.banks.domain.usecase.card.CancelCardUseCase;
 import com.financialapp.banks.domain.exception.DomainError;
 import com.financialapp.banks.domain.exception.ResourceConflictException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
@@ -14,14 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class DeleteCardUseCaseImpl implements DeleteCardUseCase {
+public class CancelCardUseCaseImpl implements CancelCardUseCase {
 
     private final CardRepository cardRepository;
     private final CardInstallmentRepository installmentRepository;
 
     @Override
     @Transactional
-    public void execute(DeleteCardCommand command) {
+    public void execute(CancelCardCommand command) {
         cardRepository.findByCardNumberAndUserId(command.cardNumber(), command.userId())
                 .orElseThrow(() -> new ResourceNotFoundException("Card", command.cardNumber()));
 

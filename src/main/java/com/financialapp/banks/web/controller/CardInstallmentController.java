@@ -30,7 +30,7 @@ import java.util.List;
 public class CardInstallmentController {
 
     private final ListCardInstallmentsUseCase listCardInstallmentsUseCase;
-    private final CreateCardExpenseUseCase createCardExpenseUseCase;
+    private final RegisterCardExpenseUseCase registerCardExpenseUseCase;
     private final PayCardInstallmentUseCase payCardInstallmentUseCase;
     private final ImportCardExpensesUseCase importCardExpensesUseCase;
     private final CheckDuplicateExpensesUseCase checkDuplicateExpensesUseCase;
@@ -54,7 +54,7 @@ public class CardInstallmentController {
             @PathVariable String cardNumber,
             @Valid @RequestBody CardExpenseCreateRequest request) {
         Money amount = Money.of(new BigDecimal(request.totalAmount()), request.currency());
-        List<CardInstallmentResponse> result = createCardExpenseUseCase.execute(new CreateCardExpenseCommand(
+        List<CardInstallmentResponse> result = registerCardExpenseUseCase.execute(new RegisterCardExpenseCommand(
                 cardNumber,
                 new UserId(userId),
                 request.description(),
@@ -90,10 +90,10 @@ public class CardInstallmentController {
             @RequestHeader("X-User-Id") Long userId,
             @RequestBody CardExpenseImportRequest request) {
         List<ImportCardExpensesCommand.ImportedExpense> expenses = request.expenses().stream()
-                .map(e -> new ImportCardExpensesCommand.ImportedExpense(
-                        e.description(),
-                        new Money(new BigDecimal(e.amount()), Currency.getInstance(e.currency())),
-                        e.date()))
+                .map(expense -> new ImportCardExpensesCommand.ImportedExpense(
+                        expense.description(),
+                        new Money(new BigDecimal(expense.amount()), Currency.getInstance(expense.currency())),
+                        expense.date()))
                 .toList();
         var result = importCardExpensesUseCase.execute(new ImportCardExpensesCommand(
                 cardNumber,
@@ -113,14 +113,14 @@ public class CardInstallmentController {
             @PathVariable String cardNumber,
             @RequestBody List<CardExpenseCreateRequest> expenses) {
         UserId user = new UserId(userId);
-        List<CreateCardExpenseCommand> commands = expenses.stream()
-                .map(e -> new CreateCardExpenseCommand(
+        List<RegisterCardExpenseCommand> commands = expenses.stream()
+                .map(expense -> new RegisterCardExpenseCommand(
                         cardNumber,
                         user,
-                        e.description(),
-                        new Money(new BigDecimal(e.totalAmount()), Currency.getInstance(e.currency())),
-                        e.totalInstallments(),
-                        e.firstDueDate()
+                        expense.description(),
+                        new Money(new BigDecimal(expense.totalAmount()), Currency.getInstance(expense.currency())),
+                        expense.totalInstallments(),
+                        expense.firstDueDate()
                 )).toList();
         return ResponseEntity.ok(ApiResponse.ok(
                 checkDuplicateExpensesUseCase.execute(cardNumber, user, commands)));

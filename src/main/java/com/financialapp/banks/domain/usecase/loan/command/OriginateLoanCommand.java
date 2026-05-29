@@ -7,7 +7,7 @@ import com.financialapp.banks.domain.model.loan.AmortizationType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record CreateLoanCommand(
+public record OriginateLoanCommand(
     UserId userId,
     BankName bankName,
     String destinationAccountCbu,

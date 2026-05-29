@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.card.impl;
 
-import com.financialapp.banks.domain.usecase.card.command.CreateCardCommand;
-import com.financialapp.banks.domain.usecase.card.CreateCardUseCase;
+import com.financialapp.banks.domain.usecase.card.command.IssueCardCommand;
+import com.financialapp.banks.domain.usecase.card.IssueCardUseCase;
 import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.card.Card;
@@ -17,14 +17,14 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class CreateCardUseCaseImpl implements CreateCardUseCase {
+public class IssueCardUseCaseImpl implements IssueCardUseCase {
 
     private final CardRepository cardRepository;
     private final BankRepository bankRepository;
 
     @Override
     @Transactional
-    public Card execute(CreateCardCommand cmd) {
+    public Card execute(IssueCardCommand cmd) {
         bankRepository.findByName(cmd.bankName())
                 .orElseThrow(() -> new ResourceNotFoundException("Bank", cmd.bankName().getDisplayName()));
 

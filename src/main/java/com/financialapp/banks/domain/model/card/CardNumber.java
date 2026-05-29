@@ -6,10 +6,10 @@ import java.util.regex.Pattern;
 
 public record CardNumber(String value) {
 
-    private static final Pattern PATTERN = Pattern.compile("^\\d{16}$");
+    private static final Pattern CARD_NUMBER_FORMAT_VALIDATOR = Pattern.compile("^\\d{16}$");
 
     public CardNumber {
-        if (value == null || !PATTERN.matcher(value).matches()) {
+        if (value == null || !CARD_NUMBER_FORMAT_VALIDATOR.matcher(value).matches()) {
             throw new InvalidCardNumberException(value);
         }
     }

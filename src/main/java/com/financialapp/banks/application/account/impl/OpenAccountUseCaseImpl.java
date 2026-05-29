@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.account.impl;
 
-import com.financialapp.banks.domain.usecase.account.command.CreateAccountCommand;
-import com.financialapp.banks.domain.usecase.account.CreateAccountUseCase;
+import com.financialapp.banks.domain.usecase.account.command.OpenAccountCommand;
+import com.financialapp.banks.domain.usecase.account.OpenAccountUseCase;
 import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
@@ -17,14 +17,14 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class CreateAccountUseCaseImpl implements CreateAccountUseCase {
+public class OpenAccountUseCaseImpl implements OpenAccountUseCase {
 
     private final AccountRepository accountRepository;
     private final BankRepository bankRepository;
 
     @Override
     @Transactional
-    public Account execute(CreateAccountCommand cmd) {
+    public Account execute(OpenAccountCommand cmd) {
         bankRepository.findByName(cmd.bankName())
                 .orElseThrow(() -> new ResourceNotFoundException("Bank", cmd.bankName().getDisplayName()));
 

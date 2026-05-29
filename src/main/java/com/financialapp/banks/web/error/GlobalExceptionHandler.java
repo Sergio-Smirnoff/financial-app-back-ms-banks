@@ -80,7 +80,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
         String cause = ex.getMostSpecificCause().getMessage();
         String constraint = CONSTRAINT_MESSAGES.keySet().stream()
-            .filter(k -> cause != null && cause.contains(k))
+            .filter(constraintKey -> cause != null && cause.contains(constraintKey))
             .findFirst().orElse("unknown_constraint");
         String message = CONSTRAINT_MESSAGES.getOrDefault(constraint, "Data conflict");
         ErrorResponse body = ErrorResponse.builder()

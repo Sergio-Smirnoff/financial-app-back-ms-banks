@@ -2,8 +2,8 @@ package com.financialapp.banks.application.loan.impl;
 
 import com.financialapp.banks.domain.usecase.account.command.AdjustBalanceCommand;
 import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
-import com.financialapp.banks.domain.usecase.loan.command.CreateLoanCommand;
-import com.financialapp.banks.domain.usecase.loan.CreateLoanUseCase;
+import com.financialapp.banks.domain.usecase.loan.command.OriginateLoanCommand;
+import com.financialapp.banks.domain.usecase.loan.OriginateLoanUseCase;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.loan.LoanAccountMismatchException;
@@ -32,7 +32,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CreateLoanUseCaseImpl implements CreateLoanUseCase {
+public class OriginateLoanUseCaseImpl implements OriginateLoanUseCase {
 
     private final LoanRepository loanRepository;
     private final BankRepository bankRepository;
@@ -43,7 +43,7 @@ public class CreateLoanUseCaseImpl implements CreateLoanUseCase {
 
     @Override
     @Transactional
-    public Loan execute(CreateLoanCommand cmd) {
+    public Loan execute(OriginateLoanCommand cmd) {
         bankRepository.findByName(cmd.bankName())
                 .orElseThrow(() -> new ResourceNotFoundException("Bank", cmd.bankName().getDisplayName()));
 

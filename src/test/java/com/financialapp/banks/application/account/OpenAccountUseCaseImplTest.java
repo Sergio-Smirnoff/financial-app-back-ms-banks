@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.account;
 
-import com.financialapp.banks.domain.usecase.account.command.CreateAccountCommand;
-import com.financialapp.banks.application.account.impl.CreateAccountUseCaseImpl;
+import com.financialapp.banks.domain.usecase.account.command.OpenAccountCommand;
+import com.financialapp.banks.application.account.impl.OpenAccountUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
@@ -28,19 +28,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CreateAccountUseCaseImplTest {
+class OpenAccountUseCaseImplTest {
 
     @Mock BankRepository bankRepository;
     @Mock AccountRepository accountRepository;
-    CreateAccountUseCaseImpl useCase;
+    OpenAccountUseCaseImpl useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new CreateAccountUseCaseImpl(accountRepository, bankRepository);
+        useCase = new OpenAccountUseCaseImpl(accountRepository, bankRepository);
     }
 
-    private CreateAccountCommand command(AccountType type) {
-        return new CreateAccountCommand(
+    private OpenAccountCommand command(AccountType type) {
+        return new OpenAccountCommand(
                 new UserId(1L), BankName.GALICIA, "Savings", type,
                 new Money(new BigDecimal("100.00"), Currency.getInstance("USD")),
                 true, "1234567890123456789012", "alias");

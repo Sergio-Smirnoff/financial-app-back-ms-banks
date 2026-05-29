@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.account;
 
-import com.financialapp.banks.domain.usecase.account.command.DeleteAccountCommand;
-import com.financialapp.banks.application.account.impl.DeleteAccountUseCaseImpl;
+import com.financialapp.banks.domain.usecase.account.command.CloseAccountCommand;
+import com.financialapp.banks.application.account.impl.CloseAccountUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.InfrastructureException;
@@ -26,18 +26,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DeleteAccountUseCaseImplTest {
+class CloseAccountUseCaseImplTest {
 
     @Mock AccountRepository accountRepository;
     @Mock InvestmentsPort investmentsPort;
-    DeleteAccountUseCaseImpl useCase;
+    CloseAccountUseCaseImpl useCase;
 
     private static final String CBU = "0000003100012345678901";
     private static final BankName BANK_NAME = BankName.GALICIA;
 
     @BeforeEach
     void setUp() {
-        useCase = new DeleteAccountUseCaseImpl(accountRepository, investmentsPort);
+        useCase = new CloseAccountUseCaseImpl(accountRepository, investmentsPort);
     }
 
     private InvestmentAccount investmentAccount() {
@@ -55,7 +55,7 @@ class DeleteAccountUseCaseImplTest {
         when(investmentsPort.countHoldings(CBU))
                 .thenThrow(new InfrastructureException("ms-investments: timeout"));
 
-        assertThatThrownBy(() -> useCase.execute(new DeleteAccountCommand(CBU)))
+        assertThatThrownBy(() -> useCase.execute(new CloseAccountCommand(CBU)))
                 .isInstanceOf(InvestmentsServiceException.class)
                 .isNotInstanceOf(InfrastructureException.class);
     }
@@ -66,7 +66,7 @@ class DeleteAccountUseCaseImplTest {
                 .thenReturn(Optional.of(investmentAccount()));
         when(investmentsPort.countHoldings(CBU)).thenReturn(0);
 
-        useCase.execute(new DeleteAccountCommand(CBU));
+        useCase.execute(new CloseAccountCommand(CBU));
 
         verify(accountRepository).delete(CBU);
     }

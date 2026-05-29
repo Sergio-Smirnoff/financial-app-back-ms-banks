@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.card.impl;
 
-import com.financialapp.banks.domain.usecase.card.command.CreateCardExpenseCommand;
+import com.financialapp.banks.domain.usecase.card.command.RegisterCardExpenseCommand;
 import com.financialapp.banks.domain.usecase.card.command.ImportCardExpensesCommand;
 import com.financialapp.banks.domain.usecase.card.command.PayCardInstallmentCommand;
 import com.financialapp.banks.domain.usecase.card.BatchImportResult;
@@ -21,7 +21,7 @@ import java.util.List;
 public class ImportCardExpensesUseCaseImpl implements ImportCardExpensesUseCase {
 
     private final CardRepository cardRepository;
-    private final CreateCardExpenseUseCaseImpl createExpense;
+    private final RegisterCardExpenseUseCaseImpl createExpense;
     private final PayCardInstallmentUseCaseImpl payInstallment;
 
     @Override
@@ -40,7 +40,7 @@ public class ImportCardExpensesUseCaseImpl implements ImportCardExpensesUseCase 
                 continue;
             }
             try {
-                List<CardInstallment> created = createExpense.execute(new CreateCardExpenseCommand(
+                List<CardInstallment> created = createExpense.execute(new RegisterCardExpenseCommand(
                         cmd.cardNumber(), cmd.userId(), expense.description(), expense.amount(), 1, expense.date()));
                 payInstallment.execute(new PayCardInstallmentCommand(
                         cmd.cardNumber(), created.get(0).id(), cmd.userId(), accountCbu, expense.date()));

@@ -8,7 +8,7 @@ import com.financialapp.banks.domain.model.card.CardType;
 
 import java.time.YearMonth;
 
-public record CreateCardCommand(
+public record IssueCardCommand(
     UserId userId,
     BankName bankName,
     CardBrand brand,

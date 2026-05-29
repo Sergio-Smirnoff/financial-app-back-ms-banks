@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.account.impl;
 
-import com.financialapp.banks.domain.usecase.account.command.DeleteAccountCommand;
-import com.financialapp.banks.domain.usecase.account.DeleteAccountUseCase;
+import com.financialapp.banks.domain.usecase.account.command.CloseAccountCommand;
+import com.financialapp.banks.domain.usecase.account.CloseAccountUseCase;
 import com.financialapp.banks.domain.exception.DomainError;
 import com.financialapp.banks.domain.exception.DomainException;
 import com.financialapp.banks.domain.exception.InfrastructureException;
@@ -22,14 +22,14 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class DeleteAccountUseCaseImpl implements DeleteAccountUseCase {
+public class CloseAccountUseCaseImpl implements CloseAccountUseCase {
 
     private final AccountRepository accountRepository;
     private final InvestmentsPort investmentsPort;
 
     @Override
     @Transactional
-    public void execute(DeleteAccountCommand command) {
+    public void execute(CloseAccountCommand command) {
         Account account = accountRepository.findByCbu(command.cbu())
                 .orElseThrow(() -> new ResourceNotFoundException("Account", command.cbu()));
 

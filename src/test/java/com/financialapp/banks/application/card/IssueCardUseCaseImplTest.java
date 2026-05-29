@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.card;
 
-import com.financialapp.banks.domain.usecase.card.command.CreateCardCommand;
-import com.financialapp.banks.application.card.impl.CreateCardUseCaseImpl;
+import com.financialapp.banks.domain.usecase.card.command.IssueCardCommand;
+import com.financialapp.banks.application.card.impl.IssueCardUseCaseImpl;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
@@ -31,19 +31,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CreateCardUseCaseImplTest {
+class IssueCardUseCaseImplTest {
 
     @Mock CardRepository cardRepository;
     @Mock BankRepository bankRepository;
-    CreateCardUseCaseImpl useCase;
+    IssueCardUseCaseImpl useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new CreateCardUseCaseImpl(cardRepository, bankRepository);
+        useCase = new IssueCardUseCaseImpl(cardRepository, bankRepository);
     }
 
-    private CreateCardCommand command(CardBehavior behavior) {
-        return new CreateCardCommand(new UserId(1L), BankName.GALICIA,
+    private IssueCardCommand command(CardBehavior behavior) {
+        return new IssueCardCommand(new UserId(1L), BankName.GALICIA,
                 CardBrand.VISA, CardType.PLATINUM, behavior,
                 "1234567890123456", YearMonth.now().plusYears(2), 20, 10);
     }

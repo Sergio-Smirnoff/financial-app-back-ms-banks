@@ -31,10 +31,10 @@ public class UpcomingPaymentController {
         List<UpcomingPaymentResponse> result = getUpcomingPaymentsUseCase
                 .execute(new UserId(userId), from, to)
                 .stream()
-                .map(p -> new UpcomingPaymentResponse(
-                        p.id(), p.type(), p.description(),
-                        p.amount().amount().toPlainString(), p.amount().currency().getCurrencyCode(),
-                        p.dueDate(), p.installmentNumber(), p.totalInstallments(), p.paid()))
+                .map(payment -> new UpcomingPaymentResponse(
+                        payment.id(), payment.type(), payment.description(),
+                        payment.amount().amount().toPlainString(), payment.amount().currency().getCurrencyCode(),
+                        payment.dueDate(), payment.installmentNumber(), payment.totalInstallments(), payment.paid()))
                 .toList();
         return ResponseEntity.ok(ApiResponse.ok(result));
     }

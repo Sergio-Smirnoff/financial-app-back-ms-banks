@@ -1,10 +1,10 @@
 package com.financialapp.banks.web.controller;
 
-import com.financialapp.banks.domain.usecase.card.command.CreateCardCommand;
-import com.financialapp.banks.domain.usecase.card.command.DeleteCardCommand;
+import com.financialapp.banks.domain.usecase.card.command.IssueCardCommand;
+import com.financialapp.banks.domain.usecase.card.command.CancelCardCommand;
 import com.financialapp.banks.domain.usecase.card.command.UpdateCardCommand;
-import com.financialapp.banks.domain.usecase.card.CreateCardUseCase;
-import com.financialapp.banks.domain.usecase.card.DeleteCardUseCase;
+import com.financialapp.banks.domain.usecase.card.IssueCardUseCase;
+import com.financialapp.banks.domain.usecase.card.CancelCardUseCase;
 import com.financialapp.banks.domain.usecase.card.GetCardUseCase;
 import com.financialapp.banks.domain.usecase.card.ListCardsUseCase;
 import com.financialapp.banks.domain.usecase.card.UpdateCardUseCase;
@@ -40,8 +40,8 @@ public class CardController {
 
     private final ListCardsUseCase listCardsUseCase;
     private final GetCardUseCase getCardUseCase;
-    private final CreateCardUseCase createCardUseCase;
-    private final DeleteCardUseCase deleteCardUseCase;
+    private final IssueCardUseCase issueCardUseCase;
+    private final CancelCardUseCase cancelCardUseCase;
     private final UpdateCardUseCase updateCardUseCase;
     private final CardWebMapper cardMapper;
 
@@ -70,7 +70,7 @@ public class CardController {
     public ResponseEntity<ApiResponse<CardResponse>> create(
             @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody CardRequest request) {
-        var result = createCardUseCase.execute(new CreateCardCommand(
+        var result = issueCardUseCase.execute(new IssueCardCommand(
                 new UserId(userId),
                 BankName.fromString(request.bankName()),
                 request.brand(),
@@ -106,7 +106,7 @@ public class CardController {
     public ResponseEntity<ApiResponse<Void>> delete(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cardNumber) {
-        deleteCardUseCase.execute(new DeleteCardCommand(cardNumber, new UserId(userId)));
+        cancelCardUseCase.execute(new CancelCardCommand(cardNumber, new UserId(userId)));
         return ResponseEntity.ok(ApiResponse.ok("Card deleted", null));
     }
 }

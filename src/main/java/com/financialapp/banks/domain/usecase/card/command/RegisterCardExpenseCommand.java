@@ -5,7 +5,7 @@ import com.financialapp.banks.domain.common.model.UserId;
 
 import java.time.LocalDate;
 
-public record CreateCardExpenseCommand(
+public record RegisterCardExpenseCommand(
     String cardNumber,
     UserId userId,
     String description,

@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.card.impl;
 
-import com.financialapp.banks.domain.usecase.card.command.CreateCardExpenseCommand;
-import com.financialapp.banks.domain.usecase.card.CreateCardExpenseUseCase;
+import com.financialapp.banks.domain.usecase.card.command.RegisterCardExpenseCommand;
+import com.financialapp.banks.domain.usecase.card.RegisterCardExpenseUseCase;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.card.CardInstallment;
 import com.financialapp.banks.domain.repository.CardInstallmentRepository;
@@ -14,14 +14,14 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CreateCardExpenseUseCaseImpl implements CreateCardExpenseUseCase {
+public class RegisterCardExpenseUseCaseImpl implements RegisterCardExpenseUseCase {
 
     private final CardInstallmentRepository installmentRepository;
     private final CardRepository cardRepository;
 
     @Override
     @Transactional
-    public List<CardInstallment> execute(CreateCardExpenseCommand cmd) {
+    public List<CardInstallment> execute(RegisterCardExpenseCommand cmd) {
         var card = cardRepository.findByCardNumberAndUserId(cmd.cardNumber(), cmd.userId())
                 .orElseThrow(() -> new ResourceNotFoundException("Card", cmd.cardNumber()));
 

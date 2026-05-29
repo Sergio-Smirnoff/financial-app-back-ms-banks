@@ -39,14 +39,14 @@ public class FinancesClientAdapter implements FinancesPort {
             var response = client.getTransactions(accountCbu, limit, from, to);
             if (response == null || response.getData() == null) return List.of();
             return response.getData().stream()
-                    .map(d -> new TransactionSummary(
-                            d.transactionId(),
-                            d.accountCbu(),
-                            new Money(d.amount(), Currency.getInstance(d.currency())),
-                            d.description(),
-                            d.category(),
-                            d.subcategory(),
-                            d.date()))
+                    .map(dto -> new TransactionSummary(
+                            dto.transactionId(),
+                            dto.accountCbu(),
+                            new Money(dto.amount(), Currency.getInstance(dto.currency())),
+                            dto.description(),
+                            dto.category(),
+                            dto.subcategory(),
+                            dto.date()))
                     .toList();
         } catch (Exception e) {
             log.error("ms-finances call failed [fetchTransactions] for accountCbu={}: {}", accountCbu, e.getMessage(), e);

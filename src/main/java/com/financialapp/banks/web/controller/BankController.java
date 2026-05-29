@@ -39,9 +39,9 @@ public class BankController {
     @Operation(summary = "List the user's banks (those where they hold accounts)")
     public ResponseEntity<ApiResponse<List<BankResponse>>> list(@RequestHeader("X-User-Id") Long userId) {
         List<BankResponse> responses = listBanksUseCase.execute(new UserId(userId)).stream()
-                .map(b -> bankMapper.toResponse(
-                        b.bank(),
-                        b.accounts().stream().map(accountMapper::toResponse).toList()))
+                .map(bankWithAccounts -> bankMapper.toResponse(
+                        bankWithAccounts.bank(),
+                        bankWithAccounts.accounts().stream().map(accountMapper::toResponse).toList()))
                 .toList();
         return ResponseEntity.ok(ApiResponse.ok(responses));
     }

@@ -32,8 +32,8 @@ import java.util.List;
 public class LoanController {
 
     private final ListLoansUseCase listLoansUseCase;
-    private final CreateLoanUseCase createLoanUseCase;
-    private final DeleteLoanUseCase deleteLoanUseCase;
+    private final OriginateLoanUseCase originateLoanUseCase;
+    private final CancelLoanUseCase cancelLoanUseCase;
     private final GetLoanInstallmentsUseCase getLoanInstallmentsUseCase;
     private final PayLoanInstallmentUseCase payLoanInstallmentUseCase;
     private final LoanWebMapper loanMapper;
@@ -55,7 +55,7 @@ public class LoanController {
     public ResponseEntity<ApiResponse<LoanResponse>> create(
             @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody LoanRequest request) {
-        var loan = createLoanUseCase.execute(new CreateLoanCommand(
+        var loan = originateLoanUseCase.execute(new OriginateLoanCommand(
                 new UserId(userId),
                 BankName.fromString(request.bankName()),
                 request.destinationAccountCbu(),
@@ -75,7 +75,7 @@ public class LoanController {
     public ResponseEntity<ApiResponse<Void>> delete(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id) {
-        deleteLoanUseCase.execute(new DeleteLoanCommand(new LoanId(id), new UserId(userId)));
+        cancelLoanUseCase.execute(new CancelLoanCommand(new LoanId(id), new UserId(userId)));
         return ResponseEntity.ok(ApiResponse.ok("Loan deleted", null));
     }
 

@@ -1,7 +1,7 @@
 package com.financialapp.banks.application.card;
 
-import com.financialapp.banks.domain.usecase.card.command.CreateCardExpenseCommand;
-import com.financialapp.banks.application.card.impl.CreateCardExpenseUseCaseImpl;
+import com.financialapp.banks.domain.usecase.card.command.RegisterCardExpenseCommand;
+import com.financialapp.banks.application.card.impl.RegisterCardExpenseUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.card.CardInstallmentNotSupportedException;
@@ -37,15 +37,15 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CreateCardExpenseUseCaseImplTest {
+class RegisterCardExpenseUseCaseImplTest {
 
     @Mock CardInstallmentRepository installmentRepository;
     @Mock CardRepository cardRepository;
-    CreateCardExpenseUseCaseImpl useCase;
+    RegisterCardExpenseUseCaseImpl useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new CreateCardExpenseUseCaseImpl(installmentRepository, cardRepository);
+        useCase = new RegisterCardExpenseUseCaseImpl(installmentRepository, cardRepository);
     }
 
     private CreditCard creditCard() {
@@ -60,7 +60,7 @@ class CreateCardExpenseUseCaseImplTest {
         when(cardRepository.findByCardNumberAndUserId("1234", new UserId(1L))).thenReturn(Optional.of(creditCard()));
         when(installmentRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
-        List<CardInstallment> result = useCase.execute(new CreateCardExpenseCommand(
+        List<CardInstallment> result = useCase.execute(new RegisterCardExpenseCommand(
                 "1234", new UserId(1L), "New Mac",
                 new Money(new BigDecimal("3000"), Currency.getInstance("USD")),
                 3, LocalDate.of(2026, 5, 1)));
@@ -79,7 +79,7 @@ class CreateCardExpenseUseCaseImplTest {
                 LocalDateTime.now(), LocalDateTime.now());
         when(cardRepository.findByCardNumberAndUserId("1234", new UserId(1L))).thenReturn(Optional.of(debit));
 
-        assertThatThrownBy(() -> useCase.execute(new CreateCardExpenseCommand(
+        assertThatThrownBy(() -> useCase.execute(new RegisterCardExpenseCommand(
                 "1234", new UserId(1L), "Coffee",
                 new Money(BigDecimal.TEN, Currency.getInstance("USD")), 1, LocalDate.now())))
                 .isInstanceOf(CardInstallmentNotSupportedException.class);

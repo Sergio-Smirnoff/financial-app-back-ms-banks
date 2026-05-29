@@ -39,7 +39,7 @@ class CardControllerIT {
     }
 
     @Test
-    void createCard_then_listIncludesIt() throws Exception {
+    void issueCard_then_listIncludesIt() throws Exception {
         CardRequest req = new CardRequest("GALICIA", CardBrand.VISA, CardType.PLATINUM,
                 CardBehavior.CREDIT, "1234567890123456", YearMonth.now().plusYears(2), 20, 10);
 
@@ -57,7 +57,7 @@ class CardControllerIT {
     }
 
     @Test
-    void createCard_acceptsMmYyExpiryString() throws Exception {
+    void issueCard_acceptsMmYyExpiryString() throws Exception {
         String body = """
                 {"bankName":"GALICIA","brand":"VISA","cardType":"STANDARD","behavior":"CREDIT",
                  "cardNumber":"4387269571327193","expiringDate":"08/30","closingDay":15,"dueDay":5}
@@ -73,7 +73,7 @@ class CardControllerIT {
     }
 
     @Test
-    void createCard_rejectsNon16DigitNumber() throws Exception {
+    void issueCard_rejectsNon16DigitNumber() throws Exception {
         CardRequest req = new CardRequest("GALICIA", CardBrand.VISA, CardType.PLATINUM,
                 CardBehavior.CREDIT, "1234", YearMonth.now().plusYears(2), 20, 10);
 

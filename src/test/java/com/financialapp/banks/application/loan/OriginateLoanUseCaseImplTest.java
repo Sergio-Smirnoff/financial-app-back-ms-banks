@@ -1,8 +1,8 @@
 package com.financialapp.banks.application.loan;
 
 import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
-import com.financialapp.banks.domain.usecase.loan.command.CreateLoanCommand;
-import com.financialapp.banks.application.loan.impl.CreateLoanUseCaseImpl;
+import com.financialapp.banks.domain.usecase.loan.command.OriginateLoanCommand;
+import com.financialapp.banks.application.loan.impl.OriginateLoanUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
@@ -40,7 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CreateLoanUseCaseImplTest {
+class OriginateLoanUseCaseImplTest {
 
     @Mock LoanRepository loanRepository;
     @Mock BankRepository bankRepository;
@@ -48,11 +48,11 @@ class CreateLoanUseCaseImplTest {
     @Mock LoanInstallmentRepository installmentRepository;
     @Mock AdjustBalanceUseCaseImpl adjustBalance;
     @Mock DomainEventPublisher eventPublisher;
-    CreateLoanUseCaseImpl useCase;
+    OriginateLoanUseCaseImpl useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new CreateLoanUseCaseImpl(loanRepository, bankRepository, accountRepository,
+        useCase = new OriginateLoanUseCaseImpl(loanRepository, bankRepository, accountRepository,
                 installmentRepository, adjustBalance, eventPublisher);
     }
 
@@ -74,7 +74,7 @@ class CreateLoanUseCaseImplTest {
                     l.amortizationType(), l.startDate(), l.active(), l.createdAt(), l.updatedAt());
         });
 
-        Loan result = useCase.execute(new CreateLoanCommand(new UserId(1L), BankName.GALICIA,
+        Loan result = useCase.execute(new OriginateLoanCommand(new UserId(1L), BankName.GALICIA,
                 "1234567890123456789012", "Car Loan", new BigDecimal("10000.00"),
                 new BigDecimal("12.00"), 12, LocalDate.of(2026, 1, 1), AmortizationType.FRENCH));
 
@@ -97,7 +97,7 @@ class CreateLoanUseCaseImplTest {
                 LocalDateTime.now(), LocalDateTime.now());
         when(accountRepository.findByCbu("1234567890123456789012")).thenReturn(Optional.of(otherBankAccount));
 
-        assertThatThrownBy(() -> useCase.execute(new CreateLoanCommand(new UserId(1L), BankName.GALICIA,
+        assertThatThrownBy(() -> useCase.execute(new OriginateLoanCommand(new UserId(1L), BankName.GALICIA,
                 "1234567890123456789012", "Car Loan", new BigDecimal("100"), new BigDecimal("12"),
                 1, LocalDate.now(), AmortizationType.FRENCH)))
                 .isInstanceOf(LoanAccountMismatchException.class);
@@ -107,7 +107,7 @@ class CreateLoanUseCaseImplTest {
     void create_throwsWhenBankMissing() {
         when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> useCase.execute(new CreateLoanCommand(new UserId(1L), BankName.GALICIA,
+        assertThatThrownBy(() -> useCase.execute(new OriginateLoanCommand(new UserId(1L), BankName.GALICIA,
                 "cbu", "Loan", new BigDecimal("100"), new BigDecimal("12"), 1, LocalDate.now(), AmortizationType.FRENCH)))
                 .isInstanceOf(ResourceNotFoundException.class);
     }

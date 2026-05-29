@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.card.impl;
 
-import com.financialapp.banks.domain.usecase.card.command.CreateCardExpenseCommand;
+import com.financialapp.banks.domain.usecase.card.command.RegisterCardExpenseCommand;
 import com.financialapp.banks.domain.usecase.card.CheckDuplicateExpensesUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
@@ -22,13 +22,13 @@ public class CheckDuplicateExpensesUseCaseImpl implements CheckDuplicateExpenses
 
     @Override
     @Transactional(readOnly = true)
-    public List<Integer> execute(String cardNumber, UserId userId, List<CreateCardExpenseCommand> expenses) {
+    public List<Integer> execute(String cardNumber, UserId userId, List<RegisterCardExpenseCommand> expenses) {
         cardRepository.findByCardNumberAndUserId(cardNumber, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card", cardNumber));
 
         return IntStream.range(0, expenses.size())
-                .filter(i -> {
-                    CreateCardExpenseCommand cmd = expenses.get(i);
+                .filter(expenseIndex -> {
+                    RegisterCardExpenseCommand cmd = expenses.get(expenseIndex);
                     return installmentRepository.existsByCardNumberAndDescriptionAndAmountAndDueDate(
                             cardNumber, cmd.description(), cmd.amount(), cmd.firstDueDate());
                 })

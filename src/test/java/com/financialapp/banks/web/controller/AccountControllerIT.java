@@ -38,7 +38,7 @@ class AccountControllerIT {
     @MockBean GetAccountTransactionsUseCase getTransactionsUseCase;
 
     @Test
-    void createAccount_then_getByCbu() throws Exception {
+    void openAccount_then_getByCbu() throws Exception {
         AccountRequest req = new AccountRequest(
                 "GALICIA", "Savings", AccountType.SAVINGS,
                 "USD", true,
@@ -139,7 +139,7 @@ class AccountControllerIT {
     }
 
     @Test
-    void createAccount_malformedCurrency_returns400WithValidationCode() throws Exception {
+    void openAccount_malformedCurrency_returns400WithValidationCode() throws Exception {
         AccountRequest req = new AccountRequest(
                 "GALICIA", "Savings", AccountType.SAVINGS,
                 "US", true,
@@ -155,7 +155,7 @@ class AccountControllerIT {
     }
 
     @Test
-    void createAccount_unknownCurrencyCode_returns400WithCurrencyCode() throws Exception {
+    void openAccount_unknownCurrencyCode_returns400WithCurrencyCode() throws Exception {
         AccountRequest req = new AccountRequest(
                 "GALICIA", "Savings", AccountType.SAVINGS,
                 "ZZZ", true,
@@ -171,7 +171,7 @@ class AccountControllerIT {
     }
 
     @Test
-    void createAccount_invalidType_returns400() throws Exception {
+    void openAccount_invalidType_returns400() throws Exception {
         String body = """
                 {"bankName":"GALICIA","name":"Savings","type":"FOO","balance":1000.00,
                  "currency":"USD","isActive":true,"cbu":"1234567890123456789012","alias":"alias1"}
@@ -275,7 +275,7 @@ class AccountControllerIT {
     }
 
     @Test
-    void createAccount_lowercaseCurrency_normalizedToUppercase() throws Exception {
+    void openAccount_lowercaseCurrency_normalizedToUppercase() throws Exception {
         AccountRequest req = new AccountRequest(
                 "GALICIA", "Savings", AccountType.SAVINGS,
                 "usd", true,
