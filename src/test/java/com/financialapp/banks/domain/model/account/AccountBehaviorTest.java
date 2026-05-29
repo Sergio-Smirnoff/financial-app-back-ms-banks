@@ -45,7 +45,7 @@ class AccountBehaviorTest {
     void debit_reducesBalanceByAmount() {
         CheckingAccount acc = checking(new BigDecimal("100.00"));
 
-        Account result = acc.debit(ars("30.00"), NOW);
+        Account result = acc.debit(ars("30.00"), NOW).account();
 
         assertThat(result.balance().amount()).isEqualByComparingTo("70.00");
     }
@@ -54,7 +54,7 @@ class AccountBehaviorTest {
     void debit_returnsNewInstanceLeavingOriginalUnchanged() {
         CheckingAccount acc = checking(new BigDecimal("100.00"));
 
-        Account result = acc.debit(ars("30.00"), NOW);
+        Account result = acc.debit(ars("30.00"), NOW).account();
 
         assertThat(result).isNotSameAs(acc);
         assertThat(acc.balance().amount()).isEqualByComparingTo("100.00");
@@ -81,7 +81,7 @@ class AccountBehaviorTest {
     void credit_increasesBalanceByAmount() {
         CheckingAccount acc = checking(new BigDecimal("100.00"));
 
-        Account result = acc.credit(ars("50.00"), NOW);
+        Account result = acc.credit(ars("50.00"), NOW).account();
 
         assertThat(result.balance().amount()).isEqualByComparingTo("150.00");
     }
