@@ -205,6 +205,76 @@ class AccountControllerIT {
     }
 
     @Test
+    void updateAccount_acceptsStringBalance_andReturnsIt() throws Exception {
+        AccountRequest createReq = new AccountRequest(
+                "GALICIA", "Savings", AccountType.SAVINGS,
+                "USD", true,
+                "1234567890123456789099", "alias99");
+
+        mockMvc.perform(post("/api/v1/banks/accounts")
+                        .header("X-User-Id", "1")
+                        .header("X-Internal-Token", "test-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createReq)))
+                .andExpect(status().isCreated());
+
+        String patchBody = """
+                {"balance":"500.00","currency":"USD"}
+                """;
+
+        mockMvc.perform(patch("/api/v1/banks/accounts/{cbu}", "1234567890123456789099")
+                        .header("X-User-Id", "1")
+                        .header("X-Internal-Token", "test-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(patchBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.balance").value("500.00"));
+    }
+
+    @Test
+    void updateAccount_invalidBalanceString_returns400WithValidationCode() throws Exception {
+        String patchBody = """
+                {"balance":"12.345","currency":"USD"}
+                """;
+
+        mockMvc.perform(patch("/api/v1/banks/accounts/{cbu}", "1234567890123456789099")
+                        .header("X-User-Id", "1")
+                        .header("X-Internal-Token", "test-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(patchBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("validation_error"));
+    }
+
+    @Test
+    void adjustBalance_acceptsStringDelta_returns200() throws Exception {
+        AccountRequest createReq = new AccountRequest(
+                "GALICIA", "Checking", AccountType.CHECKING,
+                "USD", true,
+                "1234567890123456789088", "alias88");
+
+        mockMvc.perform(post("/api/v1/banks/accounts")
+                        .header("X-User-Id", "1")
+                        .header("X-Internal-Token", "test-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createReq)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/v1/banks/accounts/{cbu}/balance/adjust", "1234567890123456789088")
+                        .header("X-User-Id", "1")
+                        .header("X-Internal-Token", "test-token")
+                        .param("delta", "250.50")
+                        .param("currency", "USD"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/banks/accounts/{cbu}", "1234567890123456789088")
+                        .header("X-User-Id", "1")
+                        .header("X-Internal-Token", "test-token"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.balance").value("250.50"));
+    }
+
+    @Test
     void createAccount_lowercaseCurrency_normalizedToUppercase() throws Exception {
         AccountRequest req = new AccountRequest(
                 "GALICIA", "Savings", AccountType.SAVINGS,

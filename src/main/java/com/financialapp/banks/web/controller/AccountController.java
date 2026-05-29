@@ -92,9 +92,7 @@ public class AccountController {
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cbu,
             @Valid @RequestBody UpdateAccountRequest request) {
-        Money balance = request.balance() != null && request.currency() != null
-                ? Money.of(request.balance(), request.currency())
-                : null;
+        Money balance = toMoney(request.balance(), request.currency());
         var result = updateAccountUseCase.execute(new UpdateAccountCommand(
                 cbu, request.name(), balance, request.isActive()));
         return ResponseEntity.ok(ApiResponse.ok(accountMapper.toResponse(result)));
@@ -139,9 +137,15 @@ public class AccountController {
     @Operation(summary = "Adjust account balance")
     public ResponseEntity<ApiResponse<Void>> adjustBalance(
             @PathVariable String cbu,
-            @RequestParam BigDecimal delta,
+            @RequestParam String delta,
             @RequestParam String currency) {
-        adjustBalanceUseCase.execute(new AdjustBalanceCommand(cbu, Money.of(delta, currency)));
+        adjustBalanceUseCase.execute(new AdjustBalanceCommand(cbu, Money.of(new BigDecimal(delta), currency)));
         return ResponseEntity.ok(ApiResponse.ok("Balance adjusted", null));
+    }
+
+    private Money toMoney(String amount, String currency) {
+        return amount != null && currency != null
+                ? Money.of(new BigDecimal(amount), currency)
+                : null;
     }
 }
