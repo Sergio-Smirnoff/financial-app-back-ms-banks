@@ -1,12 +1,11 @@
 package com.financialapp.banks.web.dto.response;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record AccountTransactionResponse(
         Long transactionId,
         String accountCbu,
-        BigDecimal amount,
+        String amount,
         String currency,
         String description,
         String category,

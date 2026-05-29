@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Currency;
 import java.util.List;
@@ -52,7 +53,7 @@ public class CardInstallmentController {
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cardNumber,
             @Valid @RequestBody CardExpenseCreateRequest request) {
-        Money amount = Money.of(request.totalAmount(), request.currency());
+        Money amount = Money.of(new BigDecimal(request.totalAmount()), request.currency());
         List<CardInstallmentResponse> result = createCardExpenseUseCase.execute(new CreateCardExpenseCommand(
                 cardNumber,
                 new UserId(userId),
@@ -91,7 +92,7 @@ public class CardInstallmentController {
         List<ImportCardExpensesCommand.ImportedExpense> expenses = request.expenses().stream()
                 .map(e -> new ImportCardExpensesCommand.ImportedExpense(
                         e.description(),
-                        new Money(e.amount(), Currency.getInstance(e.currency())),
+                        new Money(new BigDecimal(e.amount()), Currency.getInstance(e.currency())),
                         e.date()))
                 .toList();
         var result = importCardExpensesUseCase.execute(new ImportCardExpensesCommand(
@@ -117,7 +118,7 @@ public class CardInstallmentController {
                         cardNumber,
                         user,
                         e.description(),
-                        new Money(e.totalAmount(), Currency.getInstance(e.currency())),
+                        new Money(new BigDecimal(e.totalAmount()), Currency.getInstance(e.currency())),
                         e.totalInstallments(),
                         e.firstDueDate()
                 )).toList();

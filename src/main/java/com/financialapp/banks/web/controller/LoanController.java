@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -59,8 +60,8 @@ public class LoanController {
                 BankName.fromString(request.bankName()),
                 request.destinationAccountCbu(),
                 request.name(),
-                request.principal(),
-                request.interestRate(),
+                new BigDecimal(request.principal()),
+                new BigDecimal(request.interestRate()),
                 request.totalInstallments(),
                 request.startDate(),
                 AmortizationType.FRENCH

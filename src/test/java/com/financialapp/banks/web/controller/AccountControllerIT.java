@@ -72,7 +72,7 @@ class AccountControllerIT {
                         .header("X-Internal-Token", "test-token"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].transactionId").value(1))
-                .andExpect(jsonPath("$.data[0].amount").value(500.00))
+                .andExpect(jsonPath("$.data[0].amount").value("500.00"))
                 .andExpect(jsonPath("$.data[0].currency").value("ARS"));
     }
 

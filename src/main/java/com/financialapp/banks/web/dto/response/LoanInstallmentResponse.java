@@ -2,7 +2,6 @@ package com.financialapp.banks.web.dto.response;
 
 import lombok.Builder;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -11,7 +10,7 @@ public record LoanInstallmentResponse(
         Long id,
         Long loanId,
         int installmentNumber,
-        BigDecimal amount,
+        String amount,
         LocalDate dueDate,
         boolean paid,
         LocalDate paidDate,

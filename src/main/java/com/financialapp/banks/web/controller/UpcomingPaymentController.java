@@ -33,7 +33,7 @@ public class UpcomingPaymentController {
                 .stream()
                 .map(p -> new UpcomingPaymentResponse(
                         p.id(), p.type(), p.description(),
-                        p.amount().amount(), p.amount().currency().getCurrencyCode(),
+                        p.amount().amount().toPlainString(), p.amount().currency().getCurrencyCode(),
                         p.dueDate(), p.installmentNumber(), p.totalInstallments(), p.paid()))
                 .toList();
         return ResponseEntity.ok(ApiResponse.ok(result));

@@ -126,7 +126,7 @@ public class AccountController {
         List<AccountTransactionResponse> response = transactions.stream()
                 .map(t -> new AccountTransactionResponse(
                         t.transactionId(), t.accountCbu(),
-                        t.amount().amount(), t.amount().currency().getCurrencyCode(),
+                        t.amount().amount().toPlainString(), t.amount().currency().getCurrencyCode(),
                         t.description(), t.category(), t.subcategory(), t.date()))
                 .toList();
 

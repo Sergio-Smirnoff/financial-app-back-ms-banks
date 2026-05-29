@@ -13,7 +13,7 @@ public class LoanInstallmentWebMapper {
                 .id(installment.id().value())
                 .loanId(installment.loanId().value())
                 .installmentNumber(installment.installmentNumber())
-                .amount(installment.amount().amount())
+                .amount(installment.amount().amount().toPlainString())
                 .dueDate(installment.dueDate())
                 .paid(installment.paid())
                 .paidDate(installment.paidDate())
