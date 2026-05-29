@@ -22,7 +22,8 @@ class AccountWebMapperTest {
                 new UserId(1L), BankName.values()[0], "Main", true,
                 LocalDateTime.now(), LocalDateTime.now());
         var resp = mapper.toResponse(account);
-        assertThat(resp.balance()).isEqualTo("1234.50");
+        assertThat((Object) resp.balance()).isInstanceOf(String.class);
+        assertThat((Object) resp.balance()).isEqualTo("1234.50");
         assertThat(resp.currency()).isEqualTo("ARS");
     }
 }
