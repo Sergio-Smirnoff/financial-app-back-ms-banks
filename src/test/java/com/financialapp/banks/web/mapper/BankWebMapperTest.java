@@ -18,4 +18,16 @@ class BankWebMapperTest {
         assertThat(resp.displayName()).isEqualTo(sample.getDisplayName());
         assertThat(resp.logoUrl()).isEqualTo(sample.getLogoUrl());
     }
+
+    @Test
+    void mapsBankingCatalogToResponse() {
+        var catalog = new com.financialapp.banks.domain.usecase.catalog.BankingCatalog(
+                java.util.List.of("CHECKING"), java.util.List.of("CREDIT"),
+                java.util.List.of("VISA"), java.util.List.of("REVOLVING"));
+        var resp = mapper.toCatalogResponse(catalog);
+        assertThat(resp.accountTypes()).containsExactly("CHECKING");
+        assertThat(resp.cardTypes()).containsExactly("CREDIT");
+        assertThat(resp.cardBrands()).containsExactly("VISA");
+        assertThat(resp.cardBehaviors()).containsExactly("REVOLVING");
+    }
 }

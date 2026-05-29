@@ -2,9 +2,11 @@ package com.financialapp.banks.web.mapper;
 
 import com.financialapp.banks.domain.model.bank.Bank;
 import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.usecase.catalog.BankingCatalog;
 import com.financialapp.banks.web.dto.response.AccountResponse;
 import com.financialapp.banks.web.dto.response.AvailableBankResponse;
 import com.financialapp.banks.web.dto.response.BankResponse;
+import com.financialapp.banks.web.dto.response.BankingCatalogResponse;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -33,5 +35,10 @@ public class BankWebMapper {
 
     public AvailableBankResponse toAvailableBank(BankName bank) {
         return new AvailableBankResponse(bank.name(), bank.getDisplayName(), bank.getLogoUrl());
+    }
+
+    public BankingCatalogResponse toCatalogResponse(BankingCatalog c) {
+        return new BankingCatalogResponse(
+                c.accountTypes(), c.cardTypes(), c.cardBrands(), c.cardBehaviors());
     }
 }
