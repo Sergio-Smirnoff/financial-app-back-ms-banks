@@ -1,12 +1,17 @@
 package com.financialapp.banks.domain.model.card;
 
+import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
+import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.card.CardInstallmentNotSupportedException;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.DebitCard;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Card {
 
@@ -16,6 +21,7 @@ public abstract class Card {
     protected final CardDetails details;
     protected final LocalDateTime createdAt;
     protected final LocalDateTime updatedAt;
+    protected final List<CardInstallment> installments = new ArrayList<>();
 
     protected Card(CardNumber cardNumber, UserId userId, BankName bankName,
                    CardDetails details, LocalDateTime createdAt, LocalDateTime updatedAt) {
@@ -43,6 +49,56 @@ public abstract class Card {
         if (details.behavior() == CardBehavior.INSTANT_PAYMENT) {
             throw new CardInstallmentNotSupportedException(cardNumber.value());
         }
+    }
+
+    public List<CardInstallment> installments() {
+        return List.copyOf(installments);
+    }
+
+    /** Hydration hook for persistence — replaces the installment collection in one shot. */
+    public void restoreInstallments(List<CardInstallment> loaded) {
+        installments.clear();
+        installments.addAll(loaded);
+    }
+
+    /**
+     * Registers a new installment-based expense on this card. Splits {@code total} across
+     * {@code totalInstallments} via {@link CardInstallment#schedule} and appends them.
+     * @throws CardInstallmentNotSupportedException when the card cannot carry installments.
+     */
+    public List<CardInstallment> registerExpense(String description, Money total,
+                                                 int totalInstallments, LocalDate firstDueDate) {
+        ensureSupportsInstallments();
+        List<CardInstallment> created = CardInstallment.schedule(
+                cardNumber.value(), description, total, totalInstallments, firstDueDate);
+        installments.addAll(created);
+        return created;
+    }
+
+    /**
+     * Pays the installment with the given id on {@code paidDate}, replacing it in place.
+     * @throws ResourceNotFoundException if the id is not on this card.
+     * @throws com.financialapp.banks.domain.exception.card.CardInstallmentAlreadyPaidException if already paid.
+     */
+    public CardInstallment payInstallment(CardInstallmentId installmentId, LocalDate paidDate) {
+        for (int index = 0; index < installments.size(); index++) {
+            CardInstallment current = installments.get(index);
+            if (current.id().equals(installmentId)) {
+                CardInstallment paid = current.pay(paidDate);
+                installments.set(index, paid);
+                return paid;
+            }
+        }
+        throw new ResourceNotFoundException("CardInstallment",
+                installmentId.value() == null ? "new" : installmentId.value().toString());
+    }
+
+    /** True when an installment with the same description, amount and due date already exists. */
+    public boolean hasInstallmentMatching(String description, Money amount, LocalDate dueDate) {
+        return installments.stream().anyMatch(installment ->
+                installment.description().equals(description)
+                        && installment.amount().amount().compareTo(amount.amount()) == 0
+                        && installment.dueDate().equals(dueDate));
     }
 
     public CardNumber cardNumber() { return cardNumber; }
