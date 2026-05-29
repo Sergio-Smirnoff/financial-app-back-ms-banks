@@ -5,6 +5,7 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
@@ -50,4 +51,13 @@ class LayeredArchitectureTest {
             .that().resideInAPackage("..banks.application..")
             .should().dependOnClassesThat().resideInAPackage("..banks.web..")
             .as("Application must not depend on the web layer");
+
+    @ArchTest
+    static final ArchRule only_aggregate_roots_have_repositories = classes()
+            .that().resideInAPackage("..banks.domain.repository..")
+            .and().areInterfaces()
+            .should().haveSimpleNameEndingWith("Repository")
+            .andShould().haveSimpleNameNotContaining("Installment")
+            .as("Only aggregate roots (Bank, Account, Card, Loan) may have a domain repository; "
+                    + "installments are owned by their root and have no repository");
 }
