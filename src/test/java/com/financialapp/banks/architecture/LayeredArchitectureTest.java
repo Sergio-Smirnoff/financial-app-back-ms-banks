@@ -53,6 +53,13 @@ class LayeredArchitectureTest {
             .as("Application must not depend on the web layer");
 
     @ArchTest
+    static final ArchRule domain_events_are_recorded_by_aggregates_not_the_application = noClasses()
+            .that().resideInAPackage("..banks.application..")
+            .should().dependOnClassesThat().resideInAPackage("..banks.domain.event..")
+            .as("Domain events must be recorded by aggregates in the domain, not constructed in the "
+                    + "application layer (use cases drain them via DomainEventPublisher.publishAll)");
+
+    @ArchTest
     static final ArchRule only_aggregate_roots_have_repositories = classes()
             .that().resideInAPackage("..banks.domain.repository..")
             .and().areInterfaces()
