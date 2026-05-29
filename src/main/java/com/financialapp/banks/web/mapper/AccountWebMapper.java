@@ -18,7 +18,7 @@ public class AccountWebMapper {
                 .userId(account.userId().value())
                 .name(account.name())
                 .type(resolveType(account))
-                .balance(account.balance().amount())
+                .balance(account.balance().amount().toPlainString())
                 .currency(account.balance().currency().getCurrencyCode())
                 .cbu(account.cbu())
                 .alias(account.alias())

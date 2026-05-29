@@ -19,11 +19,13 @@ public class BankWebMapper {
 
     public BankResponse toResponse(Bank bank, List<AccountResponse> accounts) {
         if (bank == null) return null;
-        Map<String, BigDecimal> totalBalances = accounts.stream()
+        Map<String, BigDecimal> summed = accounts.stream()
                 .collect(Collectors.groupingBy(
                         AccountResponse::currency,
-                        Collectors.reducing(BigDecimal.ZERO, AccountResponse::balance, BigDecimal::add)
-                ));
+                        Collectors.reducing(BigDecimal.ZERO,
+                                a -> new BigDecimal(a.balance()), BigDecimal::add)));
+        Map<String, String> totalBalances = summed.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toPlainString()));
         return BankResponse.builder()
                 .name(bank.name().name())
                 .logoUrl(bank.logo() != null ? bank.logo().url() : null)

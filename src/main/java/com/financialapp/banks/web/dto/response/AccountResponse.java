@@ -2,7 +2,6 @@ package com.financialapp.banks.web.dto.response;
 
 import lombok.Builder;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Builder
@@ -11,7 +10,7 @@ public record AccountResponse(
         Long userId,
         String name,
         String type,
-        BigDecimal balance,
+        String balance,
         String currency,
         String cbu,
         String alias,
