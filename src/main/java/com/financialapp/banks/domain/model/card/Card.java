@@ -1,6 +1,7 @@
 package com.financialapp.banks.domain.model.card;
 
 import com.financialapp.banks.domain.common.model.UserId;
+import com.financialapp.banks.domain.exception.card.CardInstallmentNotSupportedException;
 import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.DebitCard;
@@ -32,6 +33,16 @@ public abstract class Card {
         return details.behavior() == CardBehavior.INSTANT_PAYMENT
                 ? new DebitCard(cardNumber, userId, bankName, details, createdAt, updatedAt)
                 : new CreditCard(cardNumber, userId, bankName, details, createdAt, updatedAt);
+    }
+
+    /**
+     * Guards that this card supports installment-based expenses.
+     * @throws CardInstallmentNotSupportedException when the card behaves as instant payment (e.g. debit).
+     */
+    public void ensureSupportsInstallments() {
+        if (details.behavior() == CardBehavior.INSTANT_PAYMENT) {
+            throw new CardInstallmentNotSupportedException(cardNumber.value());
+        }
     }
 
     public CardNumber cardNumber() { return cardNumber; }
