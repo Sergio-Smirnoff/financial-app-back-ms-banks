@@ -14,10 +14,6 @@ public record CardNumber(String value) {
         }
     }
 
-    public static CardNumber of(String value) {
-        return new CardNumber(value);
-    }
-
     public String last4() {
         return value.substring(value.length() - 4);
     }

@@ -29,7 +29,7 @@ public class CardPersistenceMapper {
         );
         UserId userId = new UserId(entity.getUserId());
         BankName bankName = BankName.valueOf(bank.getName());
-        CardNumber cardNumber = CardNumber.of(entity.getCardNumber());
+        CardNumber cardNumber = new CardNumber(entity.getCardNumber());
         return entity.getBehavior() == CardBehavior.INSTANT_PAYMENT
                 ? new DebitCard(cardNumber, userId, bankName, details, entity.getCreatedAt(), entity.getUpdatedAt())
                 : new CreditCard(cardNumber, userId, bankName, details, entity.getCreatedAt(), entity.getUpdatedAt());

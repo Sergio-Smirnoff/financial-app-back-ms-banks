@@ -38,7 +38,7 @@ class UpdateCardUseCaseImplTest {
         CardDetails details = new CardDetails(
                 CardBrand.VISA, CardType.PLATINUM, CardBehavior.CREDIT,
                 expiry, new CardBilling(closing, due));
-        return new CreditCard(CardNumber.of(cardNumber), new UserId(1L), BankName.GALICIA,
+        return new CreditCard(new CardNumber(cardNumber), new UserId(1L), BankName.GALICIA,
                 details, LocalDateTime.now(), LocalDateTime.now());
     }
 
@@ -46,7 +46,7 @@ class UpdateCardUseCaseImplTest {
         CardDetails details = new CardDetails(
                 CardBrand.MASTERCARD, CardType.STANDARD, CardBehavior.INSTANT_PAYMENT,
                 expiry, new CardBilling(closing, due));
-        return new DebitCard(CardNumber.of(cardNumber), new UserId(2L), BankName.SANTANDER,
+        return new DebitCard(new CardNumber(cardNumber), new UserId(2L), BankName.SANTANDER,
                 details, LocalDateTime.now(), LocalDateTime.now());
     }
 

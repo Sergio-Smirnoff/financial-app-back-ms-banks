@@ -51,7 +51,7 @@ class CreateCardExpenseUseCaseImplTest {
     private CreditCard creditCard() {
         CardDetails details = new CardDetails(CardBrand.VISA, CardType.PLATINUM,
                 CardBehavior.CREDIT, YearMonth.now().plusYears(2), new CardBilling(20, 10));
-        return new CreditCard(CardNumber.of("1234567890123456"), new UserId(1L), BankName.GALICIA, details,
+        return new CreditCard(new CardNumber("1234567890123456"), new UserId(1L), BankName.GALICIA, details,
                 LocalDateTime.now(), LocalDateTime.now());
     }
 
@@ -75,7 +75,7 @@ class CreateCardExpenseUseCaseImplTest {
     void create_rejectsInstantPaymentCard() {
         CardDetails details = new CardDetails(CardBrand.VISA, CardType.STANDARD,
                 CardBehavior.INSTANT_PAYMENT, YearMonth.now().plusYears(2), new CardBilling(20, 10));
-        DebitCard debit = new DebitCard(CardNumber.of("1234567890123456"), new UserId(1L), BankName.GALICIA, details,
+        DebitCard debit = new DebitCard(new CardNumber("1234567890123456"), new UserId(1L), BankName.GALICIA, details,
                 LocalDateTime.now(), LocalDateTime.now());
         when(cardRepository.findByCardNumberAndUserId("1234", new UserId(1L))).thenReturn(Optional.of(debit));
 
