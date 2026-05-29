@@ -3,9 +3,9 @@ package com.financialapp.banks.application.loan.impl;
 import com.financialapp.banks.domain.usecase.loan.GetLoanInstallmentsUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.model.loan.LoanId;
 import com.financialapp.banks.domain.model.loan.LoanInstallment;
-import com.financialapp.banks.domain.repository.LoanInstallmentRepository;
 import com.financialapp.banks.domain.repository.LoanRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,14 +17,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetLoanInstallmentsUseCaseImpl implements GetLoanInstallmentsUseCase {
 
-    private final LoanInstallmentRepository installmentRepository;
     private final LoanRepository loanRepository;
 
     @Override
     @Transactional(readOnly = true)
     public List<LoanInstallment> execute(LoanId loanId, UserId userId) {
-        loanRepository.findByIdAndUserId(loanId, userId)
+        Loan loan = loanRepository.findByIdAndUserId(loanId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan", loanId.value().toString()));
-        return installmentRepository.findByLoanId(loanId);
+        return loan.installments();
     }
 }

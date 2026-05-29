@@ -25,7 +25,7 @@ class LoanWebMapperTest {
                 Money.of(new BigDecimal("150000.00"), "ARS"),
                 new BigDecimal("0.4500"),
                 12, 12, AmortizationType.FRENCH,
-                LocalDate.now(), true, LocalDateTime.now(), LocalDateTime.now());
+                LocalDate.now(), true, java.util.List.of(), LocalDateTime.now(), LocalDateTime.now());
 
         var resp = mapper.toResponse(loan);
 

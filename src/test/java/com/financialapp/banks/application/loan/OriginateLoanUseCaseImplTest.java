@@ -1,6 +1,6 @@
 package com.financialapp.banks.application.loan;
 
-import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
+import com.financialapp.banks.domain.usecase.account.AdjustBalanceUseCase;
 import com.financialapp.banks.domain.usecase.loan.command.OriginateLoanCommand;
 import com.financialapp.banks.application.loan.impl.OriginateLoanUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
@@ -13,11 +13,9 @@ import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.domain.model.loan.AmortizationType;
 import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.model.loan.LoanId;
-import com.financialapp.banks.domain.model.loan.LoanInstallment;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import com.financialapp.banks.domain.repository.BankRepository;
-import com.financialapp.banks.domain.repository.LoanInstallmentRepository;
 import com.financialapp.banks.domain.repository.LoanRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +28,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Currency;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,15 +42,14 @@ class OriginateLoanUseCaseImplTest {
     @Mock LoanRepository loanRepository;
     @Mock BankRepository bankRepository;
     @Mock AccountRepository accountRepository;
-    @Mock LoanInstallmentRepository installmentRepository;
-    @Mock AdjustBalanceUseCaseImpl adjustBalance;
+    @Mock AdjustBalanceUseCase adjustBalance;
     @Mock DomainEventPublisher eventPublisher;
     OriginateLoanUseCaseImpl useCase;
 
     @BeforeEach
     void setUp() {
         useCase = new OriginateLoanUseCaseImpl(loanRepository, bankRepository, accountRepository,
-                installmentRepository, adjustBalance, eventPublisher);
+                adjustBalance, eventPublisher);
     }
 
     private CheckingAccount destAccount() {
@@ -71,7 +67,7 @@ class OriginateLoanUseCaseImplTest {
             Loan l = inv.getArgument(0);
             return new Loan(new LoanId(500L), l.userId(), l.bankName(), l.name(), l.principal(),
                     l.interestRate(), l.totalInstallments(), l.remainingInstallments(),
-                    l.amortizationType(), l.startDate(), l.active(), l.createdAt(), l.updatedAt());
+                    l.amortizationType(), l.startDate(), l.active(), l.installments(), l.createdAt(), l.updatedAt());
         });
 
         Loan result = useCase.execute(new OriginateLoanCommand(new UserId(1L), BankName.GALICIA,
@@ -80,10 +76,9 @@ class OriginateLoanUseCaseImplTest {
 
         assertThat(result.id().value()).isEqualTo(500L);
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<LoanInstallment>> captor = ArgumentCaptor.forClass(List.class);
-        verify(installmentRepository).saveAll(captor.capture());
-        assertThat(captor.getValue()).hasSize(12);
+        ArgumentCaptor<Loan> captor = ArgumentCaptor.forClass(Loan.class);
+        verify(loanRepository).save(captor.capture());
+        assertThat(captor.getValue().installments()).hasSize(12);
         verify(adjustBalance).execute(any());
         verify(eventPublisher).publish(any());
     }

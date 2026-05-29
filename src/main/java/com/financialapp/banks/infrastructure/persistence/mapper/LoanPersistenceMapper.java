@@ -30,6 +30,7 @@ public class LoanPersistenceMapper {
                 AmortizationType.FRENCH,
                 entity.getStartDate(),
                 entity.isActive(),
+                java.util.List.of(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
