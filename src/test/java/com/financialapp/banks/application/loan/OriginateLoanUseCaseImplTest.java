@@ -80,7 +80,7 @@ class OriginateLoanUseCaseImplTest {
         verify(loanRepository).save(captor.capture());
         assertThat(captor.getValue().installments()).hasSize(12);
         verify(adjustBalance).execute(any());
-        verify(eventPublisher).publish(any());
+        verify(eventPublisher).publishAll(any());
     }
 
     @Test

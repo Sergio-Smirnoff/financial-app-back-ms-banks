@@ -8,9 +8,9 @@ import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardInstallment;
+import com.financialapp.banks.domain.model.card.CardInstallmentPayment;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.CardRepository;
-import com.financialapp.banks.domain.event.CardInstallmentPaidEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,16 +32,14 @@ public class PayCardInstallmentUseCaseImpl implements PayCardInstallmentUseCase 
                 .orElseThrow(() -> new ResourceNotFoundException("Card", cmd.cardNumber()));
 
         LocalDate paidDate = cmd.paidDate() != null ? cmd.paidDate() : LocalDate.now();
-        CardInstallment paid = card.payInstallment(cmd.installmentId(), paidDate);
+        CardInstallmentPayment payment = card.payInstallment(cmd.installmentId(), paidDate, cmd.accountCbu());
         cardRepository.save(card);
+        CardInstallment paid = payment.installment();
 
         adjustBalance.execute(new AdjustBalanceCommand(
                 cmd.accountCbu(), new Money(paid.amount().amount().negate(), paid.amount().currency())));
 
-        eventPublisher.publish(new CardInstallmentPaidEvent(
-                cmd.userId(), cmd.accountCbu(),
-                new Money(paid.amount().amount().negate(), paid.amount().currency()),
-                paid.description(), paid.installmentNumber(), paid.totalInstallments(), paidDate));
+        eventPublisher.publishAll(payment.events());
 
         return paid;
     }

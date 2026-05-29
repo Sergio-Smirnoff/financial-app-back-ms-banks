@@ -94,10 +94,12 @@ class PayLoanInstallmentUseCaseImplTest {
         assertThat(loanCaptor.getValue().remainingInstallments()).isEqualTo(2);
         assertThat(loanCaptor.getValue().active()).isTrue();
 
-        // event payload is derived from the aggregate's paid installment
-        ArgumentCaptor<LoanInstallmentPaidEvent> eventCaptor = ArgumentCaptor.forClass(LoanInstallmentPaidEvent.class);
-        verify(eventPublisher).publish(eventCaptor.capture());
-        LoanInstallmentPaidEvent event = eventCaptor.getValue();
+        // event is recorded by the aggregate and drained via publishAll
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<java.util.List<com.financialapp.banks.domain.common.DomainEvent>> eventCaptor =
+                ArgumentCaptor.forClass(java.util.List.class);
+        verify(eventPublisher).publishAll(eventCaptor.capture());
+        LoanInstallmentPaidEvent event = (LoanInstallmentPaidEvent) eventCaptor.getValue().get(0);
         assertThat(event.amount().amount()).isEqualByComparingTo("-100.00");
         assertThat(event.installmentNumber()).isEqualTo(3);
         assertThat(event.paidDate()).isEqualTo(paidDate);

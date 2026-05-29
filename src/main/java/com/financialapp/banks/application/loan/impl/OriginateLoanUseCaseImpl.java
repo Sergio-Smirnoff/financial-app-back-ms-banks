@@ -9,16 +9,15 @@ import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.loan.LoanAccountMismatchException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.loan.Loan;
+import com.financialapp.banks.domain.model.loan.LoanOrigination;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import com.financialapp.banks.domain.repository.BankRepository;
 import com.financialapp.banks.domain.repository.LoanRepository;
-import com.financialapp.banks.domain.event.LoanCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.Currency;
 
 @Service
@@ -45,19 +44,18 @@ public class OriginateLoanUseCaseImpl implements OriginateLoanUseCase {
         }
 
         Currency currency = dest.balance().currency();
-        Loan loan = Loan.originate(
+        LoanOrigination origination = Loan.originate(
                 cmd.userId(), cmd.bankName(), cmd.name(),
                 new Money(cmd.principal(), currency), cmd.interestRate(),
-                cmd.totalInstallments(), cmd.amortizationType(), cmd.startDate());
+                cmd.totalInstallments(), cmd.amortizationType(), cmd.startDate(),
+                cmd.destinationAccountCbu());
 
-        Loan saved = loanRepository.save(loan);
+        Loan saved = loanRepository.save(origination.loan());
 
         adjustBalance.execute(new AdjustBalanceCommand(
                 cmd.destinationAccountCbu(), new Money(cmd.principal(), currency)));
 
-        eventPublisher.publish(new LoanCreatedEvent(
-                cmd.userId(), cmd.destinationAccountCbu(),
-                new Money(cmd.principal(), currency), cmd.name(), LocalDate.now()));
+        eventPublisher.publishAll(origination.events());
 
         return saved;
     }

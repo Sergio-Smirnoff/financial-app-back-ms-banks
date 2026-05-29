@@ -21,7 +21,7 @@ class LoanOriginationTest {
                 new UserId(1L), BankName.GALICIA, "Car loan",
                 new Money(new BigDecimal("12000.00"), ARS),
                 new BigDecimal("0"), 12, AmortizationType.FRENCH,
-                LocalDate.of(2026, 6, 1));
+                LocalDate.of(2026, 6, 1), "0001234567890123456789").loan();
 
         assertThat(loan.id().value()).isNull();
         assertThat(loan.active()).isTrue();

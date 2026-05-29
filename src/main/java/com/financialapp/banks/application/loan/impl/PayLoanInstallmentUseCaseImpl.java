@@ -7,9 +7,9 @@ import com.financialapp.banks.domain.usecase.loan.PayLoanInstallmentUseCase;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.model.loan.LoanInstallment;
+import com.financialapp.banks.domain.model.loan.LoanInstallmentPayment;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.LoanRepository;
-import com.financialapp.banks.domain.event.LoanInstallmentPaidEvent;
 import com.financialapp.banks.domain.common.model.Money;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,17 +32,15 @@ public class PayLoanInstallmentUseCaseImpl implements PayLoanInstallmentUseCase 
                 .orElseThrow(() -> new ResourceNotFoundException("Loan", cmd.loanId().value().toString()));
 
         LocalDate paidDate = cmd.paidDate() != null ? cmd.paidDate() : LocalDate.now();
-        Loan updated = loan.payInstallment(cmd.installmentId(), paidDate);   // ensures active + paid-state + ownership
-        Loan saved = loanRepository.save(updated);
-        LoanInstallment paid = saved.installmentBy(cmd.installmentId());
+        // The aggregate enforces active + paid-state + ownership and records the paid event.
+        LoanInstallmentPayment payment = loan.payInstallment(cmd.installmentId(), paidDate, cmd.accountCbu());
+        loanRepository.save(payment.loan());
+        LoanInstallment paid = payment.installment();
 
         adjustBalance.execute(new AdjustBalanceCommand(
                 cmd.accountCbu(), new Money(paid.amount().amount().negate(), paid.amount().currency())));
 
-        eventPublisher.publish(new LoanInstallmentPaidEvent(
-                cmd.userId(), cmd.accountCbu(),
-                new Money(paid.amount().amount().negate(), paid.amount().currency()),
-                saved.name(), paid.installmentNumber(), paidDate));
+        eventPublisher.publishAll(payment.events());
 
         return paid;
     }

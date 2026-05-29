@@ -1,7 +1,10 @@
 package com.financialapp.banks.domain.model.loan;
 
+import com.financialapp.banks.domain.common.DomainEvent;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
+import com.financialapp.banks.domain.event.LoanCreatedEvent;
+import com.financialapp.banks.domain.event.LoanInstallmentPaidEvent;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.loan.LoanAlreadyClosedException;
 import com.financialapp.banks.domain.model.bank.BankName;
@@ -35,14 +38,15 @@ public record Loan(
     }
 
     /**
-     * Factory: originates a new (unpersisted) loan and builds its full installment schedule
-     * via {@link LoanAmortization}. The loan starts active with all installments unpaid; ids
-     * are null until persisted. Cross-aggregate checks (account/bank existence) belong in the
-     * use case, not here.
+     * Factory: originates a new (unpersisted) loan, builds its full installment schedule via
+     * {@link LoanAmortization}, and records a {@link LoanCreatedEvent} (the loan is disbursed to
+     * {@code destinationAccountCbu}). The loan starts active with all installments unpaid; ids are
+     * null until persisted. Cross-aggregate checks (account/bank existence) belong in the use case.
      */
-    public static Loan originate(UserId userId, BankName bankName, String name, Money principal,
-                                 BigDecimal interestRate, int totalInstallments,
-                                 AmortizationType amortizationType, LocalDate startDate) {
+    public static LoanOrigination originate(UserId userId, BankName bankName, String name, Money principal,
+                                            BigDecimal interestRate, int totalInstallments,
+                                            AmortizationType amortizationType, LocalDate startDate,
+                                            String destinationAccountCbu) {
         LocalDateTime now = LocalDateTime.now();
         BigDecimal perInstallment = LoanAmortization.frenchInstallment(
                 principal.amount(), interestRate, totalInstallments);
@@ -60,8 +64,10 @@ public record Loan(
                     now,
                     now));
         }
-        return new Loan(new LoanId(null), userId, bankName, name, principal, interestRate,
+        Loan loan = new Loan(new LoanId(null), userId, bankName, name, principal, interestRate,
                 totalInstallments, totalInstallments, amortizationType, startDate, true, schedule, now, now);
+        DomainEvent event = new LoanCreatedEvent(userId, destinationAccountCbu, principal, name, LocalDate.now());
+        return new LoanOrigination(loan, List.of(event));
     }
 
     /**
@@ -93,7 +99,8 @@ public record Loan(
      * @throws LoanAlreadyClosedException when the loan is not active.
      * @throws com.financialapp.banks.domain.exception.loan.LoanInstallmentAlreadyPaidException when already paid.
      */
-    public Loan payInstallment(LoanInstallmentId installmentId, LocalDate paidDate) {
+    public LoanInstallmentPayment payInstallment(LoanInstallmentId installmentId, LocalDate paidDate,
+                                                 String paidFromAccountCbu) {
         ensureActive();
         LoanInstallment target = installmentBy(installmentId);
         LoanInstallment paid = target.pay(paidDate);
@@ -103,9 +110,15 @@ public record Loan(
             updated.add(installment.id().equals(installmentId) ? paid : installment);
         }
         int remaining = remainingInstallments - 1;
-        return new Loan(id, userId, bankName, name, principal, interestRate,
+        Loan updatedLoan = new Loan(id, userId, bankName, name, principal, interestRate,
                 totalInstallments, remaining, amortizationType, startDate,
                 remaining > 0, updated, createdAt, LocalDateTime.now());
+
+        DomainEvent event = new LoanInstallmentPaidEvent(
+                userId, paidFromAccountCbu,
+                new Money(paid.amount().amount().negate(), paid.amount().currency()),
+                name, paid.installmentNumber(), paidDate);
+        return new LoanInstallmentPayment(updatedLoan, paid, List.of(event));
     }
 
     /**

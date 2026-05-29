@@ -17,11 +17,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class LoanPaymentTest {
 
     private static final Currency ARS = Currency.getInstance("ARS");
+    private static final String CBU = "0001234567890123456789";
 
     private Loan twoInstallmentLoan() {
         return Loan.originate(new UserId(1L), BankName.GALICIA, "Loan",
                         new Money(new BigDecimal("200.00"), ARS), BigDecimal.ZERO, 2,
-                        AmortizationType.FRENCH, LocalDate.of(2026, 6, 1))
+                        AmortizationType.FRENCH, LocalDate.of(2026, 6, 1), CBU).loan()
                 .withInstallmentIds(List.of(new LoanInstallmentId(10L), new LoanInstallmentId(11L)));
     }
 
@@ -29,7 +30,7 @@ class LoanPaymentTest {
     void payInstallment_marks_one_paid_and_decrements_remaining() {
         Loan loan = twoInstallmentLoan();
 
-        Loan after = loan.payInstallment(new LoanInstallmentId(10L), LocalDate.of(2026, 6, 5));
+        Loan after = loan.payInstallment(new LoanInstallmentId(10L), LocalDate.of(2026, 6, 5), CBU).loan();
 
         assertThat(after.remainingInstallments()).isEqualTo(1);
         assertThat(after.active()).isTrue();
@@ -40,17 +41,27 @@ class LoanPaymentTest {
     @Test
     void paying_last_installment_closes_loan() {
         Loan loan = twoInstallmentLoan()
-                .payInstallment(new LoanInstallmentId(10L), LocalDate.of(2026, 6, 5))
-                .payInstallment(new LoanInstallmentId(11L), LocalDate.of(2026, 7, 5));
+                .payInstallment(new LoanInstallmentId(10L), LocalDate.of(2026, 6, 5), CBU).loan()
+                .payInstallment(new LoanInstallmentId(11L), LocalDate.of(2026, 7, 5), CBU).loan();
 
         assertThat(loan.remainingInstallments()).isZero();
         assertThat(loan.active()).isFalse();
     }
 
     @Test
+    void payInstallment_records_a_paid_event() {
+        Loan loan = twoInstallmentLoan();
+
+        LoanInstallmentPayment payment = loan.payInstallment(new LoanInstallmentId(10L), LocalDate.of(2026, 6, 5), CBU);
+
+        assertThat(payment.events()).hasSize(1);
+        assertThat(payment.installment().paid()).isTrue();
+    }
+
+    @Test
     void paying_an_already_paid_installment_fails() {
-        Loan loan = twoInstallmentLoan().payInstallment(new LoanInstallmentId(10L), LocalDate.of(2026, 6, 5));
-        assertThatThrownBy(() -> loan.payInstallment(new LoanInstallmentId(10L), LocalDate.of(2026, 6, 6)))
+        Loan loan = twoInstallmentLoan().payInstallment(new LoanInstallmentId(10L), LocalDate.of(2026, 6, 5), CBU).loan();
+        assertThatThrownBy(() -> loan.payInstallment(new LoanInstallmentId(10L), LocalDate.of(2026, 6, 6), CBU))
                 .isInstanceOf(LoanInstallmentAlreadyPaidException.class);
     }
 }

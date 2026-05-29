@@ -99,9 +99,11 @@ class PayCardInstallmentUseCaseImplTest {
         verify(adjustBalance).execute(adjustCaptor.capture());
         assertThat(adjustCaptor.getValue().delta().amount()).isEqualByComparingTo("-1000.00");
 
-        ArgumentCaptor<CardInstallmentPaidEvent> eventCaptor = ArgumentCaptor.forClass(CardInstallmentPaidEvent.class);
-        verify(eventPublisher).publish(eventCaptor.capture());
-        CardInstallmentPaidEvent event = eventCaptor.getValue();
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<java.util.List<com.financialapp.banks.domain.common.DomainEvent>> eventCaptor =
+                ArgumentCaptor.forClass(java.util.List.class);
+        verify(eventPublisher).publishAll(eventCaptor.capture());
+        CardInstallmentPaidEvent event = (CardInstallmentPaidEvent) eventCaptor.getValue().get(0);
         assertThat(event.amount().amount()).isEqualByComparingTo("-1000.00");
         assertThat(event.installmentNumber()).isEqualTo(2);
         assertThat(event.totalInstallments()).isEqualTo(3);

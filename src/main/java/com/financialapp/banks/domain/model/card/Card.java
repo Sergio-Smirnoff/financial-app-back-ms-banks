@@ -1,7 +1,9 @@
 package com.financialapp.banks.domain.model.card;
 
+import com.financialapp.banks.domain.common.DomainEvent;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
+import com.financialapp.banks.domain.event.CardInstallmentPaidEvent;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.card.CardInstallmentNotSupportedException;
 import com.financialapp.banks.domain.model.bank.BankName;
@@ -80,13 +82,18 @@ public abstract class Card {
      * @throws ResourceNotFoundException if the id is not on this card.
      * @throws com.financialapp.banks.domain.exception.card.CardInstallmentAlreadyPaidException if already paid.
      */
-    public CardInstallment payInstallment(CardInstallmentId installmentId, LocalDate paidDate) {
+    public CardInstallmentPayment payInstallment(CardInstallmentId installmentId, LocalDate paidDate,
+                                                 String paidFromAccountCbu) {
         for (int index = 0; index < installments.size(); index++) {
             CardInstallment current = installments.get(index);
             if (current.id().equals(installmentId)) {
                 CardInstallment paid = current.pay(paidDate);
                 installments.set(index, paid);
-                return paid;
+                DomainEvent event = new CardInstallmentPaidEvent(
+                        userId, paidFromAccountCbu,
+                        new Money(paid.amount().amount().negate(), paid.amount().currency()),
+                        paid.description(), paid.installmentNumber(), paid.totalInstallments(), paidDate);
+                return new CardInstallmentPayment(paid, List.of(event));
             }
         }
         throw new ResourceNotFoundException("CardInstallment",

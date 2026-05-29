@@ -58,7 +58,7 @@ class CardInstallmentsTest {
         card.registerExpense("TV", new Money(new BigDecimal("300.00"), ARS), 1, LocalDate.of(2026, 7, 1));
         CardInstallmentId id = card.installments().get(0).id();
 
-        CardInstallment paid = card.payInstallment(id, LocalDate.of(2026, 7, 5));
+        CardInstallment paid = card.payInstallment(id, LocalDate.of(2026, 7, 5), "0001").installment();
 
         assertThat(paid.paid()).isTrue();
         assertThat(card.installments().get(0).paid()).isTrue();

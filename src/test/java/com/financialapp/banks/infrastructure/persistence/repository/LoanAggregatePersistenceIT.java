@@ -30,7 +30,8 @@ class LoanAggregatePersistenceIT {
     void save_then_load_round_trips_installments() {
         Loan loan = Loan.originate(new UserId(1L), BankName.GALICIA, "Car loan",
                 new Money(new BigDecimal("1200.00"), Currency.getInstance("ARS")),
-                BigDecimal.ZERO, 12, AmortizationType.FRENCH, LocalDate.of(2026, 6, 1));
+                BigDecimal.ZERO, 12, AmortizationType.FRENCH, LocalDate.of(2026, 6, 1),
+                "0001234567890123456789").loan();
 
         Loan saved = loanRepository.save(loan);
 
