@@ -3,8 +3,8 @@ package com.financialapp.banks.application.card.impl;
 import com.financialapp.banks.domain.usecase.card.command.RegisterCardExpenseCommand;
 import com.financialapp.banks.domain.usecase.card.RegisterCardExpenseUseCase;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardInstallment;
-import com.financialapp.banks.domain.repository.CardInstallmentRepository;
 import com.financialapp.banks.domain.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,20 +16,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RegisterCardExpenseUseCaseImpl implements RegisterCardExpenseUseCase {
 
-    private final CardInstallmentRepository installmentRepository;
     private final CardRepository cardRepository;
 
     @Override
     @Transactional
     public List<CardInstallment> execute(RegisterCardExpenseCommand cmd) {
-        var card = cardRepository.findByCardNumberAndUserId(cmd.cardNumber(), cmd.userId())
+        Card card = cardRepository.findByCardNumberAndUserId(cmd.cardNumber(), cmd.userId())
                 .orElseThrow(() -> new ResourceNotFoundException("Card", cmd.cardNumber()));
-
-        card.ensureSupportsInstallments();
-
-        List<CardInstallment> installments = CardInstallment.schedule(
-                cmd.cardNumber(), cmd.description(), cmd.amount(), cmd.totalInstallments(), cmd.firstDueDate());
-
-        return installmentRepository.saveAll(installments);
+        card.registerExpense(cmd.description(), cmd.amount(), cmd.totalInstallments(), cmd.firstDueDate());
+        Card saved = cardRepository.save(card);
+        return saved.installments().stream()
+                .filter(installment -> installment.description().equals(cmd.description())
+                        && !installment.dueDate().isBefore(cmd.firstDueDate()))
+                .toList();
     }
 }

@@ -4,7 +4,7 @@ import com.financialapp.banks.domain.usecase.card.command.RegisterCardExpenseCom
 import com.financialapp.banks.domain.usecase.card.CheckDuplicateExpensesUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
-import com.financialapp.banks.domain.repository.CardInstallmentRepository;
+import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,20 +17,19 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 public class CheckDuplicateExpensesUseCaseImpl implements CheckDuplicateExpensesUseCase {
 
-    private final CardInstallmentRepository installmentRepository;
     private final CardRepository cardRepository;
 
     @Override
     @Transactional(readOnly = true)
     public List<Integer> execute(String cardNumber, UserId userId, List<RegisterCardExpenseCommand> expenses) {
-        cardRepository.findByCardNumberAndUserId(cardNumber, userId)
+        Card card = cardRepository.findByCardNumberAndUserId(cardNumber, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card", cardNumber));
 
         return IntStream.range(0, expenses.size())
                 .filter(expenseIndex -> {
-                    RegisterCardExpenseCommand cmd = expenses.get(expenseIndex);
-                    return installmentRepository.existsByCardNumberAndDescriptionAndAmountAndDueDate(
-                            cardNumber, cmd.description(), cmd.amount(), cmd.firstDueDate());
+                    RegisterCardExpenseCommand candidate = expenses.get(expenseIndex);
+                    return card.hasInstallmentMatching(
+                            candidate.description(), candidate.amount(), candidate.firstDueDate());
                 })
                 .boxed()
                 .toList();

@@ -5,6 +5,8 @@ import com.financialapp.banks.domain.usecase.card.command.ImportCardExpensesComm
 import com.financialapp.banks.domain.usecase.card.command.PayCardInstallmentCommand;
 import com.financialapp.banks.domain.usecase.card.BatchImportResult;
 import com.financialapp.banks.domain.usecase.card.ImportCardExpensesUseCase;
+import com.financialapp.banks.domain.usecase.card.RegisterCardExpenseUseCase;
+import com.financialapp.banks.domain.usecase.card.PayCardInstallmentUseCase;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.card.CardInstallment;
 import com.financialapp.banks.domain.repository.CardRepository;
@@ -21,8 +23,8 @@ import java.util.List;
 public class ImportCardExpensesUseCaseImpl implements ImportCardExpensesUseCase {
 
     private final CardRepository cardRepository;
-    private final RegisterCardExpenseUseCaseImpl createExpense;
-    private final PayCardInstallmentUseCaseImpl payInstallment;
+    private final RegisterCardExpenseUseCase createExpense;
+    private final PayCardInstallmentUseCase payInstallment;
 
     @Override
     @Transactional
