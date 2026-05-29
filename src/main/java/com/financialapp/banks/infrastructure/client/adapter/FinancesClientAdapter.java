@@ -37,8 +37,8 @@ public class FinancesClientAdapter implements FinancesPort {
     private List<TransactionSummary> fetchAndMap(String accountCbu, Integer limit, LocalDate from, LocalDate to) {
         try {
             var response = client.getTransactions(accountCbu, limit, from, to);
-            if (response == null || response.getData() == null) return List.of();
-            return response.getData().stream()
+            if (response == null || response.data() == null) return List.of();
+            return response.data().stream()
                     .map(dto -> new TransactionSummary(
                             dto.transactionId(),
                             dto.accountCbu(),

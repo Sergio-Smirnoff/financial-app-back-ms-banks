@@ -1,6 +1,6 @@
 package com.financialapp.banks.infrastructure.client;
 
-import com.financialapp.banks.web.dto.response.ApiResponse;
+import com.financialapp.banks.infrastructure.client.dto.ExternalApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,7 +24,7 @@ public interface FinancesFeignClient {
     ) {}
 
     @GetMapping("/api/v1/finances/transactions")
-    ApiResponse<List<TransactionDto>> getTransactions(
+    ExternalApiResponse<List<TransactionDto>> getTransactions(
             @RequestParam("accountCbu") String accountCbu,
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "from", required = false) LocalDate from,
