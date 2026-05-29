@@ -5,9 +5,6 @@ import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
 import com.financialapp.banks.domain.usecase.loan.command.PayLoanInstallmentCommand;
 import com.financialapp.banks.domain.usecase.loan.PayLoanInstallmentUseCase;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
-import com.financialapp.banks.domain.exception.loan.LoanAlreadyClosedException;
-import com.financialapp.banks.domain.exception.loan.LoanInstallmentAlreadyPaidException;
-import com.financialapp.banks.domain.exception.loan.LoanInstallmentMismatchException;
 import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.model.loan.LoanInstallment;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
@@ -20,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -36,46 +32,21 @@ public class PayLoanInstallmentUseCaseImpl implements PayLoanInstallmentUseCase 
     public LoanInstallment execute(PayLoanInstallmentCommand cmd) {
         Loan loan = loanRepository.findByIdAndUserId(cmd.loanId(), cmd.userId())
                 .orElseThrow(() -> new ResourceNotFoundException("Loan", cmd.loanId().value().toString()));
-
-        if (!loan.active()) {
-            throw new LoanAlreadyClosedException(cmd.loanId().value().toString());
-        }
+        loan.ensureActive();
 
         LoanInstallment installment = installmentRepository.findById(cmd.installmentId())
                 .orElseThrow(() -> new ResourceNotFoundException("LoanInstallment", cmd.installmentId().value().toString()));
+        installment.ensureBelongsTo(cmd.loanId());
 
-        if (!installment.loanId().equals(cmd.loanId())) {
-            throw new LoanInstallmentMismatchException(cmd.installmentId().value().toString(), cmd.loanId().value().toString());
-        }
-        if (installment.paid()) {
-            throw new LoanInstallmentAlreadyPaidException(cmd.installmentId().value().toString());
-        }
+        LocalDate paidDate = cmd.paidDate() != null ? cmd.paidDate() : LocalDate.now();
+        LoanInstallment paid = installment.pay(paidDate);
 
         adjustBalance.execute(new AdjustBalanceCommand(
                 cmd.accountCbu(), new Money(installment.amount().amount().negate(), installment.amount().currency())));
 
-        LocalDate paidDate = cmd.paidDate() != null ? cmd.paidDate() : LocalDate.now();
-        LoanInstallment paid = new LoanInstallment(
-                installment.id(),
-                installment.loanId(),
-                installment.installmentNumber(),
-                installment.amount(),
-                installment.dueDate(),
-                true,
-                paidDate,
-                installment.createdAt(),
-                LocalDateTime.now()
-        );
         LoanInstallment saved = installmentRepository.save(paid);
 
-        int remaining = loan.remainingInstallments() - 1;
-        Loan updated = new Loan(
-                loan.id(), loan.userId(), loan.bankName(), loan.name(),
-                loan.principal(), loan.interestRate(), loan.totalInstallments(), remaining,
-                loan.amortizationType(), loan.startDate(), remaining > 0,
-                loan.createdAt(), LocalDateTime.now()
-        );
-        loanRepository.save(updated);
+        loanRepository.save(loan.registerInstallmentPaid());
 
         eventPublisher.publish(new LoanInstallmentPaidEvent(
                 cmd.userId(),
