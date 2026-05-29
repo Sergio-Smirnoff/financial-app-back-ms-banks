@@ -6,9 +6,6 @@ import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.AccountType;
-import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
-import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
-import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import com.financialapp.banks.domain.repository.BankRepository;
 
@@ -43,14 +40,8 @@ public class CreateAccountUseCaseImpl implements CreateAccountUseCase {
 
         LocalDateTime now = LocalDateTime.now();
         boolean isActive = cmd.isActive() != null ? cmd.isActive() : true;
-        Account account = switch (cmd.type()) {
-            case CHECKING -> new CheckingAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
-                    cmd.userId(), cmd.bankName(), cmd.name(), isActive, now, now);
-            case SAVINGS -> new SavingsAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
-                    cmd.userId(), cmd.bankName(), cmd.name(), isActive, now, now);
-            case INVESTMENT -> new InvestmentAccount(cmd.cbu(), cmd.alias(), cmd.initialBalance(),
-                    cmd.userId(), cmd.bankName(), cmd.name(), isActive, now, now);
-        };
+        Account account = Account.create(cmd.type(), cmd.cbu(), cmd.alias(), cmd.initialBalance(),
+                cmd.userId(), cmd.bankName(), cmd.name(), isActive, now, now);
 
         return accountRepository.save(account);
     }

@@ -5,12 +5,8 @@ import com.financialapp.banks.domain.usecase.card.CreateCardUseCase;
 import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.card.Card;
-import com.financialapp.banks.domain.model.card.CardBehavior;
 import com.financialapp.banks.domain.model.card.CardBilling;
 import com.financialapp.banks.domain.model.card.CardDetails;
-import com.financialapp.banks.domain.model.card.CardNumber;
-import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
-import com.financialapp.banks.domain.model.card.cardPaymentMethod.DebitCard;
 import com.financialapp.banks.domain.repository.BankRepository;
 import com.financialapp.banks.domain.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
@@ -45,10 +41,7 @@ public class CreateCardUseCaseImpl implements CreateCardUseCase {
         );
 
         LocalDateTime now = LocalDateTime.now();
-        CardNumber cardNumber = CardNumber.of(cmd.number());
-        Card card = cmd.behavior() == CardBehavior.INSTANT_PAYMENT
-                ? new DebitCard(cardNumber, cmd.userId(), cmd.bankName(), details, now, now)
-                : new CreditCard(cardNumber, cmd.userId(), cmd.bankName(), details, now, now);
+        Card card = Card.create(cmd.number(), cmd.userId(), cmd.bankName(), details, now, now);
 
         return cardRepository.save(card);
     }

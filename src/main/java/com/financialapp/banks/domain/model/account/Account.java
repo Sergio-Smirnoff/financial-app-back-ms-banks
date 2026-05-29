@@ -3,6 +3,9 @@ package com.financialapp.banks.domain.model.account;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.account.AccountInsufficientFundsException;
+import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
+import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
+import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
 import com.financialapp.banks.domain.model.bank.BankName;
 
 import java.time.LocalDateTime;
@@ -31,6 +34,16 @@ public abstract class Account {
         this.isActive = isActive;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public static Account create(AccountType type, String cbu, String alias, Money balance,
+                                 UserId userId, BankName bankName, String name, boolean isActive,
+                                 LocalDateTime createdAt, LocalDateTime updatedAt) {
+        return switch (type) {
+            case CHECKING -> new CheckingAccount(cbu, alias, balance, userId, bankName, name, isActive, createdAt, updatedAt);
+            case SAVINGS -> new SavingsAccount(cbu, alias, balance, userId, bankName, name, isActive, createdAt, updatedAt);
+            case INVESTMENT -> new InvestmentAccount(cbu, alias, balance, userId, bankName, name, isActive, createdAt, updatedAt);
+        };
     }
 
     public String cbu() { return cbu; }
