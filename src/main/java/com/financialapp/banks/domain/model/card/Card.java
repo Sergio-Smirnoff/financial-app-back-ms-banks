@@ -93,6 +93,11 @@ public abstract class Card {
                 installmentId.value() == null ? "new" : installmentId.value().toString());
     }
 
+    /** True when the card has at least one unpaid installment (blocks cancellation). */
+    public boolean hasUnpaidInstallments() {
+        return installments.stream().anyMatch(installment -> !installment.paid());
+    }
+
     /** True when an installment with the same description, amount and due date already exists. */
     public boolean hasInstallmentMatching(String description, Money amount, LocalDate dueDate) {
         return installments.stream().anyMatch(installment ->

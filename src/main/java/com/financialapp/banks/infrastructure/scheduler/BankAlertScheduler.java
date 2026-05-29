@@ -2,15 +2,12 @@ package com.financialapp.banks.infrastructure.scheduler;
 
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.card.Card;
-import com.financialapp.banks.domain.model.card.CardInstallment;
-import com.financialapp.banks.domain.model.loan.LoanInstallment;
 import com.financialapp.banks.domain.repository.AccountRepository;
-import com.financialapp.banks.domain.repository.CardInstallmentRepository;
 import com.financialapp.banks.domain.repository.CardRepository;
-import com.financialapp.banks.domain.repository.LoanInstallmentRepository;
-import com.financialapp.banks.domain.repository.LoanRepository;
 import com.financialapp.banks.infrastructure.messaging.payload.BankAlertEvent;
 import com.financialapp.banks.infrastructure.messaging.payload.TransactionalKafkaEvent;
+import com.financialapp.banks.infrastructure.persistence.jpa.CardInstallmentJpaRepository;
+import com.financialapp.banks.infrastructure.persistence.jpa.LoanInstallmentJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -21,6 +18,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Infrastructure scheduler issuing daily, all-user alerts. Because these are cross-aggregate,
+ * all-user reads (not aggregate mutations), it queries the JPA installment repositories
+ * directly as a read source rather than going through the aggregate roots.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -32,9 +34,8 @@ public class BankAlertScheduler {
     private static final int CARD_INSTALLMENT_WINDOW_DAYS = 3;
 
     private final CardRepository cardRepository;
-    private final CardInstallmentRepository cardInstallmentRepository;
-    private final LoanInstallmentRepository loanInstallmentRepository;
-    private final LoanRepository loanRepository;
+    private final LoanInstallmentJpaRepository loanInstallmentJpaRepository;
+    private final CardInstallmentJpaRepository cardInstallmentJpaRepository;
     private final AccountRepository accountRepository;
     private final ApplicationEventPublisher springPublisher;
 
@@ -70,21 +71,42 @@ public class BankAlertScheduler {
     private void checkUpcomingLoanPayments() {
         LocalDate today = LocalDate.now();
         LocalDate limit = today.plusDays(LOAN_REMINDER_WINDOW_DAYS);
-        List<LoanInstallment> upcoming = loanInstallmentRepository.findUpcomingUnpaid(today, limit);
+        var upcoming = loanInstallmentJpaRepository.findUpcomingUnpaid(today, limit);
 
         log.info("Found {} loan installment(s) due within {} days", upcoming.size(), LOAN_REMINDER_WINDOW_DAYS);
-        for (LoanInstallment inst : upcoming) {
-            loanRepository.findById(inst.loanId()).ifPresent(loan ->
-                sendAlert(loan.userId().value(), BankAlertEvent.builder()
-                        .userId(loan.userId().value())
-                        .type("LOAN_REMINDER")
-                        .title("Loan Payment Due")
-                        .message(String.format("Installment #%d for loan '%s' is due on %s.",
-                                inst.installmentNumber(), loan.name(), inst.dueDate()))
-                        .metadata(String.format("{\"loanId\":%d,\"installmentId\":%d}",
-                                inst.loanId().value(), inst.id().value()))
-                        .build())
-            );
+        for (var inst : upcoming) {
+            var loan = inst.getLoan();
+            sendAlert(loan.getUserId(), BankAlertEvent.builder()
+                    .userId(loan.getUserId())
+                    .type("LOAN_REMINDER")
+                    .title("Loan Payment Due")
+                    .message(String.format("Installment #%d for loan '%s' is due on %s.",
+                            inst.getInstallmentNumber(), loan.getName(), inst.getDueDate()))
+                    .metadata(String.format("{\"loanId\":%d,\"installmentId\":%d}",
+                            loan.getId(), inst.getId()))
+                    .build());
+        }
+    }
+
+    private void checkUpcomingCardInstallments() {
+        LocalDate today = LocalDate.now();
+        LocalDate limit = today.plusDays(CARD_INSTALLMENT_WINDOW_DAYS);
+        var upcoming = cardInstallmentJpaRepository.findAllUpcomingUnpaid(today, limit);
+
+        log.info("Found {} card installment(s) due within {} days", upcoming.size(), CARD_INSTALLMENT_WINDOW_DAYS);
+        for (var inst : upcoming) {
+            var card = inst.getCard();
+            sendAlert(card.getUserId(), BankAlertEvent.builder()
+                    .userId(card.getUserId())
+                    .type("PAYMENT_DUE")
+                    .title("Card Installment Due")
+                    .message(String.format("Installment %d/%d for '%s' is due on %s (%.2f %s).",
+                            inst.getInstallmentNumber(), inst.getTotalInstallments(),
+                            inst.getDescription(), inst.getDueDate(),
+                            inst.getAmount(), inst.getCurrency()))
+                    .metadata(String.format("{\"cardNumber\":\"%s\",\"installmentId\":%d}",
+                            card.getCardNumber(), inst.getId()))
+                    .build());
         }
     }
 
@@ -104,29 +126,6 @@ public class BankAlertScheduler {
                     .metadata(String.format("{\"accountCbu\":\"%s\",\"bankName\":\"%s\"}",
                             account.cbu(), account.bankName()))
                     .build());
-        }
-    }
-
-    private void checkUpcomingCardInstallments() {
-        LocalDate today = LocalDate.now();
-        LocalDate limit = today.plusDays(CARD_INSTALLMENT_WINDOW_DAYS);
-        List<CardInstallment> upcoming = cardInstallmentRepository.findUpcomingUnpaid(today, limit);
-
-        log.info("Found {} card installment(s) due within {} days", upcoming.size(), CARD_INSTALLMENT_WINDOW_DAYS);
-        for (CardInstallment inst : upcoming) {
-            cardRepository.findByCardNumber(inst.cardNumber()).ifPresent(card ->
-                sendAlert(card.userId().value(), BankAlertEvent.builder()
-                        .userId(card.userId().value())
-                        .type("PAYMENT_DUE")
-                        .title("Card Installment Due")
-                        .message(String.format("Installment %d/%d for '%s' is due on %s (%.2f %s).",
-                                inst.installmentNumber(), inst.totalInstallments(),
-                                inst.description(), inst.dueDate(),
-                                inst.amount().amount(), inst.amount().currency().getCurrencyCode()))
-                        .metadata(String.format("{\"cardNumber\":\"%s\",\"installmentId\":%d}",
-                                inst.cardNumber(), inst.id().value()))
-                        .build())
-            );
         }
     }
 
