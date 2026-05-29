@@ -5,11 +5,7 @@ import com.financialapp.banks.domain.usecase.account.AdjustBalanceUseCase;
 import com.financialapp.banks.domain.event.BalanceAdjustedEvent;
 import com.financialapp.banks.domain.event.LowBalanceEvent;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
-import com.financialapp.banks.domain.exception.account.AccountCurrencyMismatchException;
-import com.financialapp.banks.domain.exception.account.AccountInsufficientFundsException;
-import com.financialapp.banks.domain.exception.account.AccountInvestmentRestrictionException;
 import com.financialapp.banks.domain.model.account.Account;
-import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.AccountRepository;
@@ -36,31 +32,24 @@ public class AdjustBalanceUseCaseImpl implements AdjustBalanceUseCase {
         Account account = accountRepository.findByCbu(cmd.accountCbu())
                 .orElseThrow(() -> new ResourceNotFoundException("Account", cmd.accountCbu()));
 
-        if (account instanceof InvestmentAccount) {
-            throw new AccountInvestmentRestrictionException(cmd.accountCbu());
-        }
+        // Normalize the signed delta to the account currency when none is supplied,
+        // preserving the original tolerance for currency-less deltas.
+        Money delta = cmd.delta();
+        Money amount = delta.currency() == null
+                ? new Money(delta.amount(), account.balance().currency())
+                : delta;
 
-        if (cmd.delta().currency() != null &&
-                !account.balance().currency().equals(cmd.delta().currency())) {
-            throw new AccountCurrencyMismatchException(
-                account.balance().currency().getCurrencyCode(),
-                cmd.delta().currency().getCurrencyCode());
-        }
+        // Decide debit vs credit from the signed delta, exactly as before:
+        // a negative delta reduces the balance, otherwise it increases it.
+        // The Account aggregate enforces the investment restriction, the
+        // same-currency guard and the insufficient-funds invariant.
+        Account updated = amount.isNegative()
+                ? account.debit(amount.negate(), LocalDateTime.now())
+                : account.credit(amount, LocalDateTime.now());
 
-        BigDecimal newBalance = account.balance().amount().add(cmd.delta().amount());
-
-        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
-            throw new AccountInsufficientFundsException(
-                cmd.accountCbu(),
-                account.balance(),
-                new Money(cmd.delta().amount().negate(), account.balance().currency()));
-        }
-
-        Money updatedBalance = new Money(newBalance, account.balance().currency());
-        Account updated = account.withBalance(updatedBalance, LocalDateTime.now());
         accountRepository.save(updated);
 
-        if (newBalance.compareTo(LOW_BALANCE_THRESHOLD) < 0) {
+        if (updated.isLowBalance(new Money(LOW_BALANCE_THRESHOLD, account.balance().currency()))) {
             eventPublisher.publish(new LowBalanceEvent(
                     account.userId(),
                     account.cbu(),

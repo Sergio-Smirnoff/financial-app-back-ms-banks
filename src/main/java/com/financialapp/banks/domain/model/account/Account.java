@@ -2,6 +2,7 @@ package com.financialapp.banks.domain.model.account;
 
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
+import com.financialapp.banks.domain.exception.account.AccountInsufficientFundsException;
 import com.financialapp.banks.domain.model.bank.BankName;
 
 import java.time.LocalDateTime;
@@ -43,4 +44,39 @@ public abstract class Account {
     public LocalDateTime updatedAt() { return updatedAt; }
 
     public abstract Account withBalance(Money newBalance, LocalDateTime updatedAt);
+
+    /**
+     * Removes {@code amount} from the balance. The amount is a positive magnitude.
+     * Enforces the investment-account restriction, the same-currency guard
+     * (via {@link Money#subtract}) and the no-overdraft (insufficient funds) invariant.
+     */
+    public Account debit(Money amount, LocalDateTime when) {
+        ensureNotInvestmentRestricted();
+        if (balance.isLessThan(amount)) {
+            throw new AccountInsufficientFundsException(cbu, balance, amount);
+        }
+        return withBalance(balance.subtract(amount), when);
+    }
+
+    /**
+     * Adds {@code amount} to the balance. The amount is a positive magnitude.
+     * Enforces the investment-account restriction and the same-currency guard
+     * (via {@link Money#add}).
+     */
+    public Account credit(Money amount, LocalDateTime when) {
+        ensureNotInvestmentRestricted();
+        return withBalance(balance.add(amount), when);
+    }
+
+    public boolean isLowBalance(Money threshold) {
+        return balance.isLessThan(threshold);
+    }
+
+    /**
+     * Hook for account types that forbid manual balance adjustments.
+     * Default: no restriction.
+     */
+    protected void ensureNotInvestmentRestricted() {
+        // no-op by default
+    }
 }

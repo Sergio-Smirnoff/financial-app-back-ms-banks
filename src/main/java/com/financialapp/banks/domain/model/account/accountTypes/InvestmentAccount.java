@@ -2,6 +2,7 @@ package com.financialapp.banks.domain.model.account.accountTypes;
 
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
+import com.financialapp.banks.domain.exception.account.AccountInvestmentRestrictionException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.bank.BankName;
 
@@ -18,5 +19,10 @@ public class InvestmentAccount extends Account {
     @Override
     public Account withBalance(Money newBalance, LocalDateTime updatedAt) {
         return new InvestmentAccount(cbu, alias, newBalance, userId, bankName, name, isActive, createdAt, updatedAt);
+    }
+
+    @Override
+    protected void ensureNotInvestmentRestricted() {
+        throw new AccountInvestmentRestrictionException(cbu);
     }
 }
