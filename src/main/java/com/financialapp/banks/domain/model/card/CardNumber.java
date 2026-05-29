@@ -18,8 +18,12 @@ public record CardNumber(String value) {
         return value.substring(value.length() - 4);
     }
 
+    /**
+     * Masks all but the last four digits so the PAN never leaks into logs or error messages.
+     * Use {@link #value()} when the full number is genuinely required.
+     */
     @Override
     public String toString() {
-        return value;
+        return "*".repeat(value.length() - 4) + last4();
     }
 }
