@@ -38,7 +38,7 @@ class UpdateCardUseCaseImplTest {
         CardDetails details = new CardDetails(
                 CardBrand.VISA, CardType.PLATINUM, CardBehavior.CREDIT,
                 expiry, new CardBilling(closing, due));
-        return new CreditCard(new CardNumber(cardNumber), new UserId(1L), new BankNumber("007"),
+        return new CreditCard(CardNumber.from(cardNumber), new UserId(1L), new BankNumber("007"),
                 details, LocalDateTime.now(), LocalDateTime.now());
     }
 
@@ -46,18 +46,18 @@ class UpdateCardUseCaseImplTest {
         CardDetails details = new CardDetails(
                 CardBrand.MASTERCARD, CardType.STANDARD, CardBehavior.INSTANT_PAYMENT,
                 expiry, new CardBilling(closing, due));
-        return new DebitCard(new CardNumber(cardNumber), new UserId(2L), new BankNumber("072"),
+        return new DebitCard(CardNumber.from(cardNumber), new UserId(2L), new BankNumber("072"),
                 details, LocalDateTime.now(), LocalDateTime.now());
     }
 
     @Test
     void shouldUpdateCreditCardBillingAndExpiry() {
-        CreditCard existing = buildCreditCard("1234567890123456", YearMonth.of(2026, 1), 15, 10);
-        when(cardRepository.findByCardNumberAndUserId(eq("1234567890123456"), any())).thenReturn(Optional.of(existing));
+        CreditCard existing = buildCreditCard("4111111111111111", YearMonth.of(2026, 1), 15, 10);
+        when(cardRepository.findByCardNumberAndUserId(eq("4111111111111111"), any())).thenReturn(Optional.of(existing));
         when(cardRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         YearMonth newExpiry = YearMonth.of(2028, 6);
-        UpdateCardCommand cmd = new UpdateCardCommand("1234567890123456", new UserId(1L), newExpiry, 20, 5);
+        UpdateCardCommand cmd = new UpdateCardCommand("4111111111111111", new UserId(1L), newExpiry, 20, 5);
 
         var result = useCase.execute(cmd);
 
@@ -70,12 +70,12 @@ class UpdateCardUseCaseImplTest {
 
     @Test
     void shouldUpdateDebitCardPartially() {
-        DebitCard existing = buildDebitCard("5678901234567890", YearMonth.of(2025, 12), 10, 5);
-        when(cardRepository.findByCardNumberAndUserId(eq("5678901234567890"), any())).thenReturn(Optional.of(existing));
+        DebitCard existing = buildDebitCard("4242424242424242", YearMonth.of(2025, 12), 10, 5);
+        when(cardRepository.findByCardNumberAndUserId(eq("4242424242424242"), any())).thenReturn(Optional.of(existing));
         when(cardRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         // only update closingDay, keep expiry and dueDay
-        UpdateCardCommand cmd = new UpdateCardCommand("5678901234567890", new UserId(2L), null, 25, null);
+        UpdateCardCommand cmd = new UpdateCardCommand("4242424242424242", new UserId(2L), null, 25, null);
 
         var result = useCase.execute(cmd);
 
@@ -87,11 +87,11 @@ class UpdateCardUseCaseImplTest {
 
     @Test
     void shouldKeepAllFieldsWhenCommandHasNulls() {
-        CreditCard existing = buildCreditCard("9999999999999999", YearMonth.of(2027, 3), 12, 8);
-        when(cardRepository.findByCardNumberAndUserId(eq("9999999999999999"), any())).thenReturn(Optional.of(existing));
+        CreditCard existing = buildCreditCard("5555555555554444", YearMonth.of(2027, 3), 12, 8);
+        when(cardRepository.findByCardNumberAndUserId(eq("5555555555554444"), any())).thenReturn(Optional.of(existing));
         when(cardRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        UpdateCardCommand cmd = new UpdateCardCommand("9999999999999999", new UserId(1L), null, null, null);
+        UpdateCardCommand cmd = new UpdateCardCommand("5555555555554444", new UserId(1L), null, null, null);
 
         var result = useCase.execute(cmd);
 

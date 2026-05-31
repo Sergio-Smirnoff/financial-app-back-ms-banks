@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 class PayCardInstallmentUseCaseImplTest {
 
     private static final Currency USD = Currency.getInstance("USD");
-    private static final String CARD = "1234567890123456";
+    private static final String CARD = "4111111111111111";
 
     @Mock CardRepository cardRepository;
     @Mock AdjustBalanceUseCase adjustBalance;

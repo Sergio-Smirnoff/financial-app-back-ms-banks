@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CardFactoryTest {
 
-    private static final String NUMBER = "1234567890123456";
+    private static final String NUMBER = "4111111111111111";
     private static final UserId USER_ID = new UserId(1L);
     private static final LocalDateTime NOW = LocalDateTime.now();
 

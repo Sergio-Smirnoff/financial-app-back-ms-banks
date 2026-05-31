@@ -37,7 +37,7 @@ public abstract class Card {
 
     public static Card create(String number, UserId userId, BankNumber bankNumber,
                               CardDetails details, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        CardNumber cardNumber = new CardNumber(number);
+        CardNumber cardNumber = CardNumber.from(number);
         return details.behavior() == CardBehavior.INSTANT_PAYMENT
                 ? new DebitCard(cardNumber, userId, bankNumber, details, createdAt, updatedAt)
                 : new CreditCard(cardNumber, userId, bankNumber, details, createdAt, updatedAt);

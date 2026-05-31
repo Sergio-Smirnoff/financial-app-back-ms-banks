@@ -45,7 +45,7 @@ class IssueCardUseCaseImplTest {
     private IssueCardCommand command(CardBehavior behavior) {
         return new IssueCardCommand(new UserId(1L), new BankNumber("007"),
                 CardBrand.VISA, CardType.PLATINUM, behavior,
-                "1234567890123456", YearMonth.now().plusYears(2), 20, 10);
+                "4111111111111111", YearMonth.now().plusYears(2), 20, 10);
     }
 
     @Test
@@ -57,7 +57,7 @@ class IssueCardUseCaseImplTest {
         Card result = useCase.execute(command(CardBehavior.CREDIT));
 
         assertThat(result).isInstanceOf(CreditCard.class);
-        assertThat(result.cardNumber().value()).isEqualTo("1234567890123456");
+        assertThat(result.cardNumber().value()).isEqualTo("4111111111111111");
     }
 
     @Test

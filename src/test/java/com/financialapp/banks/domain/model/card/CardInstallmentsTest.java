@@ -22,7 +22,7 @@ class CardInstallmentsTest {
     private Card creditCard() {
         CardDetails details = new CardDetails(CardBrand.VISA, CardType.STANDARD, CardBehavior.CREDIT,
                 YearMonth.of(2030, 1), new CardBilling(20, 10));
-        return Card.create("1234567890123456", new UserId(1L), new BankNumber("007"), details,
+        return Card.create("4111111111111111", new UserId(1L), new BankNumber("007"), details,
                 LocalDateTime.now(), LocalDateTime.now());
     }
 
@@ -38,7 +38,7 @@ class CardInstallmentsTest {
     void debit_card_rejects_installments() {
         CardDetails details = new CardDetails(CardBrand.VISA, CardType.STANDARD, CardBehavior.INSTANT_PAYMENT,
                 YearMonth.of(2030, 1), new CardBilling(20, 10));
-        Card debit = Card.create("1234567890123456", new UserId(1L), new BankNumber("007"), details,
+        Card debit = Card.create("4111111111111111", new UserId(1L), new BankNumber("007"), details,
                 LocalDateTime.now(), LocalDateTime.now());
         assertThatThrownBy(() -> debit.registerExpense("X", new Money(new BigDecimal("10.00"), ARS), 1, LocalDate.now()))
                 .isInstanceOf(CardInstallmentNotSupportedException.class);

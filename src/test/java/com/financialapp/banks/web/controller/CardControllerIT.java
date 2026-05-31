@@ -41,7 +41,7 @@ class CardControllerIT {
     @Test
     void issueCard_then_listIncludesIt() throws Exception {
         CardRequest req = new CardRequest("007", CardBrand.VISA, CardType.PLATINUM,
-                CardBehavior.CREDIT, "1234567890123456", YearMonth.now().plusYears(2), 20, 10);
+                CardBehavior.CREDIT, "4111111111111111", YearMonth.now().plusYears(2), 20, 10);
 
         mockMvc.perform(post("/api/v1/banks/cards")
                         .header("X-User-Id", "1")
@@ -49,18 +49,18 @@ class CardControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.cardNumber").value("1234567890123456"));
+                .andExpect(jsonPath("$.data.cardNumber").value("4111111111111111"));
 
         mockMvc.perform(get("/api/v1/banks/cards").header("X-User-Id", "1").header("X-Internal-Token", "test-token"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].cardNumber").value("1234567890123456"));
+                .andExpect(jsonPath("$.data[0].cardNumber").value("4111111111111111"));
     }
 
     @Test
     void issueCard_acceptsMmYyExpiryString() throws Exception {
         String body = """
                 {"bankNumber":"007","brand":"VISA","cardType":"STANDARD","behavior":"CREDIT",
-                 "cardNumber":"4387269571327193","expiringDate":"08/30","closingDay":15,"dueDay":5}
+                 "cardNumber":"4111111111111111","expiringDate":"08/30","closingDay":15,"dueDay":5}
                 """;
 
         mockMvc.perform(post("/api/v1/banks/cards")

@@ -17,7 +17,7 @@ class CardSupportsInstallmentsTest {
     private Card card(CardBehavior behavior) {
         CardDetails details = new CardDetails(CardBrand.VISA, CardType.PLATINUM,
                 behavior, YearMonth.now().plusYears(2), new CardBilling(20, 10));
-        CardNumber number = new CardNumber("1234567890123456");
+        CardNumber number = CardNumber.from("4111111111111111");
         return behavior == CardBehavior.INSTANT_PAYMENT
                 ? new DebitCard(number, new UserId(1L), new BankNumber("007"), details, LocalDateTime.now(), LocalDateTime.now())
                 : new CreditCard(number, new UserId(1L), new BankNumber("007"), details, LocalDateTime.now(), LocalDateTime.now());
