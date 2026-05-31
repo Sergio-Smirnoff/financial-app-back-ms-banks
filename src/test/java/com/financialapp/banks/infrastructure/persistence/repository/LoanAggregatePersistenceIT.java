@@ -2,7 +2,7 @@ package com.financialapp.banks.infrastructure.persistence.repository;
 
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.loan.AmortizationType;
 import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.repository.LoanRepository;
@@ -28,7 +28,7 @@ class LoanAggregatePersistenceIT {
 
     @Test
     void save_then_load_round_trips_installments() {
-        Loan loan = Loan.originate(new UserId(1L), BankName.GALICIA, "Car loan",
+        Loan loan = Loan.originate(new UserId(1L), new BankNumber("007"), "Car loan",
                 new Money(new BigDecimal("1200.00"), Currency.getInstance("ARS")),
                 BigDecimal.ZERO, 12, AmortizationType.FRENCH, LocalDate.of(2026, 6, 1),
                 "0001234567890123456789").loan();

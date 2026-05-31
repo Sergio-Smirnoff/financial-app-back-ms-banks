@@ -24,7 +24,7 @@ public class ListAccountsUseCaseImpl implements ListAccountsUseCase {
                 command.userId(),
                 command.type(),
                 command.currency(),
-                command.bankName(),
+                command.bankNumber(),
                 command.name(),
                 command.hideEmpty()
         );

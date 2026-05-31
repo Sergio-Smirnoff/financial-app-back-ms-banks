@@ -2,7 +2,7 @@ package com.financialapp.banks.infrastructure.persistence.mapper;
 
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardBehavior;
 import com.financialapp.banks.domain.model.card.CardBilling;
@@ -35,11 +35,11 @@ public class CardPersistenceMapper {
                 new CardBilling(entity.getClosingDay(), entity.getDueDay())
         );
         UserId userId = new UserId(entity.getUserId());
-        BankName bankName = BankName.valueOf(bank.getName());
+        BankNumber bankNumber = new BankNumber(bank.getBankNumber());
         CardNumber cardNumber = new CardNumber(entity.getCardNumber());
         Card card = entity.getBehavior() == CardBehavior.INSTANT_PAYMENT
-                ? new DebitCard(cardNumber, userId, bankName, details, entity.getCreatedAt(), entity.getUpdatedAt())
-                : new CreditCard(cardNumber, userId, bankName, details, entity.getCreatedAt(), entity.getUpdatedAt());
+                ? new DebitCard(cardNumber, userId, bankNumber, details, entity.getCreatedAt(), entity.getUpdatedAt())
+                : new CreditCard(cardNumber, userId, bankNumber, details, entity.getCreatedAt(), entity.getUpdatedAt());
 
         List<CardInstallment> installments = entity.getInstallments().stream()
                 .sorted(Comparator.comparing(CardInstallmentJpaEntity::getDueDate))

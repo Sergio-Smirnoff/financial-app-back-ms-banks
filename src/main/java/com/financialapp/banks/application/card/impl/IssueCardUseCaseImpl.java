@@ -25,8 +25,8 @@ public class IssueCardUseCaseImpl implements IssueCardUseCase {
     @Override
     @Transactional
     public Card execute(IssueCardCommand cmd) {
-        bankRepository.findByName(cmd.bankName())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank", cmd.bankName().getDisplayName()));
+        bankRepository.findByBankNumber(cmd.bankNumber())
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", cmd.bankNumber().value()));
 
         if (cardRepository.findByCardNumber(cmd.number()).isPresent()) {
             throw new ResourceAlreadyExistsException("Card", cmd.number());
@@ -41,7 +41,7 @@ public class IssueCardUseCaseImpl implements IssueCardUseCase {
         );
 
         LocalDateTime now = LocalDateTime.now();
-        Card card = Card.create(cmd.number(), cmd.userId(), cmd.bankName(), details, now, now);
+        Card card = Card.create(cmd.number(), cmd.userId(), cmd.bankNumber(), details, now, now);
 
         return cardRepository.save(card);
     }

@@ -6,8 +6,9 @@ import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.InfrastructureException;
 import com.financialapp.banks.domain.exception.InvestmentsServiceException;
+import com.financialapp.banks.domain.common.model.Cbu;
 import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.port.InvestmentsPort;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,8 +33,8 @@ class CloseAccountUseCaseImplTest {
     @Mock InvestmentsPort investmentsPort;
     CloseAccountUseCaseImpl useCase;
 
-    private static final String CBU = "0000003100012345678901";
-    private static final BankName BANK_NAME = BankName.GALICIA;
+    private static final Cbu CBU = Cbu.from("0070001600000000123459");
+    private static final BankNumber BANK_NUMBER = new BankNumber("007");
 
     @BeforeEach
     void setUp() {
@@ -44,30 +45,30 @@ class CloseAccountUseCaseImplTest {
         return new InvestmentAccount(
                 CBU, "alias.test",
                 new Money(BigDecimal.ZERO, Currency.getInstance("ARS")),
-                new UserId(1L), BANK_NAME, "My Investment Account",
+                new UserId(1L), BANK_NUMBER, "My Investment Account",
                 true, LocalDateTime.now(), LocalDateTime.now());
     }
 
     @Test
     void execute_wrapsInfrastructureExceptionAsInvestmentsServiceException() {
-        when(accountRepository.findByCbu(CBU))
+        when(accountRepository.findByCbu(CBU.value()))
                 .thenReturn(Optional.of(investmentAccount()));
-        when(investmentsPort.countHoldings(CBU))
+        when(investmentsPort.countHoldings(CBU.value()))
                 .thenThrow(new InfrastructureException("ms-investments: timeout"));
 
-        assertThatThrownBy(() -> useCase.execute(new CloseAccountCommand(CBU)))
+        assertThatThrownBy(() -> useCase.execute(new CloseAccountCommand(CBU.value())))
                 .isInstanceOf(InvestmentsServiceException.class)
                 .isNotInstanceOf(InfrastructureException.class);
     }
 
     @Test
     void execute_deletesAccountWhenNoHoldings() {
-        when(accountRepository.findByCbu(CBU))
+        when(accountRepository.findByCbu(CBU.value()))
                 .thenReturn(Optional.of(investmentAccount()));
-        when(investmentsPort.countHoldings(CBU)).thenReturn(0);
+        when(investmentsPort.countHoldings(CBU.value())).thenReturn(0);
 
-        useCase.execute(new CloseAccountCommand(CBU));
+        useCase.execute(new CloseAccountCommand(CBU.value()));
 
-        verify(accountRepository).delete(CBU);
+        verify(accountRepository).delete(CBU.value());
     }
 }

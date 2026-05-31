@@ -7,7 +7,7 @@ import com.financialapp.banks.domain.usecase.account.command.FilterAccountComman
 import com.financialapp.banks.domain.usecase.account.ListAccountsUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.Bank;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.web.dto.response.AccountResponse;
 import com.financialapp.banks.web.dto.response.ApiResponse;
 import com.financialapp.banks.web.dto.response.AvailableBankResponse;
@@ -55,14 +55,14 @@ public class BankController {
                         .toList()));
     }
 
-    @GetMapping("/{name}")
+    @GetMapping("/{bankNumber}")
     @Operation(summary = "Get a bank with the user's accounts there")
     public ResponseEntity<ApiResponse<BankResponse>> get(
             @RequestHeader("X-User-Id") Long userId,
-            @PathVariable String name) {
-        Bank bank = getBankUseCase.execute(BankName.fromString(name));
+            @PathVariable String bankNumber) {
+        Bank bank = getBankUseCase.execute(new BankNumber(bankNumber));
         List<AccountResponse> accounts = listAccountsUseCase.execute(
-                new FilterAccountCommand(new UserId(userId), null, null, bank.name(), null, false))
+                new FilterAccountCommand(new UserId(userId), null, null, bank.bankNumber(), null, false))
                 .stream().map(accountMapper::toResponse).toList();
         return ResponseEntity.ok(ApiResponse.ok(bankMapper.toResponse(bank, accounts)));
     }

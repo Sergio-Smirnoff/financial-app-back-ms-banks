@@ -2,7 +2,7 @@ package com.financialapp.banks.domain.model.loan;
 
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -18,7 +18,7 @@ class LoanOriginationTest {
     @Test
     void originate_builds_loan_with_full_schedule() {
         Loan loan = Loan.originate(
-                new UserId(1L), BankName.GALICIA, "Car loan",
+                new UserId(1L), new BankNumber("007"), "Car loan",
                 new Money(new BigDecimal("12000.00"), ARS),
                 new BigDecimal("0"), 12, AmortizationType.FRENCH,
                 LocalDate.of(2026, 6, 1), "0001234567890123456789").loan();

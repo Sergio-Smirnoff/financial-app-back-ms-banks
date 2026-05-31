@@ -33,19 +33,19 @@ public class OriginateLoanUseCaseImpl implements OriginateLoanUseCase {
     @Override
     @Transactional
     public Loan execute(OriginateLoanCommand cmd) {
-        bankRepository.findByName(cmd.bankName())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank", cmd.bankName().getDisplayName()));
+        bankRepository.findByBankNumber(cmd.bankNumber())
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", cmd.bankNumber().value()));
 
         Account dest = accountRepository.findByCbu(cmd.destinationAccountCbu())
                 .orElseThrow(() -> new ResourceNotFoundException("Account", cmd.destinationAccountCbu()));
 
-        if (!dest.bankName().equals(cmd.bankName())) {
-            throw new LoanAccountMismatchException(cmd.destinationAccountCbu(), cmd.bankName().getDisplayName());
+        if (!dest.bankNumber().equals(cmd.bankNumber())) {
+            throw new LoanAccountMismatchException(cmd.destinationAccountCbu(), cmd.bankNumber().value());
         }
 
         Currency currency = dest.balance().currency();
         LoanOrigination origination = Loan.originate(
-                cmd.userId(), cmd.bankName(), cmd.name(),
+                cmd.userId(), cmd.bankNumber(), cmd.name(),
                 new Money(cmd.principal(), currency), cmd.interestRate(),
                 cmd.totalInstallments(), cmd.amortizationType(), cmd.startDate(),
                 cmd.destinationAccountCbu());

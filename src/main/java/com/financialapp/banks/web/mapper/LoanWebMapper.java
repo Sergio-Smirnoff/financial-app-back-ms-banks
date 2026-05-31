@@ -11,7 +11,7 @@ public class LoanWebMapper {
         if (loan == null) return null;
         return LoanResponse.builder()
                 .id(loan.id().value())
-                .bankName(loan.bankName().name())
+                .bankNumber(loan.bankNumber().value())
                 .userId(loan.userId().value())
                 .name(loan.name())
                 .principal(loan.principal().amount().toPlainString())

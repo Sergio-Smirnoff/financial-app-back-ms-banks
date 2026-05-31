@@ -1,11 +1,12 @@
 package com.financialapp.banks.domain.model.account;
 
+import com.financialapp.banks.domain.common.model.Cbu;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -22,8 +23,8 @@ class AccountFactoryTest {
     private static final LocalDateTime NOW = LocalDateTime.now();
 
     private Account create(AccountType type) {
-        return Account.create(type, "1234567890123456789012", "alias", BALANCE,
-                USER_ID, BankName.GALICIA, "My Account", true, NOW, NOW);
+        return Account.create(type, Cbu.from("0070001600000000123459"), "alias", BALANCE,
+                USER_ID, new BankNumber("007"), "My Account", true, NOW, NOW);
     }
 
     @Test
@@ -31,7 +32,7 @@ class AccountFactoryTest {
         Account account = create(AccountType.CHECKING);
 
         assertThat(account).isInstanceOf(CheckingAccount.class);
-        assertThat(account.cbu()).isEqualTo("1234567890123456789012");
+        assertThat(account.cbu().value()).isEqualTo("0070001600000000123459");
         assertThat(account.balance().amount()).isEqualByComparingTo("100.00");
     }
 
@@ -40,7 +41,7 @@ class AccountFactoryTest {
         Account account = create(AccountType.SAVINGS);
 
         assertThat(account).isInstanceOf(SavingsAccount.class);
-        assertThat(account.cbu()).isEqualTo("1234567890123456789012");
+        assertThat(account.cbu().value()).isEqualTo("0070001600000000123459");
         assertThat(account.balance().amount()).isEqualByComparingTo("100.00");
     }
 
@@ -49,7 +50,7 @@ class AccountFactoryTest {
         Account account = create(AccountType.INVESTMENT);
 
         assertThat(account).isInstanceOf(InvestmentAccount.class);
-        assertThat(account.cbu()).isEqualTo("1234567890123456789012");
+        assertThat(account.cbu().value()).isEqualTo("0070001600000000123459");
         assertThat(account.balance().amount()).isEqualByComparingTo("100.00");
     }
 }

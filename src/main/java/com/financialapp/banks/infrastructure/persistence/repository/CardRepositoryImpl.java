@@ -2,7 +2,7 @@ package com.financialapp.banks.infrastructure.persistence.repository;
 
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardBrand;
 import com.financialapp.banks.domain.model.card.CardType;
@@ -35,15 +35,15 @@ public class CardRepositoryImpl implements CardRepository {
     }
 
     @Override
-    public List<Card> findByBankName(BankName bankName) {
-        BankJpaEntity bank = requireBank(bankName);
+    public List<Card> findByBankNumber(BankNumber bankNumber) {
+        BankJpaEntity bank = requireBank(bankNumber);
         return cardJpaRepository.findByBankId(bank.getId())
                 .stream().map(entity -> mapper.toDomain(entity, bank)).toList();
     }
 
     @Override
-    public int countByBankName(BankName bankName) {
-        return bankJpaRepository.findByName(bankName.name())
+    public int countByBankNumber(BankNumber bankNumber) {
+        return bankJpaRepository.findByBankNumber(bankNumber.value())
                 .map(bank -> cardJpaRepository.countByBankId(bank.getId())).orElse(0);
     }
 
@@ -58,8 +58,8 @@ public class CardRepositoryImpl implements CardRepository {
     }
 
     @Override
-    public boolean existsByBankNameAndBrandAndTypeAndCardNumber(BankName bankName, CardBrand brand, CardType type, String cardNumber) {
-        return bankJpaRepository.findByName(bankName.name())
+    public boolean existsByBankNumberAndBrandAndTypeAndCardNumber(BankNumber bankNumber, CardBrand brand, CardType type, String cardNumber) {
+        return bankJpaRepository.findByBankNumber(bankNumber.value())
                 .map(bank -> cardJpaRepository.existsByBankIdAndBrandAndCardTypeAndCardNumber(
                         bank.getId(), brand, type, cardNumber))
                 .orElse(false);
@@ -74,7 +74,7 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     @Transactional
     public Card save(Card card) {
-        BankJpaEntity bank = requireBank(card.bankName());
+        BankJpaEntity bank = requireBank(card.bankNumber());
         CardJpaEntity entity = cardJpaRepository.findByCardNumber(card.cardNumber().value())
                 .map(existing -> mapper.merge(existing, card, bank))
                 .orElseGet(() -> mapper.toJpa(card, bank));
@@ -93,8 +93,8 @@ public class CardRepositoryImpl implements CardRepository {
         return mapper.toDomain(entity, bank);
     }
 
-    private BankJpaEntity requireBank(BankName name) {
-        return bankJpaRepository.findByName(name.name())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank", name.getDisplayName()));
+    private BankJpaEntity requireBank(BankNumber bankNumber) {
+        return bankJpaRepository.findByBankNumber(bankNumber.value())
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", bankNumber.value()));
     }
 }

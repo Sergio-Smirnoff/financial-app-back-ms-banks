@@ -7,9 +7,12 @@ import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.loan.LoanAccountMismatchException;
+import com.financialapp.banks.domain.common.model.Cbu;
+import com.financialapp.banks.domain.model.account.AccountNumber;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
 import com.financialapp.banks.domain.model.bank.Bank;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
+import com.financialapp.banks.domain.model.bank.SucursalCode;
 import com.financialapp.banks.domain.model.loan.AmortizationType;
 import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.model.loan.LoanId;
@@ -53,24 +56,25 @@ class OriginateLoanUseCaseImplTest {
     }
 
     private CheckingAccount destAccount() {
-        return new CheckingAccount("1234567890123456789012", "alias",
+        return new CheckingAccount(
+                new Cbu(new BankNumber("007"), new SucursalCode("0001"), new AccountNumber("0000000012345")), "alias",
                 new Money(BigDecimal.ZERO, Currency.getInstance("USD")),
-                new UserId(1L), BankName.GALICIA, "My acc", true,
+                new UserId(1L), new BankNumber("007"), "My acc", true,
                 LocalDateTime.now(), LocalDateTime.now());
     }
 
     @Test
     void create_generatesAmortizedInstallments() {
-        when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.of(new Bank(BankName.GALICIA, null)));
+        when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
         when(accountRepository.findByCbu("1234567890123456789012")).thenReturn(Optional.of(destAccount()));
         when(loanRepository.save(any(Loan.class))).thenAnswer(inv -> {
             Loan l = inv.getArgument(0);
-            return new Loan(new LoanId(500L), l.userId(), l.bankName(), l.name(), l.principal(),
+            return new Loan(new LoanId(500L), l.userId(), l.bankNumber(), l.name(), l.principal(),
                     l.interestRate(), l.totalInstallments(), l.remainingInstallments(),
                     l.amortizationType(), l.startDate(), l.active(), l.installments(), l.createdAt(), l.updatedAt());
         });
 
-        Loan result = useCase.execute(new OriginateLoanCommand(new UserId(1L), BankName.GALICIA,
+        Loan result = useCase.execute(new OriginateLoanCommand(new UserId(1L), new BankNumber("007"),
                 "1234567890123456789012", "Car Loan", new BigDecimal("10000.00"),
                 new BigDecimal("12.00"), 12, LocalDate.of(2026, 1, 1), AmortizationType.FRENCH));
 
@@ -85,14 +89,15 @@ class OriginateLoanUseCaseImplTest {
 
     @Test
     void create_rejectsMismatchedBank() {
-        when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.of(new Bank(BankName.GALICIA, null)));
-        CheckingAccount otherBankAccount = new CheckingAccount("1234567890123456789012", "alias",
+        when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
+        CheckingAccount otherBankAccount = new CheckingAccount(
+                new Cbu(new BankNumber("072"), new SucursalCode("0001"), new AccountNumber("0000000012345")), "alias",
                 new Money(BigDecimal.ZERO, Currency.getInstance("USD")),
-                new UserId(1L), BankName.SANTANDER, "My acc", true,
+                new UserId(1L), new BankNumber("072"), "My acc", true,
                 LocalDateTime.now(), LocalDateTime.now());
         when(accountRepository.findByCbu("1234567890123456789012")).thenReturn(Optional.of(otherBankAccount));
 
-        assertThatThrownBy(() -> useCase.execute(new OriginateLoanCommand(new UserId(1L), BankName.GALICIA,
+        assertThatThrownBy(() -> useCase.execute(new OriginateLoanCommand(new UserId(1L), new BankNumber("007"),
                 "1234567890123456789012", "Car Loan", new BigDecimal("100"), new BigDecimal("12"),
                 1, LocalDate.now(), AmortizationType.FRENCH)))
                 .isInstanceOf(LoanAccountMismatchException.class);
@@ -100,9 +105,9 @@ class OriginateLoanUseCaseImplTest {
 
     @Test
     void create_throwsWhenBankMissing() {
-        when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.empty());
+        when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> useCase.execute(new OriginateLoanCommand(new UserId(1L), BankName.GALICIA,
+        assertThatThrownBy(() -> useCase.execute(new OriginateLoanCommand(new UserId(1L), new BankNumber("007"),
                 "cbu", "Loan", new BigDecimal("100"), new BigDecimal("12"), 1, LocalDate.now(), AmortizationType.FRENCH)))
                 .isInstanceOf(ResourceNotFoundException.class);
     }

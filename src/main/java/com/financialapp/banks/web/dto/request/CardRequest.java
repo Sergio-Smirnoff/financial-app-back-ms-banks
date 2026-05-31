@@ -14,7 +14,7 @@ import jakarta.validation.constraints.Pattern;
 import java.time.YearMonth;
 
 public record CardRequest(
-        @NotBlank String bankName,
+        @NotBlank @Pattern(regexp = "^\\d{3}$", message = "bankNumber must be exactly 3 digits") String bankNumber,
         @NotNull CardBrand brand,
         @NotNull CardType cardType,
         @NotNull CardBehavior behavior,

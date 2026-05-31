@@ -3,7 +3,7 @@ package com.financialapp.banks.domain.model.loan;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.loan.LoanInstallmentAlreadyPaidException;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -20,7 +20,7 @@ class LoanPaymentTest {
     private static final String CBU = "0001234567890123456789";
 
     private Loan twoInstallmentLoan() {
-        return Loan.originate(new UserId(1L), BankName.GALICIA, "Loan",
+        return Loan.originate(new UserId(1L), new BankNumber("007"), "Loan",
                         new Money(new BigDecimal("200.00"), ARS), BigDecimal.ZERO, 2,
                         AmortizationType.FRENCH, LocalDate.of(2026, 6, 1), CBU).loan()
                 .withInstallmentIds(List.of(new LoanInstallmentId(10L), new LoanInstallmentId(11L)));

@@ -1,7 +1,6 @@
 package com.financialapp.banks.web.mapper;
 
 import com.financialapp.banks.domain.model.bank.Bank;
-import com.financialapp.banks.domain.model.bank.BankName;
 import com.financialapp.banks.domain.usecase.catalog.BankingCatalog;
 import com.financialapp.banks.web.dto.response.AccountResponse;
 import com.financialapp.banks.web.dto.response.AvailableBankResponse;
@@ -27,7 +26,8 @@ public class BankWebMapper {
         Map<String, String> totalBalances = summed.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, currencyTotal -> currencyTotal.getValue().toPlainString()));
         return BankResponse.builder()
-                .name(bank.name().name())
+                .bankNumber(bank.bankNumber().value())
+                .name(bank.name())
                 .logoUrl(bank.logo() != null ? bank.logo().url() : null)
                 .accounts(accounts)
                 .totalBalances(totalBalances)
@@ -35,8 +35,11 @@ public class BankWebMapper {
                 .build();
     }
 
-    public AvailableBankResponse toAvailableBank(BankName bankName) {
-        return new AvailableBankResponse(bankName.name(), bankName.getDisplayName(), bankName.getLogoUrl());
+    public AvailableBankResponse toAvailableBank(Bank bank) {
+        return new AvailableBankResponse(
+                bank.bankNumber().value(),
+                bank.name(),
+                bank.logo() != null ? bank.logo().url() : null);
     }
 
     public BankingCatalogResponse toCatalogResponse(BankingCatalog catalog) {

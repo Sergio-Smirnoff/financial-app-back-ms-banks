@@ -1,9 +1,10 @@
 package com.financialapp.banks.web.mapper;
 
+import com.financialapp.banks.domain.common.model.Cbu;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -17,9 +18,9 @@ class AccountWebMapperTest {
 
     @Test
     void balanceIsRenderedAsPlainDecimalString() {
-        var account = new CheckingAccount("0001", "alias",
+        var account = new CheckingAccount(Cbu.from("0070001600000000123459"), "alias",
                 Money.of(new BigDecimal("1234.50"), "ARS"),
-                new UserId(1L), BankName.values()[0], "Main", true,
+                new UserId(1L), new BankNumber("007"), "Main", true,
                 LocalDateTime.now(), LocalDateTime.now());
         var resp = mapper.toResponse(account);
         assertThat((Object) resp.balance()).isInstanceOf(String.class);

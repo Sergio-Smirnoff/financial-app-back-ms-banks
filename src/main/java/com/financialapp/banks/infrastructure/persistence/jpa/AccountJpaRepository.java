@@ -13,10 +13,10 @@ public interface AccountJpaRepository extends JpaRepository<AccountJpaEntity, Lo
     List<AccountJpaEntity> findByUserIdOrderByNameAsc(Long userId);
     List<AccountJpaEntity> findByBank_IdOrderByNameAsc(Long bankId);
     Optional<AccountJpaEntity> findByCbu(String cbu);
-    Optional<AccountJpaEntity> findByAliasAndBank_Name(String alias, String bankName);
-    boolean existsByBank_NameAndName(String bankName, String name);
-    boolean existsByBank_NameAndTypeAndCurrency(String bankName, String type, String currency);
-    int countByBank_Name(String bankName);
+    Optional<AccountJpaEntity> findByAliasAndBank_BankNumber(String alias, String bankNumber);
+    boolean existsByBank_BankNumberAndName(String bankNumber, String name);
+    boolean existsByBank_BankNumberAndTypeAndCurrency(String bankNumber, String type, String currency);
+    int countByBank_BankNumber(String bankNumber);
     void deleteByCbu(String cbu);
 
     @Query("SELECT a FROM AccountJpaEntity a WHERE a.isActive = true AND a.balance < :threshold")
@@ -25,7 +25,7 @@ public interface AccountJpaRepository extends JpaRepository<AccountJpaEntity, Lo
     @Query("SELECT a FROM AccountJpaEntity a WHERE a.userId = :userId " +
            "AND (:type IS NULL OR a.type = :type) " +
            "AND (:currency IS NULL OR a.currency = :currency) " +
-           "AND (:bankName IS NULL OR a.bank.name = :bankName) " +
+           "AND (:bankNumber IS NULL OR a.bank.bankNumber = :bankNumber) " +
            "AND (:name IS NULL OR a.name = :name) " +
            "AND (:hideEmpty = false OR a.balance > 0) " +
            "ORDER BY a.name ASC")
@@ -33,7 +33,7 @@ public interface AccountJpaRepository extends JpaRepository<AccountJpaEntity, Lo
             @Param("userId") Long userId,
             @Param("type") String type,
             @Param("currency") String currency,
-            @Param("bankName") String bankName,
+            @Param("bankNumber") String bankNumber,
             @Param("name") String name,
             @Param("hideEmpty") boolean hideEmpty);
 }

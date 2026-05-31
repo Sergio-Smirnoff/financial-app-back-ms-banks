@@ -59,7 +59,7 @@ class CardControllerIT {
     @Test
     void issueCard_acceptsMmYyExpiryString() throws Exception {
         String body = """
-                {"bankName":"GALICIA","brand":"VISA","cardType":"STANDARD","behavior":"CREDIT",
+                {"bankNumber":"007","brand":"VISA","cardType":"STANDARD","behavior":"CREDIT",
                  "cardNumber":"4387269571327193","expiringDate":"08/30","closingDay":15,"dueDay":5}
                 """;
 

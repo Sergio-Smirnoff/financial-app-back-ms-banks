@@ -40,9 +40,9 @@ class AccountControllerIT {
     @Test
     void openAccount_then_getByCbu() throws Exception {
         AccountRequest req = new AccountRequest(
-                "GALICIA", "Savings", AccountType.SAVINGS,
+                "007", "Savings", AccountType.SAVINGS,
                 "USD", true,
-                "1234567890123456789012", "alias1");
+                "0070001600000000123459", "alias1");
 
         mockMvc.perform(post("/api/v1/banks/accounts")
                         .header("X-User-Id", "1")
@@ -50,10 +50,10 @@ class AccountControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.cbu").value("1234567890123456789012"))
+                .andExpect(jsonPath("$.data.cbu").value("0070001600000000123459"))
                 .andExpect(jsonPath("$.data.type").value("SAVINGS"));
 
-        mockMvc.perform(get("/api/v1/banks/accounts/{cbu}", "1234567890123456789012")
+        mockMvc.perform(get("/api/v1/banks/accounts/{cbu}", "0070001600000000123459")
                         .header("X-User-Id", "1")
                 .header("X-Internal-Token", "test-token"))
                 .andExpect(status().isOk())
@@ -141,9 +141,9 @@ class AccountControllerIT {
     @Test
     void openAccount_malformedCurrency_returns400WithValidationCode() throws Exception {
         AccountRequest req = new AccountRequest(
-                "GALICIA", "Savings", AccountType.SAVINGS,
+                "007", "Savings", AccountType.SAVINGS,
                 "US", true,
-                "1234567890123456789012", "alias1");
+                "0070001600000000123459", "alias1");
 
         mockMvc.perform(post("/api/v1/banks/accounts")
                         .header("X-User-Id", "1")
@@ -157,9 +157,9 @@ class AccountControllerIT {
     @Test
     void openAccount_unknownCurrencyCode_returns400WithCurrencyCode() throws Exception {
         AccountRequest req = new AccountRequest(
-                "GALICIA", "Savings", AccountType.SAVINGS,
+                "007", "Savings", AccountType.SAVINGS,
                 "ZZZ", true,
-                "1234567890123456789012", "alias1");
+                "0070001600000000123459", "alias1");
 
         mockMvc.perform(post("/api/v1/banks/accounts")
                         .header("X-User-Id", "1")
@@ -173,8 +173,8 @@ class AccountControllerIT {
     @Test
     void openAccount_invalidType_returns400() throws Exception {
         String body = """
-                {"bankName":"GALICIA","name":"Savings","type":"FOO","balance":1000.00,
-                 "currency":"USD","isActive":true,"cbu":"1234567890123456789012","alias":"alias1"}
+                {"bankNumber":"007","name":"Savings","type":"FOO","balance":1000.00,
+                 "currency":"USD","isActive":true,"cbu":"0070001600000000123459","alias":"alias1"}
                 """;
 
         mockMvc.perform(post("/api/v1/banks/accounts")
@@ -207,9 +207,9 @@ class AccountControllerIT {
     @Test
     void updateAccount_acceptsStringBalance_andReturnsIt() throws Exception {
         AccountRequest createReq = new AccountRequest(
-                "GALICIA", "Savings", AccountType.SAVINGS,
+                "007", "Savings", AccountType.SAVINGS,
                 "USD", true,
-                "1234567890123456789099", "alias99");
+                "0070001600000000123459", "alias99");
 
         mockMvc.perform(post("/api/v1/banks/accounts")
                         .header("X-User-Id", "1")
@@ -222,7 +222,7 @@ class AccountControllerIT {
                 {"balance":"500.00","currency":"USD"}
                 """;
 
-        mockMvc.perform(patch("/api/v1/banks/accounts/{cbu}", "1234567890123456789099")
+        mockMvc.perform(patch("/api/v1/banks/accounts/{cbu}", "0070001600000000123459")
                         .header("X-User-Id", "1")
                         .header("X-Internal-Token", "test-token")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -237,7 +237,7 @@ class AccountControllerIT {
                 {"balance":"12.345","currency":"USD"}
                 """;
 
-        mockMvc.perform(patch("/api/v1/banks/accounts/{cbu}", "1234567890123456789099")
+        mockMvc.perform(patch("/api/v1/banks/accounts/{cbu}", "0070001600000000123459")
                         .header("X-User-Id", "1")
                         .header("X-Internal-Token", "test-token")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -249,9 +249,9 @@ class AccountControllerIT {
     @Test
     void adjustBalance_acceptsStringDelta_returns200() throws Exception {
         AccountRequest createReq = new AccountRequest(
-                "GALICIA", "Checking", AccountType.CHECKING,
+                "007", "Checking", AccountType.CHECKING,
                 "USD", true,
-                "1234567890123456789088", "alias88");
+                "0070001600000000123459", "alias88");
 
         mockMvc.perform(post("/api/v1/banks/accounts")
                         .header("X-User-Id", "1")
@@ -260,14 +260,14 @@ class AccountControllerIT {
                         .content(objectMapper.writeValueAsString(createReq)))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(post("/api/v1/banks/accounts/{cbu}/balance/adjust", "1234567890123456789088")
+        mockMvc.perform(post("/api/v1/banks/accounts/{cbu}/balance/adjust", "0070001600000000123459")
                         .header("X-User-Id", "1")
                         .header("X-Internal-Token", "test-token")
                         .param("delta", "250.50")
                         .param("currency", "USD"))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/v1/banks/accounts/{cbu}", "1234567890123456789088")
+        mockMvc.perform(get("/api/v1/banks/accounts/{cbu}", "0070001600000000123459")
                         .header("X-User-Id", "1")
                         .header("X-Internal-Token", "test-token"))
                 .andExpect(status().isOk())
@@ -277,9 +277,9 @@ class AccountControllerIT {
     @Test
     void openAccount_lowercaseCurrency_normalizedToUppercase() throws Exception {
         AccountRequest req = new AccountRequest(
-                "GALICIA", "Savings", AccountType.SAVINGS,
+                "007", "Savings", AccountType.SAVINGS,
                 "usd", true,
-                "1234567890123456789012", "alias1");
+                "0070001600000000123459", "alias1");
 
         mockMvc.perform(post("/api/v1/banks/accounts")
                         .header("X-User-Id", "1")

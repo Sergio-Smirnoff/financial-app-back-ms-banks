@@ -9,7 +9,7 @@ import com.financialapp.banks.domain.usecase.card.GetCardUseCase;
 import com.financialapp.banks.domain.usecase.card.ListCardsUseCase;
 import com.financialapp.banks.domain.usecase.card.UpdateCardUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.web.dto.request.CardRequest;
 import com.financialapp.banks.web.dto.request.UpdateCardRequest;
@@ -49,8 +49,8 @@ public class CardController {
     @Operation(summary = "List user cards, optionally filtered by bank")
     public ResponseEntity<ApiResponse<List<CardResponse>>> list(
             @RequestHeader("X-User-Id") Long userId,
-            @RequestParam(required = false) String bankName) {
-        BankName bank = bankName != null ? BankName.fromString(bankName) : null;
+            @RequestParam(required = false) String bankNumber) {
+        BankNumber bank = bankNumber != null ? new BankNumber(bankNumber) : null;
         List<CardResponse> result = listCardsUseCase.execute(new UserId(userId), bank)
                 .stream().map(cardMapper::toResponse).toList();
         return ResponseEntity.ok(ApiResponse.ok(result));
@@ -72,7 +72,7 @@ public class CardController {
             @Valid @RequestBody CardRequest request) {
         var result = issueCardUseCase.execute(new IssueCardCommand(
                 new UserId(userId),
-                BankName.fromString(request.bankName()),
+                new BankNumber(request.bankNumber()),
                 request.brand(),
                 request.cardType(),
                 request.behavior(),

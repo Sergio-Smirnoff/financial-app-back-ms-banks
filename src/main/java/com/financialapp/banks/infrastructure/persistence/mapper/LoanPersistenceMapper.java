@@ -2,7 +2,7 @@ package com.financialapp.banks.infrastructure.persistence.mapper;
 
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.loan.AmortizationType;
 import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.model.loan.LoanId;
@@ -40,7 +40,7 @@ public class LoanPersistenceMapper {
         return new Loan(
                 new LoanId(entity.getId()),
                 new UserId(entity.getUserId()),
-                BankName.valueOf(bank.getName()),
+                new BankNumber(bank.getBankNumber()),
                 entity.getName(),
                 principal,
                 entity.getInterestRate(),

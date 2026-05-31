@@ -2,7 +2,7 @@ package com.financialapp.banks.infrastructure.persistence.repository;
 
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.model.loan.LoanId;
 import com.financialapp.banks.domain.repository.LoanRepository;
@@ -34,8 +34,8 @@ public class LoanRepositoryImpl implements LoanRepository {
     }
 
     @Override
-    public List<Loan> findByBankName(BankName bankName) {
-        BankJpaEntity bank = requireBank(bankName);
+    public List<Loan> findByBankNumber(BankNumber bankNumber) {
+        BankJpaEntity bank = requireBank(bankNumber);
         return loanJpaRepository.findByBankId(bank.getId())
                 .stream().map(entity -> mapper.toDomain(entity, bank)).toList();
     }
@@ -51,8 +51,8 @@ public class LoanRepositoryImpl implements LoanRepository {
     }
 
     @Override
-    public int countByBankName(BankName bankName) {
-        return bankJpaRepository.findByName(bankName.name())
+    public int countByBankNumber(BankNumber bankNumber) {
+        return bankJpaRepository.findByBankNumber(bankNumber.value())
                 .map(bank -> loanJpaRepository.countByBankId(bank.getId())).orElse(0);
     }
 
@@ -65,7 +65,7 @@ public class LoanRepositoryImpl implements LoanRepository {
     @Override
     @Transactional
     public Loan save(Loan loan) {
-        BankJpaEntity bank = requireBank(loan.bankName());
+        BankJpaEntity bank = requireBank(loan.bankNumber());
         LoanJpaEntity entity = loan.id() != null && loan.id().value() != null
                 ? loanJpaRepository.findById(loan.id().value())
                         .map(existing -> mapper.merge(existing, loan, bank))
@@ -86,8 +86,8 @@ public class LoanRepositoryImpl implements LoanRepository {
         return mapper.toDomain(entity, bank);
     }
 
-    private BankJpaEntity requireBank(BankName name) {
-        return bankJpaRepository.findByName(name.name())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank", name.getDisplayName()));
+    private BankJpaEntity requireBank(BankNumber bankNumber) {
+        return bankJpaRepository.findByBankNumber(bankNumber.value())
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", bankNumber.value()));
     }
 }

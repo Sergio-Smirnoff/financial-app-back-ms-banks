@@ -6,7 +6,7 @@ import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.bank.Bank;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardBehavior;
 import com.financialapp.banks.domain.model.card.CardBrand;
@@ -43,14 +43,14 @@ class IssueCardUseCaseImplTest {
     }
 
     private IssueCardCommand command(CardBehavior behavior) {
-        return new IssueCardCommand(new UserId(1L), BankName.GALICIA,
+        return new IssueCardCommand(new UserId(1L), new BankNumber("007"),
                 CardBrand.VISA, CardType.PLATINUM, behavior,
                 "1234567890123456", YearMonth.now().plusYears(2), 20, 10);
     }
 
     @Test
     void create_persistsCreditCard() {
-        when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.of(new Bank(BankName.GALICIA, null)));
+        when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
         when(cardRepository.findByCardNumber(any())).thenReturn(Optional.empty());
         when(cardRepository.save(any(Card.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -62,7 +62,7 @@ class IssueCardUseCaseImplTest {
 
     @Test
     void create_persistsDebitCardForInstantPayment() {
-        when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.of(new Bank(BankName.GALICIA, null)));
+        when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
         when(cardRepository.findByCardNumber(any())).thenReturn(Optional.empty());
         when(cardRepository.save(any(Card.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -73,7 +73,7 @@ class IssueCardUseCaseImplTest {
 
     @Test
     void create_rejectsDuplicate() {
-        when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.of(new Bank(BankName.GALICIA, null)));
+        when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
         when(cardRepository.findByCardNumber(any())).thenReturn(Optional.of(mock(Card.class)));
 
         assertThatThrownBy(() -> useCase.execute(command(CardBehavior.CREDIT)))
@@ -83,7 +83,7 @@ class IssueCardUseCaseImplTest {
 
     @Test
     void create_throwsWhenBankMissing() {
-        when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.empty());
+        when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase.execute(command(CardBehavior.CREDIT)))
                 .isInstanceOf(ResourceNotFoundException.class);

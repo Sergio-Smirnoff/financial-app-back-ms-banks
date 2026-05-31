@@ -63,8 +63,8 @@ public class KafkaDomainEventPublisher implements DomainEventPublisher {
                             .title("Low Account Balance")
                             .message(String.format("Account '%s' has a low balance of %.2f %s.",
                                     e.accountName(), e.balance().amount(), e.balance().currency().getCurrencyCode()))
-                            .metadata(String.format("{\"accountCbu\":\"%s\",\"bankName\":\"%s\",\"balance\":%.2f}",
-                                    e.accountCbu(), e.bankName(), e.balance().amount()))
+                            .metadata(String.format("{\"accountCbu\":\"%s\",\"bankNumber\":\"%s\",\"balance\":%.2f}",
+                                    e.accountCbu(), e.bankNumber().value(), e.balance().amount()))
                             .build()
             );
             case BalanceAdjustedEvent e -> {
@@ -80,8 +80,8 @@ public class KafkaDomainEventPublisher implements DomainEventPublisher {
                                         e.delta().currency().getCurrencyCode(),
                                         credit ? "credited to" : "debited from",
                                         e.accountName()))
-                                .metadata(String.format("{\"accountCbu\":\"%s\",\"bankName\":\"%s\",\"amount\":%.2f}",
-                                        e.accountCbu(), e.bankName(), e.delta().amount().abs()))
+                                .metadata(String.format("{\"accountCbu\":\"%s\",\"bankNumber\":\"%s\",\"amount\":%.2f}",
+                                        e.accountCbu(), e.bankNumber().value(), e.delta().amount().abs()))
                                 .build()
                 );
             }

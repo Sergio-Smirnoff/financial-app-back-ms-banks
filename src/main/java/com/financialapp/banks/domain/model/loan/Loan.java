@@ -7,7 +7,7 @@ import com.financialapp.banks.domain.event.LoanCreatedEvent;
 import com.financialapp.banks.domain.event.LoanInstallmentPaidEvent;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.loan.LoanAlreadyClosedException;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.service.LoanAmortization;
 
 import java.math.BigDecimal;
@@ -19,7 +19,7 @@ import java.util.List;
 public record Loan(
     LoanId id,
     UserId userId,
-    BankName bankName,
+    BankNumber bankNumber,
     String name,
     Money principal,
     BigDecimal interestRate,
@@ -43,7 +43,7 @@ public record Loan(
      * {@code destinationAccountCbu}). The loan starts active with all installments unpaid; ids are
      * null until persisted. Cross-aggregate checks (account/bank existence) belong in the use case.
      */
-    public static LoanOrigination originate(UserId userId, BankName bankName, String name, Money principal,
+    public static LoanOrigination originate(UserId userId, BankNumber bankNumber, String name, Money principal,
                                             BigDecimal interestRate, int totalInstallments,
                                             AmortizationType amortizationType, LocalDate startDate,
                                             String destinationAccountCbu) {
@@ -64,7 +64,7 @@ public record Loan(
                     now,
                     now));
         }
-        Loan loan = new Loan(new LoanId(null), userId, bankName, name, principal, interestRate,
+        Loan loan = new Loan(new LoanId(null), userId, bankNumber, name, principal, interestRate,
                 totalInstallments, totalInstallments, amortizationType, startDate, true, schedule, now, now);
         DomainEvent event = new LoanCreatedEvent(userId, destinationAccountCbu, principal, name, LocalDate.now());
         return new LoanOrigination(loan, List.of(event));
@@ -110,7 +110,7 @@ public record Loan(
             updated.add(installment.id().equals(installmentId) ? paid : installment);
         }
         int remaining = remainingInstallments - 1;
-        Loan updatedLoan = new Loan(id, userId, bankName, name, principal, interestRate,
+        Loan updatedLoan = new Loan(id, userId, bankNumber, name, principal, interestRate,
                 totalInstallments, remaining, amortizationType, startDate,
                 remaining > 0, updated, createdAt, LocalDateTime.now());
 
@@ -133,7 +133,7 @@ public record Loan(
                     current.amount(), current.dueDate(), current.paid(), current.paidDate(),
                     current.createdAt(), current.updatedAt()));
         }
-        return new Loan(id, userId, bankName, name, principal, interestRate, totalInstallments,
+        return new Loan(id, userId, bankNumber, name, principal, interestRate, totalInstallments,
                 remainingInstallments, amortizationType, startDate, active, reIded, createdAt, updatedAt);
     }
 }

@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface BankJpaRepository extends JpaRepository<BankJpaEntity, Long> {
     Optional<BankJpaEntity> findByName(String name);
+    Optional<BankJpaEntity> findByBankNumber(String bankNumber);
+    boolean existsByBankNumber(String bankNumber);
 }

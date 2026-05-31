@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Builder
 public record AccountResponse(
-        String bankName,
+        String bankNumber,
         Long userId,
         String name,
         String type,

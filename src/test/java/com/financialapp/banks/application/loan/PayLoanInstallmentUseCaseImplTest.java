@@ -7,7 +7,7 @@ import com.financialapp.banks.domain.event.LoanInstallmentPaidEvent;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.loan.LoanAlreadyClosedException;
 import com.financialapp.banks.domain.exception.loan.LoanInstallmentAlreadyPaidException;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.loan.AmortizationType;
 import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.model.loan.LoanId;
@@ -60,7 +60,7 @@ class PayLoanInstallmentUseCaseImplTest {
                 new Money(new BigDecimal("100.00"), USD), LocalDate.of(2026, 5, 1),
                 installmentPaid, installmentPaid ? LocalDate.of(2026, 4, 30) : null,
                 LocalDateTime.of(2026, 1, 1, 0, 0), LocalDateTime.of(2026, 1, 1, 0, 0));
-        return new Loan(new LoanId(1L), new UserId(7L), BankName.GALICIA, "Car Loan",
+        return new Loan(new LoanId(1L), new UserId(7L), new BankNumber("007"), "Car Loan",
                 new Money(new BigDecimal("10000.00"), USD), new BigDecimal("12.00"),
                 12, remaining, AmortizationType.FRENCH, LocalDate.of(2026, 1, 1), active,
                 List.of(installment), LocalDateTime.of(2026, 1, 1, 0, 0), LocalDateTime.of(2026, 1, 1, 0, 0));
@@ -137,7 +137,7 @@ class PayLoanInstallmentUseCaseImplTest {
 
     @Test
     void pay_throwsWhenInstallmentNotOnLoan() {
-        Loan loanWithoutTarget = new Loan(new LoanId(1L), new UserId(7L), BankName.GALICIA, "Car Loan",
+        Loan loanWithoutTarget = new Loan(new LoanId(1L), new UserId(7L), new BankNumber("007"), "Car Loan",
                 new Money(new BigDecimal("10000.00"), USD), new BigDecimal("12.00"),
                 12, 3, AmortizationType.FRENCH, LocalDate.of(2026, 1, 1), true,
                 List.of(), LocalDateTime.of(2026, 1, 1, 0, 0), LocalDateTime.of(2026, 1, 1, 0, 0));

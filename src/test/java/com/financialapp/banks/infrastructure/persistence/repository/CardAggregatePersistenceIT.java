@@ -2,7 +2,7 @@ package com.financialapp.banks.infrastructure.persistence.repository;
 
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardBehavior;
 import com.financialapp.banks.domain.model.card.CardBilling;
@@ -36,7 +36,7 @@ class CardAggregatePersistenceIT {
     void save_then_load_round_trips_installments() {
         CardDetails details = new CardDetails(CardBrand.VISA, CardType.STANDARD, CardBehavior.CREDIT,
                 YearMonth.of(2030, 1), new CardBilling(20, 10));
-        Card card = Card.create("9999000011112222", new UserId(1L), BankName.GALICIA, details,
+        Card card = Card.create("9999000011112222", new UserId(1L), new BankNumber("007"), details,
                 LocalDateTime.now(), LocalDateTime.now());
         card.registerExpense("TV", new Money(new BigDecimal("300.00"), Currency.getInstance("ARS")),
                 3, LocalDate.of(2026, 7, 1));

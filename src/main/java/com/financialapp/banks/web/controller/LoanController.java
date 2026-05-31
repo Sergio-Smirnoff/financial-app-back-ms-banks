@@ -3,7 +3,7 @@ package com.financialapp.banks.web.controller;
 import com.financialapp.banks.domain.usecase.loan.command.*;
 import com.financialapp.banks.domain.usecase.loan.*;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.loan.AmortizationType;
 import com.financialapp.banks.domain.model.loan.LoanId;
 import com.financialapp.banks.domain.model.loan.LoanInstallmentId;
@@ -43,8 +43,8 @@ public class LoanController {
     @Operation(summary = "List user loans, optionally filtered by bank")
     public ResponseEntity<ApiResponse<List<LoanResponse>>> list(
             @RequestHeader("X-User-Id") Long userId,
-            @RequestParam(required = false) String bankName) {
-        BankName bank = bankName != null ? BankName.fromString(bankName) : null;
+            @RequestParam(required = false) String bankNumber) {
+        BankNumber bank = bankNumber != null ? new BankNumber(bankNumber) : null;
         List<LoanResponse> result = listLoansUseCase.execute(new UserId(userId), bank)
                 .stream().map(loanMapper::toResponse).toList();
         return ResponseEntity.ok(ApiResponse.ok(result));
@@ -57,7 +57,7 @@ public class LoanController {
             @Valid @RequestBody LoanRequest request) {
         var loan = originateLoanUseCase.execute(new OriginateLoanCommand(
                 new UserId(userId),
-                BankName.fromString(request.bankName()),
+                new BankNumber(request.bankNumber()),
                 request.destinationAccountCbu(),
                 request.name(),
                 new BigDecimal(request.principal()),

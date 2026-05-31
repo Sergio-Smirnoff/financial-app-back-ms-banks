@@ -3,7 +3,7 @@ package com.financialapp.banks.domain.model.loan;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.loan.LoanAlreadyClosedException;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -20,7 +20,7 @@ class LoanTest {
         return new Loan(
                 new LoanId(1L),
                 new UserId(1L),
-                BankName.GALICIA,
+                new BankNumber("007"),
                 "Car Loan",
                 new Money(new BigDecimal("10000.00"), Currency.getInstance("USD")),
                 new BigDecimal("12.00"),

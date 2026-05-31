@@ -35,7 +35,7 @@ public class CloseAccountUseCaseImpl implements CloseAccountUseCase {
 
         if (account instanceof InvestmentAccount) {
             try {
-                int holdings = investmentsPort.countHoldings(account.cbu());
+                int holdings = investmentsPort.countHoldings(account.cbu().value());
                 if (holdings > 0) {
                     throw new ResourceConflictException(
                         DomainError.ACCOUNT_NOT_DELETABLE,
@@ -54,6 +54,6 @@ public class CloseAccountUseCaseImpl implements CloseAccountUseCase {
                 Map.of("cbu", command.cbu(), "reason", "non-zero balance"));
         }
 
-        accountRepository.delete(account.cbu());
+        accountRepository.delete(account.cbu().value());
     }
 }

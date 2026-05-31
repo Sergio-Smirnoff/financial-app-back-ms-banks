@@ -1,7 +1,7 @@
 package com.financialapp.banks.web.mapper;
 
 import com.financialapp.banks.domain.model.bank.Bank;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.web.dto.response.AccountResponse;
 import com.financialapp.banks.web.dto.response.AvailableBankResponse;
 import com.financialapp.banks.web.dto.response.BankResponse;
@@ -14,12 +14,12 @@ class BankWebMapperTest {
     private final BankWebMapper mapper = new BankWebMapper();
 
     @Test
-    void mapsBankNameToAvailableBankResponse() {
-        BankName sample = BankName.values()[0];
+    void mapsBankToAvailableBankResponse() {
+        Bank sample = new Bank(new BankNumber("007"), "GALICIA", null);
         AvailableBankResponse resp = mapper.toAvailableBank(sample);
-        assertThat(resp.name()).isEqualTo(sample.name());
-        assertThat(resp.displayName()).isEqualTo(sample.getDisplayName());
-        assertThat(resp.logoUrl()).isEqualTo(sample.getLogoUrl());
+        assertThat(resp.bankNumber()).isEqualTo("007");
+        assertThat(resp.name()).isEqualTo("GALICIA");
+        assertThat(resp.logoUrl()).isNull();
     }
 
     @Test
@@ -39,7 +39,7 @@ class BankWebMapperTest {
         var a1 = AccountResponse.builder().currency("ARS").balance("100.00").build();
         var a2 = AccountResponse.builder().currency("ARS").balance("50.50").build();
         var a3 = AccountResponse.builder().currency("USD").balance("10.00").build();
-        var bank = new Bank(BankName.values()[0], null);
+        var bank = new Bank(new BankNumber("007"), "GALICIA", null);
         BankResponse resp = mapper.toResponse(bank, java.util.List.of(a1, a2, a3));
         assertThat(resp.totalBalances()).containsEntry("ARS", "150.50").containsEntry("USD", "10.00");
         assertThat((Object) resp.totalBalances().get("ARS")).isInstanceOf(String.class);

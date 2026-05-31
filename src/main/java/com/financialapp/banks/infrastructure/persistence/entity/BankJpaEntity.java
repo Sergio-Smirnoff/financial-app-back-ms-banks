@@ -21,6 +21,9 @@ public class BankJpaEntity {
     @Column(nullable = false, length = 100)
     private String name;
 
+    @Column(name = "bank_number", nullable = false, length = 3, unique = true)
+    private String bankNumber;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

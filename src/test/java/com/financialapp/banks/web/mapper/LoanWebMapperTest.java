@@ -2,7 +2,7 @@ package com.financialapp.banks.web.mapper;
 
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.loan.AmortizationType;
 import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.model.loan.LoanId;
@@ -21,7 +21,7 @@ class LoanWebMapperTest {
     @Test
     void principalAndInterestRateAreRenderedAsPlainStrings() {
         var loan = new Loan(
-                new LoanId(1L), new UserId(1L), BankName.values()[0], "Car loan",
+                new LoanId(1L), new UserId(1L), new BankNumber("007"), "Car loan",
                 Money.of(new BigDecimal("150000.00"), "ARS"),
                 new BigDecimal("0.4500"),
                 12, 12, AmortizationType.FRENCH,

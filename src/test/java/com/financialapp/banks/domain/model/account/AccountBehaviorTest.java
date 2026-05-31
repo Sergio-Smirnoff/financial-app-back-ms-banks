@@ -1,5 +1,6 @@
 package com.financialapp.banks.domain.model.account;
 
+import com.financialapp.banks.domain.common.model.Cbu;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.account.AccountCurrencyMismatchException;
@@ -7,7 +8,7 @@ import com.financialapp.banks.domain.exception.account.AccountInsufficientFundsE
 import com.financialapp.banks.domain.exception.account.AccountInvestmentRestrictionException;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -24,16 +25,16 @@ class AccountBehaviorTest {
     private static final LocalDateTime NOW = LocalDateTime.now();
 
     private CheckingAccount checking(BigDecimal balance) {
-        return new CheckingAccount("1234567890123456789012", "alias",
+        return new CheckingAccount(Cbu.from("0070001600000000123459"), "alias",
                 new Money(balance, ARS),
-                new UserId(1L), BankName.GALICIA, "My acc", true,
+                new UserId(1L), new BankNumber("007"), "My acc", true,
                 NOW, NOW);
     }
 
     private InvestmentAccount investment(BigDecimal balance) {
-        return new InvestmentAccount("1234567890123456789012", "alias",
+        return new InvestmentAccount(Cbu.from("0070001600000000123459"), "alias",
                 new Money(balance, ARS),
-                new UserId(1L), BankName.GALICIA, "Inv", true,
+                new UserId(1L), new BankNumber("007"), "Inv", true,
                 NOW, NOW);
     }
 

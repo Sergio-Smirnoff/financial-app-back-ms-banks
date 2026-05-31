@@ -31,7 +31,7 @@ public class UpdateAccountUseCaseImpl implements UpdateAccountUseCase {
                 .orElseThrow(() -> new ResourceNotFoundException("Account", cmd.cbu()));
 
         if (cmd.name() != null && !existing.name().equals(cmd.name()) &&
-                accountRepository.existsByBankNameAndName(existing.bankName(), cmd.name())) {
+                accountRepository.existsByBankNumberAndName(existing.bankNumber(), cmd.name())) {
             throw new ResourceAlreadyExistsException("Account", cmd.name() + " in bank");
         }
 
@@ -42,11 +42,11 @@ public class UpdateAccountUseCaseImpl implements UpdateAccountUseCase {
 
         Account updated = switch (existing) {
             case CheckingAccount ignored -> new CheckingAccount(existing.cbu(), existing.alias(), newBalance,
-                    existing.userId(), existing.bankName(), newName, newActive, existing.createdAt(), now);
+                    existing.userId(), existing.bankNumber(), newName, newActive, existing.createdAt(), now);
             case SavingsAccount ignored -> new SavingsAccount(existing.cbu(), existing.alias(), newBalance,
-                    existing.userId(), existing.bankName(), newName, newActive, existing.createdAt(), now);
+                    existing.userId(), existing.bankNumber(), newName, newActive, existing.createdAt(), now);
             case InvestmentAccount ignored -> new InvestmentAccount(existing.cbu(), existing.alias(), newBalance,
-                    existing.userId(), existing.bankName(), newName, newActive, existing.createdAt(), now);
+                    existing.userId(), existing.bankNumber(), newName, newActive, existing.createdAt(), now);
             default -> throw new AccountInvalidTypeException(existing.getClass().getSimpleName());
         };
 

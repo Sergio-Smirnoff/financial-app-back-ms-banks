@@ -62,8 +62,8 @@ public class BankAlertScheduler {
                     .title("Card Expiring Soon")
                     .message(String.format("Your card ending in %s expires on %s.",
                             last4, card.details().expiringDate()))
-                    .metadata(String.format("{\"cardNumber\":\"%s\",\"bankName\":\"%s\"}",
-                            card.cardNumber().value(), card.bankName()))
+                    .metadata(String.format("{\"cardNumber\":\"%s\",\"bankNumber\":\"%s\"}",
+                            card.cardNumber().value(), card.bankNumber().value()))
                     .build());
         }
     }
@@ -123,8 +123,8 @@ public class BankAlertScheduler {
                             account.name(),
                             account.balance().amount(),
                             account.balance().currency().getCurrencyCode()))
-                    .metadata(String.format("{\"accountCbu\":\"%s\",\"bankName\":\"%s\"}",
-                            account.cbu(), account.bankName()))
+                    .metadata(String.format("{\"accountCbu\":\"%s\",\"bankNumber\":\"%s\"}",
+                            account.cbu(), account.bankNumber().value()))
                     .build());
         }
     }

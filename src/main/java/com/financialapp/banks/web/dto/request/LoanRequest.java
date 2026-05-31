@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 
 public record LoanRequest(
-        @NotBlank String bankName,
+        @NotBlank @Pattern(regexp = "^\\d{3}$", message = "bankNumber must be exactly 3 digits") String bankNumber,
         @NotBlank String destinationAccountCbu,
         @NotBlank String name,
         @NotNull @Pattern(regexp = "^\\d+(\\.\\d{1,2})?$", message = "principal must be a non-negative decimal with up to 2 decimal places") String principal,

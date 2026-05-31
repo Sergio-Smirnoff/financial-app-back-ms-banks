@@ -9,7 +9,7 @@ import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
 import com.financialapp.banks.domain.model.bank.Bank;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import com.financialapp.banks.domain.repository.BankRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,15 +41,15 @@ class OpenAccountUseCaseImplTest {
 
     private OpenAccountCommand command(AccountType type) {
         return new OpenAccountCommand(
-                new UserId(1L), BankName.GALICIA, "Savings", type,
+                new UserId(1L), new BankNumber("007"), "Savings", type,
                 new Money(new BigDecimal("100.00"), Currency.getInstance("USD")),
-                true, "1234567890123456789012", "alias");
+                true, "0070001600000000123459", "alias");
     }
 
     @Test
     void create_persistsSavingsAccount() {
-        when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.of(new Bank(BankName.GALICIA, null)));
-        when(accountRepository.existsByBankNameAndName(BankName.GALICIA, "Savings")).thenReturn(false);
+        when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
+        when(accountRepository.existsByBankNumberAndName(new BankNumber("007"), "Savings")).thenReturn(false);
         when(accountRepository.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Account result = useCase.execute(command(AccountType.SAVINGS));
@@ -60,8 +60,8 @@ class OpenAccountUseCaseImplTest {
 
     @Test
     void create_rejectsDuplicateName() {
-        when(bankRepository.findByName(BankName.GALICIA)).thenReturn(Optional.of(new Bank(BankName.GALICIA, null)));
-        when(accountRepository.existsByBankNameAndName(BankName.GALICIA, "Savings")).thenReturn(true);
+        when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
+        when(accountRepository.existsByBankNumberAndName(new BankNumber("007"), "Savings")).thenReturn(true);
 
         assertThatThrownBy(() -> useCase.execute(command(AccountType.SAVINGS)))
                 .isInstanceOf(ResourceAlreadyExistsException.class)

@@ -12,7 +12,7 @@ import java.time.YearMonth;
 
 @Builder
 public record CardResponse(
-        String bankName,
+        String bankNumber,
         Long userId,
         String displayName,
         CardBrand brand,

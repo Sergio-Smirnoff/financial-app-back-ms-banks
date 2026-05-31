@@ -5,7 +5,7 @@ import com.financialapp.banks.domain.usecase.account.*;
 import com.financialapp.banks.domain.exception.account.InvalidDateRangeException;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.web.dto.request.AccountRequest;
 import com.financialapp.banks.web.dto.request.UpdateAccountRequest;
 import com.financialapp.banks.web.dto.response.AccountResponse;
@@ -46,11 +46,11 @@ public class AccountController {
             @RequestHeader("X-User-Id") Long userId,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String currency,
-            @RequestParam(required = false) String bankName,
+            @RequestParam(required = false) String bankNumber,
             @RequestParam(required = false) String name,
             @RequestParam(required = false, defaultValue = "false") boolean hideEmpty) {
         Currency cur = currency != null ? Money.parseCurrency(currency) : null;
-        BankName bank = bankName != null ? BankName.fromString(bankName) : null;
+        BankNumber bank = bankNumber != null ? new BankNumber(bankNumber) : null;
         List<AccountResponse> result = listAccountsUseCase.execute(
                 new FilterAccountCommand(new UserId(userId), type, cur, bank, name, hideEmpty))
                 .stream().map(accountMapper::toResponse).toList();
@@ -74,7 +74,7 @@ public class AccountController {
         Money initialBalance = Money.of(BigDecimal.ZERO, request.currency());
         var result = openAccountUseCase.execute(new OpenAccountCommand(
                 new UserId(userId),
-                BankName.fromString(request.bankName()),
+                new BankNumber(request.bankNumber()),
                 request.name(),
                 request.type(),
                 initialBalance,

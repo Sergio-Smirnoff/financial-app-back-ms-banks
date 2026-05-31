@@ -6,7 +6,7 @@ import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.event.CardInstallmentPaidEvent;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.card.CardInstallmentNotSupportedException;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.DebitCard;
 
@@ -19,28 +19,28 @@ public abstract class Card {
 
     protected final CardNumber cardNumber;
     protected final UserId userId;
-    protected final BankName bankName;
+    protected final BankNumber bankNumber;
     protected final CardDetails details;
     protected final LocalDateTime createdAt;
     protected final LocalDateTime updatedAt;
     protected final List<CardInstallment> installments = new ArrayList<>();
 
-    protected Card(CardNumber cardNumber, UserId userId, BankName bankName,
+    protected Card(CardNumber cardNumber, UserId userId, BankNumber bankNumber,
                    CardDetails details, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.cardNumber = cardNumber;
         this.userId = userId;
-        this.bankName = bankName;
+        this.bankNumber = bankNumber;
         this.details = details;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
 
-    public static Card create(String number, UserId userId, BankName bankName,
+    public static Card create(String number, UserId userId, BankNumber bankNumber,
                               CardDetails details, LocalDateTime createdAt, LocalDateTime updatedAt) {
         CardNumber cardNumber = new CardNumber(number);
         return details.behavior() == CardBehavior.INSTANT_PAYMENT
-                ? new DebitCard(cardNumber, userId, bankName, details, createdAt, updatedAt)
-                : new CreditCard(cardNumber, userId, bankName, details, createdAt, updatedAt);
+                ? new DebitCard(cardNumber, userId, bankNumber, details, createdAt, updatedAt)
+                : new CreditCard(cardNumber, userId, bankNumber, details, createdAt, updatedAt);
     }
 
     /**
@@ -115,7 +115,7 @@ public abstract class Card {
 
     public CardNumber cardNumber() { return cardNumber; }
     public UserId userId() { return userId; }
-    public BankName bankName() { return bankName; }
+    public BankNumber bankNumber() { return bankNumber; }
     public CardDetails details() { return details; }
     public LocalDateTime createdAt() { return createdAt; }
     public LocalDateTime updatedAt() { return updatedAt; }

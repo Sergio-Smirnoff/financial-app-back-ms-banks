@@ -1,9 +1,9 @@
 package com.financialapp.banks.domain.usecase.bank;
 
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.Bank;
 
 import java.util.List;
 
 public interface ListAvailableBanksUseCase {
-    List<BankName> execute();
+    List<Bank> execute();
 }

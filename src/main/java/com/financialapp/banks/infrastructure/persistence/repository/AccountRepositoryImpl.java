@@ -3,7 +3,7 @@ package com.financialapp.banks.infrastructure.persistence.repository;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import com.financialapp.banks.infrastructure.persistence.entity.AccountJpaEntity;
 import com.financialapp.banks.infrastructure.persistence.entity.BankJpaEntity;
@@ -34,16 +34,15 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     @Override
-    public List<Account> findByBankName(BankName bankName) {
-        BankJpaEntity bank = bankJpaRepository.findByName(bankName.name())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank", bankName.getDisplayName()));
+    public List<Account> findByBankNumber(BankNumber bankNumber) {
+        BankJpaEntity bank = requireBank(bankNumber);
         return accountJpaRepository.findByBank_IdOrderByNameAsc(bank.getId())
                 .stream().map(mapper::toDomain).toList();
     }
 
     @Override
-    public int countByBankName(BankName bankName) {
-        return accountJpaRepository.countByBank_Name(bankName.name());
+    public int countByBankNumber(BankNumber bankNumber) {
+        return accountJpaRepository.countByBank_BankNumber(bankNumber.value());
     }
 
     @Override
@@ -52,19 +51,19 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     @Override
-    public Optional<Account> findByAliasAndBankName(String alias, BankName bankName) {
-        return accountJpaRepository.findByAliasAndBank_Name(alias, bankName.name()).map(mapper::toDomain);
+    public Optional<Account> findByAliasAndBankNumber(String alias, BankNumber bankNumber) {
+        return accountJpaRepository.findByAliasAndBank_BankNumber(alias, bankNumber.value()).map(mapper::toDomain);
     }
 
     @Override
-    public boolean existsByBankNameAndName(BankName bankName, String name) {
-        return accountJpaRepository.existsByBank_NameAndName(bankName.name(), name);
+    public boolean existsByBankNumberAndName(BankNumber bankNumber, String name) {
+        return accountJpaRepository.existsByBank_BankNumberAndName(bankNumber.value(), name);
     }
 
     @Override
-    public boolean existsByBankNameAndTypeAndCurrency(BankName bankName, String type, Currency currency) {
-        return accountJpaRepository.existsByBank_NameAndTypeAndCurrency(
-                bankName.name(), type, currency.getCurrencyCode());
+    public boolean existsByBankNumberAndTypeAndCurrency(BankNumber bankNumber, String type, Currency currency) {
+        return accountJpaRepository.existsByBank_BankNumberAndTypeAndCurrency(
+                bankNumber.value(), type, currency.getCurrencyCode());
     }
 
     @Override
@@ -75,12 +74,12 @@ public class AccountRepositoryImpl implements AccountRepository {
 
     @Override
     public List<Account> findFiltered(UserId userId, String type, Currency currency,
-                                      BankName bankName, String name, boolean hideEmpty) {
+                                      BankNumber bankNumber, String name, boolean hideEmpty) {
         return accountJpaRepository.findFiltered(
                         userId.value(),
                         type,
                         currency != null ? currency.getCurrencyCode() : null,
-                        bankName != null ? bankName.name() : null,
+                        bankNumber != null ? bankNumber.value() : null,
                         name,
                         hideEmpty)
                 .stream().map(mapper::toDomain).toList();
@@ -89,10 +88,9 @@ public class AccountRepositoryImpl implements AccountRepository {
     @Override
     @Transactional
     public Account save(Account account) {
-        BankJpaEntity bank = bankJpaRepository.findByName(account.bankName().name())
-                .orElseThrow(() -> new ResourceNotFoundException("Bank", account.bankName().getDisplayName()));
+        BankJpaEntity bank = requireBank(account.bankNumber());
 
-        AccountJpaEntity entity = accountJpaRepository.findByCbu(account.cbu())
+        AccountJpaEntity entity = accountJpaRepository.findByCbu(account.cbu().value())
                 .map(existing -> mapper.merge(existing, account, bank))
                 .orElseGet(() -> mapper.toJpa(account, bank));
 
@@ -103,5 +101,10 @@ public class AccountRepositoryImpl implements AccountRepository {
     @Transactional
     public void delete(String cbu) {
         accountJpaRepository.deleteByCbu(cbu);
+    }
+
+    private BankJpaEntity requireBank(BankNumber bankNumber) {
+        return bankJpaRepository.findByBankNumber(bankNumber.value())
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", bankNumber.value()));
     }
 }

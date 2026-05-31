@@ -10,12 +10,12 @@ public class CardWebMapper {
     public CardResponse toResponse(Card card) {
         if (card == null) return null;
         String displayName = String.format("%s %s %s ••%s",
-                card.bankName().name(),
+                card.bankNumber().value(),
                 card.details().brand(),
                 card.details().cardType(),
                 card.cardNumber().last4());
         return CardResponse.builder()
-                .bankName(card.bankName().name())
+                .bankNumber(card.bankNumber().value())
                 .userId(card.userId().value())
                 .displayName(displayName)
                 .brand(card.details().brand())

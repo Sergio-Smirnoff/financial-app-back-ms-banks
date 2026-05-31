@@ -46,9 +46,9 @@ public class UpdateCardUseCaseImpl implements UpdateCardUseCase {
                 new CardBilling(newClosing, newDue));
 
         Card updatedCard = switch (card) {
-            case CreditCard c -> new CreditCard(c.cardNumber(), c.userId(), c.bankName(),
+            case CreditCard c -> new CreditCard(c.cardNumber(), c.userId(), c.bankNumber(),
                     updated, c.createdAt(), LocalDateTime.now());
-            case DebitCard d -> new DebitCard(d.cardNumber(), d.userId(), d.bankName(),
+            case DebitCard d -> new DebitCard(d.cardNumber(), d.userId(), d.bankNumber(),
                     updated, d.createdAt(), LocalDateTime.now());
             default -> throw new CardInvalidTypeException(card.getClass().getSimpleName());
         };

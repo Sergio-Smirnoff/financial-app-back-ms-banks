@@ -1,5 +1,6 @@
 package com.financialapp.banks.infrastructure.persistence.mapper;
 
+import com.financialapp.banks.domain.common.model.Cbu;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.account.Account;
@@ -8,7 +9,7 @@ import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
 import com.financialapp.banks.domain.exception.InfrastructureException;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.infrastructure.persistence.entity.AccountJpaEntity;
 import com.financialapp.banks.infrastructure.persistence.entity.BankJpaEntity;
 import org.springframework.stereotype.Component;
@@ -22,18 +23,19 @@ public class AccountPersistenceMapper {
         if (entity == null) return null;
         Money balance = new Money(entity.getBalance(), Currency.getInstance(entity.getCurrency()));
         UserId userId = new UserId(entity.getUserId());
-        BankName bankName = BankName.valueOf(entity.getBank().getName());
+        BankNumber bankNumber = new BankNumber(entity.getBank().getBankNumber());
+        Cbu cbu = Cbu.from(entity.getCbu());
 
         AccountType type = AccountType.valueOf(entity.getType());
         return switch (type) {
             case CHECKING -> new CheckingAccount(
-                    entity.getCbu(), entity.getAlias(), balance, userId, bankName,
+                    cbu, entity.getAlias(), balance, userId, bankNumber,
                     entity.getName(), entity.getIsActive(), entity.getCreatedAt(), entity.getUpdatedAt());
             case SAVINGS -> new SavingsAccount(
-                    entity.getCbu(), entity.getAlias(), balance, userId, bankName,
+                    cbu, entity.getAlias(), balance, userId, bankNumber,
                     entity.getName(), entity.getIsActive(), entity.getCreatedAt(), entity.getUpdatedAt());
             case INVESTMENT -> new InvestmentAccount(
-                    entity.getCbu(), entity.getAlias(), balance, userId, bankName,
+                    cbu, entity.getAlias(), balance, userId, bankNumber,
                     entity.getName(), entity.getIsActive(), entity.getCreatedAt(), entity.getUpdatedAt());
         };
     }
@@ -41,7 +43,7 @@ public class AccountPersistenceMapper {
     public AccountJpaEntity toJpa(Account account, BankJpaEntity bank) {
         if (account == null) return null;
         return AccountJpaEntity.builder()
-                .cbu(account.cbu())
+                .cbu(account.cbu().value())
                 .alias(account.alias())
                 .bank(bank)
                 .userId(account.userId().value())
@@ -56,7 +58,7 @@ public class AccountPersistenceMapper {
     }
 
     public AccountJpaEntity merge(AccountJpaEntity existing, Account account, BankJpaEntity bank) {
-        existing.setCbu(account.cbu());
+        existing.setCbu(account.cbu().value());
         existing.setAlias(account.alias());
         existing.setBank(bank);
         existing.setUserId(account.userId().value());

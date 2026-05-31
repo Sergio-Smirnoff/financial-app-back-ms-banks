@@ -7,6 +7,7 @@ import java.util.Map;
 
 @Builder
 public record BankResponse(
+        String bankNumber,
         String name,
         String logoUrl,
         List<AccountResponse> accounts,

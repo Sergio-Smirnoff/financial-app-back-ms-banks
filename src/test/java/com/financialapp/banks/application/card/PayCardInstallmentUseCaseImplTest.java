@@ -6,7 +6,7 @@ import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.event.CardInstallmentPaidEvent;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.card.CardInstallmentAlreadyPaidException;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardBehavior;
 import com.financialapp.banks.domain.model.card.CardBilling;
@@ -70,7 +70,7 @@ class PayCardInstallmentUseCaseImplTest {
     private Card card(boolean withInstallment, boolean paid) {
         CardDetails details = new CardDetails(CardBrand.VISA, CardType.PLATINUM,
                 CardBehavior.CREDIT, YearMonth.now().plusYears(2), new CardBilling(20, 10));
-        Card card = Card.create(CARD, new UserId(7L), BankName.GALICIA, details,
+        Card card = Card.create(CARD, new UserId(7L), new BankNumber("007"), details,
                 LocalDateTime.now(), LocalDateTime.now());
         if (withInstallment) {
             card.restoreInstallments(List.of(installment(paid)));

@@ -4,7 +4,7 @@ import com.financialapp.banks.domain.usecase.card.command.UpdateCardCommand;
 import com.financialapp.banks.application.card.impl.UpdateCardUseCaseImpl;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.card.*;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.DebitCard;
@@ -38,7 +38,7 @@ class UpdateCardUseCaseImplTest {
         CardDetails details = new CardDetails(
                 CardBrand.VISA, CardType.PLATINUM, CardBehavior.CREDIT,
                 expiry, new CardBilling(closing, due));
-        return new CreditCard(new CardNumber(cardNumber), new UserId(1L), BankName.GALICIA,
+        return new CreditCard(new CardNumber(cardNumber), new UserId(1L), new BankNumber("007"),
                 details, LocalDateTime.now(), LocalDateTime.now());
     }
 
@@ -46,7 +46,7 @@ class UpdateCardUseCaseImplTest {
         CardDetails details = new CardDetails(
                 CardBrand.MASTERCARD, CardType.STANDARD, CardBehavior.INSTANT_PAYMENT,
                 expiry, new CardBilling(closing, due));
-        return new DebitCard(new CardNumber(cardNumber), new UserId(2L), BankName.SANTANDER,
+        return new DebitCard(new CardNumber(cardNumber), new UserId(2L), new BankNumber("072"),
                 details, LocalDateTime.now(), LocalDateTime.now());
     }
 

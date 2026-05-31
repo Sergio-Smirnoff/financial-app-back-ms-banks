@@ -1,7 +1,7 @@
 package com.financialapp.banks.domain.model.card;
 
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.DebitCard;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class CardFactoryTest {
     }
 
     private Card create(CardBehavior behavior) {
-        return Card.create(NUMBER, USER_ID, BankName.GALICIA, details(behavior), NOW, NOW);
+        return Card.create(NUMBER, USER_ID, new BankNumber("007"), details(behavior), NOW, NOW);
     }
 
     @Test

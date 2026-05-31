@@ -36,6 +36,11 @@ public enum DomainError {
     UNSUPPORTED_BANK(ErrorCategory.BAD_REQUEST, "unsupported_bank"),
     INVALID_CURRENCY(ErrorCategory.BAD_REQUEST, "invalid_currency"),
     INVALID_CARD_NUMBER(ErrorCategory.BAD_REQUEST, "invalid_card_number"),
+    INVALID_BANK_NUMBER(ErrorCategory.BAD_REQUEST, "invalid_bank_number"),
+    INVALID_SUCURSAL_CODE(ErrorCategory.BAD_REQUEST, "invalid_sucursal_code"),
+    INVALID_ACCOUNT_NUMBER(ErrorCategory.BAD_REQUEST, "invalid_account_number"),
+    INVALID_CBU(ErrorCategory.BAD_REQUEST, "invalid_cbu"),
+    CBU_BANK_MISMATCH(ErrorCategory.UNPROCESSABLE, "cbu_bank_mismatch"),
 
     // --- Downstream / infrastructure ---
     FINANCES_SERVICE_UNAVAILABLE(ErrorCategory.INTERNAL, "finances_service_unavailable"),

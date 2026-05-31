@@ -1,6 +1,7 @@
 package com.financialapp.banks.domain.model.bank;
 
 public record Bank(
-    BankName name,
+    BankNumber bankNumber,
+    String name,
     Logo logo
 ) {}

@@ -14,13 +14,13 @@ public class AccountWebMapper {
     public AccountResponse toResponse(Account account) {
         if (account == null) return null;
         return AccountResponse.builder()
-                .bankName(account.bankName().name())
+                .bankNumber(account.bankNumber().value())
                 .userId(account.userId().value())
                 .name(account.name())
                 .type(resolveType(account))
                 .balance(account.balance().amount().toPlainString())
                 .currency(account.balance().currency().getCurrencyCode())
-                .cbu(account.cbu())
+                .cbu(account.cbu().value())
                 .alias(account.alias())
                 .isActive(account.isActive())
                 .createdAt(account.createdAt())

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Builder
 public record LoanResponse(
         Long id,
-        String bankName,
+        String bankNumber,
         Long userId,
         String name,
         String principal,

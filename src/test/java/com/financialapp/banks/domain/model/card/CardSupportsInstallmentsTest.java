@@ -2,7 +2,7 @@ package com.financialapp.banks.domain.model.card;
 
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.card.CardInstallmentNotSupportedException;
-import com.financialapp.banks.domain.model.bank.BankName;
+import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.DebitCard;
 import org.junit.jupiter.api.Test;
@@ -19,8 +19,8 @@ class CardSupportsInstallmentsTest {
                 behavior, YearMonth.now().plusYears(2), new CardBilling(20, 10));
         CardNumber number = new CardNumber("1234567890123456");
         return behavior == CardBehavior.INSTANT_PAYMENT
-                ? new DebitCard(number, new UserId(1L), BankName.GALICIA, details, LocalDateTime.now(), LocalDateTime.now())
-                : new CreditCard(number, new UserId(1L), BankName.GALICIA, details, LocalDateTime.now(), LocalDateTime.now());
+                ? new DebitCard(number, new UserId(1L), new BankNumber("007"), details, LocalDateTime.now(), LocalDateTime.now())
+                : new CreditCard(number, new UserId(1L), new BankNumber("007"), details, LocalDateTime.now(), LocalDateTime.now());
     }
 
     @Test
