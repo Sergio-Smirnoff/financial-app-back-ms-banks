@@ -7,6 +7,7 @@ import com.financialapp.banks.domain.exception.ResourceConflictException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import java.util.Map;
 import com.financialapp.banks.domain.model.card.Card;
+import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
 import com.financialapp.banks.domain.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,8 @@ public class CancelCardUseCaseImpl implements CancelCardUseCase {
         Card card = cardRepository.findByCardNumberAndUserId(command.cardNumber(), command.userId())
                 .orElseThrow(() -> new ResourceNotFoundException("Card", command.cardNumber()));
 
-        if (card.hasUnpaidInstallments()) {
+        if (card instanceof CreditCard credit
+                && credit.installments().stream().anyMatch(installment -> !installment.paid())) {
             throw new ResourceConflictException(
                 DomainError.CARD_NOT_DELETABLE,
                 "Cannot delete card '" + command.cardNumber() + "' — it has unpaid installments",

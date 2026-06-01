@@ -5,6 +5,7 @@ import com.financialapp.banks.domain.usecase.card.CheckDuplicateExpensesUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.card.Card;
+import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
 import com.financialapp.banks.domain.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,12 +25,17 @@ public class CheckDuplicateExpensesUseCaseImpl implements CheckDuplicateExpenses
     public List<Integer> execute(String cardNumber, UserId userId, List<RegisterCardExpenseCommand> expenses) {
         Card card = cardRepository.findByCardNumberAndUserId(cardNumber, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card", cardNumber));
+        if (!(card instanceof CreditCard credit)) {
+            return List.of();
+        }
 
         return IntStream.range(0, expenses.size())
                 .filter(expenseIndex -> {
                     RegisterCardExpenseCommand candidate = expenses.get(expenseIndex);
-                    return card.hasInstallmentMatching(
-                            candidate.description(), candidate.amount(), candidate.firstDueDate());
+                    return credit.installments().stream().anyMatch(installment ->
+                            installment.description().equals(candidate.description())
+                                    && installment.amount().amount().compareTo(candidate.amount().amount()) == 0
+                                    && installment.dueDate().equals(candidate.firstDueDate()));
                 })
                 .boxed()
                 .toList();

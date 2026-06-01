@@ -37,9 +37,11 @@ public class CardPersistenceMapper {
         UserId userId = new UserId(entity.getUserId());
         BankNumber bankNumber = new BankNumber(bank.getBankNumber());
         CardNumber cardNumber = CardNumber.from(entity.getCardNumber());
-        Card card = entity.getBehavior() == CardBehavior.INSTANT_PAYMENT
-                ? new DebitCard(cardNumber, userId, bankNumber, details, entity.getCreatedAt(), entity.getUpdatedAt())
-                : new CreditCard(cardNumber, userId, bankNumber, details, entity.getCreatedAt(), entity.getUpdatedAt());
+
+        if (entity.getBehavior() == CardBehavior.INSTANT_PAYMENT) {
+            return new DebitCard(cardNumber, userId, bankNumber, details,
+                    entity.getCreatedAt(), entity.getUpdatedAt());
+        }
 
         List<CardInstallment> installments = entity.getInstallments().stream()
                 .sorted(Comparator.comparing(CardInstallmentJpaEntity::getDueDate))
@@ -60,8 +62,8 @@ public class CardPersistenceMapper {
                             child.getUpdatedAt());
                 })
                 .toList();
-        card.restoreInstallments(installments);
-        return card;
+        return new CreditCard(cardNumber, userId, bankNumber, details,
+                entity.getCreatedAt(), entity.getUpdatedAt(), installments);
     }
 
     public CardJpaEntity toJpa(Card card, BankJpaEntity bank) {
@@ -102,7 +104,8 @@ public class CardPersistenceMapper {
 
     private void syncInstallments(CardJpaEntity cardEntity, Card card) {
         cardEntity.getInstallments().clear();
-        for (CardInstallment installment : card.installments()) {
+        List<CardInstallment> installments = card instanceof CreditCard credit ? credit.installments() : List.of();
+        for (CardInstallment installment : installments) {
             CardInstallmentJpaEntity child = CardInstallmentJpaEntity.builder()
                     .id(installment.id() != null ? installment.id().value() : null)
                     .card(cardEntity)

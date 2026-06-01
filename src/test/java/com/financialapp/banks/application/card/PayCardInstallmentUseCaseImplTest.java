@@ -14,7 +14,9 @@ import com.financialapp.banks.domain.model.card.CardBrand;
 import com.financialapp.banks.domain.model.card.CardDetails;
 import com.financialapp.banks.domain.model.card.CardInstallment;
 import com.financialapp.banks.domain.model.card.CardInstallmentId;
+import com.financialapp.banks.domain.model.card.CardNumber;
 import com.financialapp.banks.domain.model.card.CardType;
+import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.CardRepository;
 import com.financialapp.banks.domain.usecase.account.AdjustBalanceUseCase;
@@ -70,12 +72,9 @@ class PayCardInstallmentUseCaseImplTest {
     private Card card(boolean withInstallment, boolean paid) {
         CardDetails details = new CardDetails(CardBrand.VISA, CardType.PLATINUM,
                 CardBehavior.CREDIT, YearMonth.now().plusYears(2), new CardBilling(20, 10));
-        Card card = Card.create(CARD, new UserId(7L), new BankNumber("007"), details,
-                LocalDateTime.now(), LocalDateTime.now());
-        if (withInstallment) {
-            card.restoreInstallments(List.of(installment(paid)));
-        }
-        return card;
+        List<CardInstallment> installments = withInstallment ? List.of(installment(paid)) : List.of();
+        return new CreditCard(CardNumber.from(CARD), new UserId(7L), new BankNumber("007"), details,
+                LocalDateTime.now(), LocalDateTime.now(), installments);
     }
 
     private PayCardInstallmentCommand cmd(LocalDate paidDate) {

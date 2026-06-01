@@ -5,6 +5,7 @@ import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardInstallment;
+import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
 import com.financialapp.banks.domain.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,6 @@ public class ListCardInstallmentsUseCaseImpl implements ListCardInstallmentsUseC
     public List<CardInstallment> execute(String cardNumber, UserId userId) {
         Card card = cardRepository.findByCardNumberAndUserId(cardNumber, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card", cardNumber));
-        return card.installments();
+        return card instanceof CreditCard credit ? credit.installments() : List.of();
     }
 }
