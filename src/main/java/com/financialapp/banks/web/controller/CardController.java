@@ -82,7 +82,7 @@ public class CardController {
                 request.dueDay()
         ));
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.created("Card created", cardMapper.toResponse(result)));
+                .body(ApiResponse.ok("Card created", cardMapper.toResponse(result)));
     }
 
     @PatchMapping("/{cardNumber}")
