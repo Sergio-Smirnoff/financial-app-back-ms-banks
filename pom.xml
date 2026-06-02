@@ -200,6 +200,13 @@
                             </rules>
                             <excludes>
                                 <exclude>com/financialapp/banks/BanksApplication.class</exclude>
+                                <!-- Empty anemic scaffolding (field-only, no behavior); CardPayment/LoanPayment
+                                     are also unreferenced. Human-approved exclusions — see
+                                     general-analysis/coverage-review-queue.md. -->
+                                <exclude>com/financialapp/banks/domain/common/model/Payment.class</exclude>
+                                <exclude>com/financialapp/banks/domain/common/model/Installment.class</exclude>
+                                <exclude>com/financialapp/banks/domain/model/card/CardPayment.class</exclude>
+                                <exclude>com/financialapp/banks/domain/model/loan/LoanPayment.class</exclude>
                             </excludes>
                         </configuration>
                     </execution>
