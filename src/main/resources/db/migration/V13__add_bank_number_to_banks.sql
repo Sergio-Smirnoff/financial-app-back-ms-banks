@@ -1,5 +1,5 @@
 -- V13: identify banks by their 3-digit BCRA bank number
-ALTER TABLE banks.banks ADD COLUMN bank_number CHAR(3);
+ALTER TABLE banks.banks ADD COLUMN bank_number VARCHAR(3);
 
 -- Seed/patch the catalog. Idempotent: works on a fresh DB and on one the old
 -- BankCatalogSeeder already populated (uq_banks_name from V9 backs ON CONFLICT).
