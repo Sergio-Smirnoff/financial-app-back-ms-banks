@@ -15,7 +15,7 @@ import java.io.IOException;
 @Slf4j
 public class InternalAuthFilter extends OncePerRequestFilter {
 
-    @Value("${INTERNAL_AUTH_TOKEN}")
+    @Value("${internal.auth.token}")
     private String internalToken;
 
     @Override

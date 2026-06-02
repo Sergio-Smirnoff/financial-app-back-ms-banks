@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class FeignConfig {
 
-    @Value("${INTERNAL_AUTH_TOKEN}")
+    @Value("${internal.auth.token}")
     private String internalToken;
 
     @Bean

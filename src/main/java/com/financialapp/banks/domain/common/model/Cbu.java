@@ -57,7 +57,7 @@ public record Cbu(BankNumber bankNumber, SucursalCode sucursalCode, AccountNumbe
 
     private static void requireMatchingCheckDigits(String raw, Cbu parsed) {
         if (!parsed.value().equals(raw)) {
-            throw new InvalidCbuException(raw, "check digits do not match");
+            throw new InvalidCbuException(raw, "input digits did not pass check digit validation");
         }
     }
 

@@ -50,6 +50,10 @@ finances:
   service:
     url: ${FINANCES_SERVICE_URL:http://localhost:8082}
 
+internal:
+  auth:
+    token: ${INTERNAL_AUTH_TOKEN:local-dev-token}
+
 springdoc:
   api-docs:
     path: /v3/api-docs
