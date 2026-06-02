@@ -2,7 +2,7 @@ package com.financialapp.banks.infrastructure.messaging;
 
 import com.financialapp.banks.domain.common.DomainEvent;
 import com.financialapp.banks.domain.event.*;
-import com.financialapp.banks.domain.port.DomainEventPublisher;
+import com.financialapp.banks.domain.gateway.DomainEventPublisher;
 import com.financialapp.banks.infrastructure.messaging.payload.BankAlertEvent;
 import com.financialapp.banks.infrastructure.messaging.payload.PaymentEvent;
 import com.financialapp.banks.infrastructure.messaging.payload.TransactionalKafkaEvent;

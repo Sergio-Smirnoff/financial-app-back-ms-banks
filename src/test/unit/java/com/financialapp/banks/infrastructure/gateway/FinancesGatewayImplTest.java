@@ -1,7 +1,7 @@
-package com.financialapp.banks.infrastructure.client.adapter;
+package com.financialapp.banks.infrastructure.gateway;
 
 import com.financialapp.banks.domain.exception.InfrastructureException;
-import com.financialapp.banks.domain.port.FinancesPort.TransactionSummary;
+import com.financialapp.banks.domain.gateway.FinancesGateway.TransactionSummary;
 import com.financialapp.banks.infrastructure.client.FinancesFeignClient;
 import com.financialapp.banks.infrastructure.client.FinancesFeignClient.TransactionDto;
 import com.financialapp.banks.infrastructure.client.dto.ExternalApiResponse;
@@ -23,16 +23,16 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class FinancesClientAdapterTest {
+class FinancesGatewayImplTest {
 
     @Mock FinancesFeignClient client;
-    FinancesClientAdapter adapter;
+    FinancesGatewayImpl gateway;
 
     private static final String CBU = "0070001600000000123459";
 
     @BeforeEach
     void setUp() {
-        adapter = new FinancesClientAdapter(client);
+        gateway = new FinancesGatewayImpl(client);
     }
 
     @Test
@@ -44,7 +44,7 @@ class FinancesClientAdapterTest {
                 .thenReturn(new ExternalApiResponse<>(List.of(dto)));
 
         // When fetching recent transactions
-        List<TransactionSummary> result = adapter.getRecentTransactions(CBU, 5);
+        List<TransactionSummary> result = gateway.getRecentTransactions(CBU, 5);
 
         // Then the dto is mapped to a domain summary
         assertThat(result).hasSize(1);
@@ -58,7 +58,7 @@ class FinancesClientAdapterTest {
         when(client.getTransactions(eq(CBU), isNull(), isNull(), isNull())).thenReturn(null);
 
         // When / Then an empty list is returned (no failure)
-        assertThat(adapter.getAllTransactions(CBU)).isEmpty();
+        assertThat(gateway.getAllTransactions(CBU)).isEmpty();
     }
 
     @Test
@@ -70,7 +70,7 @@ class FinancesClientAdapterTest {
                 .thenReturn(new ExternalApiResponse<>(null));
 
         // When / Then an empty list is returned
-        assertThat(adapter.getFilteredTransactions(CBU, from, to)).isEmpty();
+        assertThat(gateway.getFilteredTransactions(CBU, from, to)).isEmpty();
     }
 
     @Test
@@ -79,7 +79,7 @@ class FinancesClientAdapterTest {
         when(client.getTransactions(any(), any(), any(), any())).thenThrow(new RuntimeException("boom"));
 
         // When / Then the failure is translated to an InfrastructureException
-        assertThatThrownBy(() -> adapter.getAllTransactions(CBU))
+        assertThatThrownBy(() -> gateway.getAllTransactions(CBU))
                 .isInstanceOf(InfrastructureException.class)
                 .hasMessageContaining("ms-finances");
     }

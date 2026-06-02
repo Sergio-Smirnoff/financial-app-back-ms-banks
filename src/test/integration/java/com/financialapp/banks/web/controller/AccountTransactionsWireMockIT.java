@@ -20,8 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Exercises the account-transactions endpoint through the REAL ms-finances Feign client
- * (FeignConfig interceptor + FinancesClientAdapter) against a WireMock stub server,
- * replicating the TP1 technique. The existing AccountControllerIT @MockBeans the port;
+ * (FeignConfig interceptor + FinancesGatewayImpl) against a WireMock stub server,
+ * replicating the TP1 technique. The existing AccountControllerIT @MockBeans the gateway;
  * this one does not, so it covers the actual HTTP boundary.
  */
 @SpringBootTest

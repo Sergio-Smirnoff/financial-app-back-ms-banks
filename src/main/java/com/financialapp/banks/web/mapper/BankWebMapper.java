@@ -1,5 +1,6 @@
 package com.financialapp.banks.web.mapper;
 
+import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.model.bank.Bank;
 import com.financialapp.banks.domain.usecase.catalog.BankingCatalog;
 import com.financialapp.banks.web.dto.response.AccountResponse;
@@ -8,7 +9,6 @@ import com.financialapp.banks.web.dto.response.BankResponse;
 import com.financialapp.banks.web.dto.response.BankingCatalogResponse;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,13 +18,13 @@ public class BankWebMapper {
 
     public BankResponse toResponse(Bank bank, List<AccountResponse> accounts) {
         if (bank == null) return null;
-        Map<String, BigDecimal> summed = accounts.stream()
+        Map<String, String> totalBalances = accounts.stream()
+                .map(account -> Money.of(account.balance(), account.currency()))
                 .collect(Collectors.groupingBy(
-                        AccountResponse::currency,
-                        Collectors.reducing(BigDecimal.ZERO,
-                                account -> new BigDecimal(account.balance()), BigDecimal::add)));
-        Map<String, String> totalBalances = summed.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, currencyTotal -> currencyTotal.getValue().toPlainString()));
+                        money -> money.currency().getCurrencyCode(),
+                        Collectors.collectingAndThen(
+                                Collectors.reducing(Money::add),
+                                total -> total.map(money -> money.amount().toPlainString()).orElse("0"))));
         return BankResponse.builder()
                 .bankNumber(bank.bankNumber().value())
                 .name(bank.name())

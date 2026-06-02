@@ -1,7 +1,7 @@
-package com.financialapp.banks.infrastructure.client.adapter;
+package com.financialapp.banks.infrastructure.gateway;
 
 import com.financialapp.banks.domain.exception.InfrastructureException;
-import com.financialapp.banks.domain.port.InvestmentsPort;
+import com.financialapp.banks.domain.gateway.InvestmentsGateway;
 import com.financialapp.banks.infrastructure.client.InvestmentsFeignClient;
 import com.financialapp.banks.infrastructure.client.dto.ExternalApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class InvestmentsClientAdapter implements InvestmentsPort {
+public class InvestmentsGatewayImpl implements InvestmentsGateway {
 
     private final InvestmentsFeignClient client;
 

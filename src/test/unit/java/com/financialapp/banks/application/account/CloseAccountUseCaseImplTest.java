@@ -9,7 +9,7 @@ import com.financialapp.banks.domain.exception.InvestmentsServiceException;
 import com.financialapp.banks.domain.common.model.Cbu;
 import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.model.bank.BankNumber;
-import com.financialapp.banks.domain.port.InvestmentsPort;
+import com.financialapp.banks.domain.gateway.InvestmentsGateway;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 class CloseAccountUseCaseImplTest {
 
     @Mock AccountRepository accountRepository;
-    @Mock InvestmentsPort investmentsPort;
+    @Mock InvestmentsGateway investmentsGateway;
     CloseAccountUseCaseImpl useCase;
 
     private static final Cbu CBU = Cbu.from("0070001600000000123459");
@@ -38,7 +38,7 @@ class CloseAccountUseCaseImplTest {
 
     @BeforeEach
     void setUp() {
-        useCase = new CloseAccountUseCaseImpl(accountRepository, investmentsPort);
+        useCase = new CloseAccountUseCaseImpl(accountRepository, investmentsGateway);
     }
 
     private InvestmentAccount investmentAccount() {
@@ -53,7 +53,7 @@ class CloseAccountUseCaseImplTest {
     void execute_wrapsInfrastructureExceptionAsInvestmentsServiceException() {
         when(accountRepository.findByCbu(CBU.value()))
                 .thenReturn(Optional.of(investmentAccount()));
-        when(investmentsPort.countHoldings(CBU.value()))
+        when(investmentsGateway.countHoldings(CBU.value()))
                 .thenThrow(new InfrastructureException("ms-investments: timeout"));
 
         assertThatThrownBy(() -> useCase.execute(new CloseAccountCommand(CBU.value())))
@@ -65,7 +65,7 @@ class CloseAccountUseCaseImplTest {
     void execute_deletesAccountWhenNoHoldings() {
         when(accountRepository.findByCbu(CBU.value()))
                 .thenReturn(Optional.of(investmentAccount()));
-        when(investmentsPort.countHoldings(CBU.value())).thenReturn(0);
+        when(investmentsGateway.countHoldings(CBU.value())).thenReturn(0);
 
         useCase.execute(new CloseAccountCommand(CBU.value()));
 

@@ -4,6 +4,7 @@ import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardBrand;
+import com.financialapp.banks.domain.model.card.CardInstallment;
 import com.financialapp.banks.domain.model.card.CardType;
 
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ public interface CardRepository {
     Optional<Card> findByCardNumberAndUserId(String cardNumber, UserId userId);
     boolean existsByBankNumberAndBrandAndTypeAndCardNumber(BankNumber bankNumber, CardBrand brand, CardType type, String cardNumber);
     List<Card> findExpiringBetween(LocalDate from, LocalDate to);
+    List<CardInstallment> findUpcomingUnpaidInstallments(UserId userId, LocalDate from, LocalDate to);
     Card save(Card card);
     void delete(String cardNumber);
 }

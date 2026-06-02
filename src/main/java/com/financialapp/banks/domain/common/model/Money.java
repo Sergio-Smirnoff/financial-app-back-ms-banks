@@ -12,6 +12,16 @@ public record Money(BigDecimal amount, Currency currency) {
         return new Money(amount, parseCurrency(currencyCode));
     }
 
+    /** Builds money from a decimal string amount, keeping {@link BigDecimal} out of the web layer. */
+    public static Money of(String amount, String currencyCode) {
+        return new Money(new BigDecimal(amount), parseCurrency(currencyCode));
+    }
+
+    /** Zero amount in the given currency. */
+    public static Money zero(String currencyCode) {
+        return new Money(BigDecimal.ZERO, parseCurrency(currencyCode));
+    }
+
     public static Currency parseCurrency(String currencyCode) {
         try {
             return Currency.getInstance(currencyCode.toUpperCase());

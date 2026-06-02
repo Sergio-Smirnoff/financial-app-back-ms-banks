@@ -10,7 +10,7 @@ import com.financialapp.banks.domain.exception.loan.LoanAccountMismatchException
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.model.loan.LoanOrigination;
-import com.financialapp.banks.domain.port.DomainEventPublisher;
+import com.financialapp.banks.domain.gateway.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import com.financialapp.banks.domain.repository.BankRepository;
 import com.financialapp.banks.domain.repository.LoanRepository;
@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Currency;
 
 @Service
@@ -44,16 +45,18 @@ public class OriginateLoanUseCaseImpl implements OriginateLoanUseCase {
         }
 
         Currency currency = dest.balance().currency();
+        BigDecimal principal = new BigDecimal(cmd.principal());
+        BigDecimal interestRate = new BigDecimal(cmd.interestRate());
         LoanOrigination origination = Loan.originate(
                 cmd.userId(), cmd.bankNumber(), cmd.name(),
-                new Money(cmd.principal(), currency), cmd.interestRate(),
+                new Money(principal, currency), interestRate,
                 cmd.totalInstallments(), cmd.amortizationType(), cmd.startDate(),
                 cmd.destinationAccountCbu());
 
         Loan saved = loanRepository.save(origination.loan());
 
         adjustBalance.execute(new AdjustBalanceCommand(
-                cmd.destinationAccountCbu(), new Money(cmd.principal(), currency)));
+                cmd.destinationAccountCbu(), new Money(principal, currency)));
 
         eventPublisher.publishAll(origination.events());
 

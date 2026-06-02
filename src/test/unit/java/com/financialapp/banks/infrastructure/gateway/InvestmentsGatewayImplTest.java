@@ -1,4 +1,4 @@
-package com.financialapp.banks.infrastructure.client.adapter;
+package com.financialapp.banks.infrastructure.gateway;
 
 import com.financialapp.banks.domain.exception.InfrastructureException;
 import com.financialapp.banks.infrastructure.client.InvestmentsFeignClient;
@@ -18,16 +18,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class InvestmentsClientAdapterTest {
+class InvestmentsGatewayImplTest {
 
     @Mock InvestmentsFeignClient client;
-    InvestmentsClientAdapter adapter;
+    InvestmentsGatewayImpl gateway;
 
     private static final String CBU = "0070001600000000123459";
 
     @BeforeEach
     void setUp() {
-        adapter = new InvestmentsClientAdapter(client);
+        gateway = new InvestmentsGatewayImpl(client);
     }
 
     @Test
@@ -36,7 +36,7 @@ class InvestmentsClientAdapterTest {
         when(client.countHoldings(CBU)).thenReturn(new ExternalApiResponse<>(3L));
 
         // When / Then the count is returned as an int
-        assertThat(adapter.countHoldings(CBU)).isEqualTo(3);
+        assertThat(gateway.countHoldings(CBU)).isEqualTo(3);
     }
 
     @Test
@@ -45,7 +45,7 @@ class InvestmentsClientAdapterTest {
         when(client.countHoldings(CBU)).thenReturn(null);
 
         // When / Then it defaults to zero
-        assertThat(adapter.countHoldings(CBU)).isZero();
+        assertThat(gateway.countHoldings(CBU)).isZero();
     }
 
     @Test
@@ -54,7 +54,7 @@ class InvestmentsClientAdapterTest {
         when(client.countHoldings(CBU)).thenReturn(new ExternalApiResponse<>(null));
 
         // When / Then it defaults to zero
-        assertThat(adapter.countHoldings(CBU)).isZero();
+        assertThat(gateway.countHoldings(CBU)).isZero();
     }
 
     @Test
@@ -63,7 +63,7 @@ class InvestmentsClientAdapterTest {
         when(client.countHoldings(any())).thenThrow(new RuntimeException("down"));
 
         // When / Then it is translated to an InfrastructureException
-        assertThatThrownBy(() -> adapter.countHoldings(CBU))
+        assertThatThrownBy(() -> gateway.countHoldings(CBU))
                 .isInstanceOf(InfrastructureException.class)
                 .hasMessageContaining("ms-investments");
     }
@@ -75,7 +75,7 @@ class InvestmentsClientAdapterTest {
                 .thenReturn(new ExternalApiResponse<>(new AccountValuation(CBU, new BigDecimal("1000.00"), "ARS")));
 
         // When / Then the total valuation is returned
-        assertThat(adapter.getPortfolioValuation(CBU)).isEqualByComparingTo("1000.00");
+        assertThat(gateway.getPortfolioValuation(CBU)).isEqualByComparingTo("1000.00");
     }
 
     @Test
@@ -84,7 +84,7 @@ class InvestmentsClientAdapterTest {
         when(client.getValuation(CBU)).thenReturn(null);
 
         // When / Then it defaults to zero
-        assertThat(adapter.getPortfolioValuation(CBU)).isEqualByComparingTo("0");
+        assertThat(gateway.getPortfolioValuation(CBU)).isEqualByComparingTo("0");
     }
 
     @Test
@@ -93,7 +93,7 @@ class InvestmentsClientAdapterTest {
         when(client.getValuation(CBU)).thenReturn(new ExternalApiResponse<>(null));
 
         // When / Then it defaults to zero
-        assertThat(adapter.getPortfolioValuation(CBU)).isEqualByComparingTo("0");
+        assertThat(gateway.getPortfolioValuation(CBU)).isEqualByComparingTo("0");
     }
 
     @Test
@@ -102,7 +102,7 @@ class InvestmentsClientAdapterTest {
         when(client.getValuation(any())).thenThrow(new RuntimeException("down"));
 
         // When / Then it is translated to an InfrastructureException
-        assertThatThrownBy(() -> adapter.getPortfolioValuation(CBU))
+        assertThatThrownBy(() -> gateway.getPortfolioValuation(CBU))
                 .isInstanceOf(InfrastructureException.class)
                 .hasMessageContaining("ms-investments");
     }

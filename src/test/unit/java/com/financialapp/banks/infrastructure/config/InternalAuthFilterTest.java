@@ -44,6 +44,26 @@ class InternalAuthFilterTest {
     }
 
     @Test
+    void bypassesSwaggerUiPaths() throws Exception {
+        // Given a swagger-ui request (an exempt prefix)
+        when(request.getRequestURI()).thenReturn("/swagger-ui/index.html");
+
+        // When the filter runs / Then the chain proceeds
+        filter.doFilterInternal(request, response, chain);
+        verify(chain).doFilter(request, response);
+    }
+
+    @Test
+    void bypassesApiDocsPaths() throws Exception {
+        // Given an api-docs request (an exempt prefix)
+        when(request.getRequestURI()).thenReturn("/v3/api-docs/swagger-config");
+
+        // When the filter runs / Then the chain proceeds
+        filter.doFilterInternal(request, response, chain);
+        verify(chain).doFilter(request, response);
+    }
+
+    @Test
     void rejectsRequestWhenNoConfiguredToken() throws Exception {
         // Given a protected path and no configured internal token (null)
         when(request.getRequestURI()).thenReturn("/api/v1/banks/cards");

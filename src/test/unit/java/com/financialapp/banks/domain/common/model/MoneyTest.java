@@ -38,4 +38,14 @@ class MoneyTest {
         assertThatThrownBy(() -> Money.of(new BigDecimal("1"), "ARS").add(Money.of(new BigDecimal("1"), "USD")))
             .isInstanceOf(com.financialapp.banks.domain.exception.account.AccountCurrencyMismatchException.class);
     }
+
+    @Test void ofStringParsesDecimalAmount() {
+        assertThat(Money.of("1234.56", "ARS"))
+            .isEqualTo(Money.of(new BigDecimal("1234.56"), "ARS"));
+    }
+
+    @Test void zeroBuildsZeroAmountInCurrency() {
+        assertThat(Money.zero("USD"))
+            .isEqualTo(Money.of(new BigDecimal("0"), "USD"));
+    }
 }

@@ -9,6 +9,7 @@ import com.financialapp.banks.domain.repository.LoanRepository;
 import com.financialapp.banks.infrastructure.persistence.entity.BankJpaEntity;
 import com.financialapp.banks.infrastructure.persistence.entity.LoanJpaEntity;
 import com.financialapp.banks.infrastructure.persistence.jpa.BankJpaRepository;
+import com.financialapp.banks.infrastructure.persistence.jpa.LoanInstallmentJpaRepository;
 import com.financialapp.banks.infrastructure.persistence.jpa.LoanJpaRepository;
 import com.financialapp.banks.infrastructure.persistence.mapper.LoanPersistenceMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class LoanRepositoryImpl implements LoanRepository {
 
     private final LoanJpaRepository loanJpaRepository;
+    private final LoanInstallmentJpaRepository loanInstallmentJpaRepository;
     private final BankJpaRepository bankJpaRepository;
     private final LoanPersistenceMapper mapper;
 
@@ -60,6 +62,18 @@ public class LoanRepositoryImpl implements LoanRepository {
     public List<Loan> findActiveWithUpcomingPayment(LocalDate from, LocalDate to) {
         return loanJpaRepository.findActiveWithUpcomingPayment(from, to)
                 .stream().map(this::loadDomain).toList();
+    }
+
+    @Override
+    public List<Loan> findWithUpcomingUnpaidInstallments(UserId userId, LocalDate from, LocalDate to) {
+        return loanInstallmentJpaRepository.findUpcomingUnpaidByUser(userId.value(), from, to)
+                .stream()
+                .map(installment -> installment.getLoan().getId())
+                .distinct()
+                .map(loanJpaRepository::findById)
+                .flatMap(Optional::stream)
+                .map(this::loadDomain)
+                .toList();
     }
 
     @Override

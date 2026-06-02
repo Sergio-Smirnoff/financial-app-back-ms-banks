@@ -6,7 +6,7 @@ import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.AccountAdjustment;
 import com.financialapp.banks.domain.common.model.Money;
-import com.financialapp.banks.domain.port.DomainEventPublisher;
+import com.financialapp.banks.domain.gateway.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.AccountRepository;
 
 import lombok.RequiredArgsConstructor;

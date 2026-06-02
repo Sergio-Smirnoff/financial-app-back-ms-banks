@@ -1,6 +1,6 @@
 package com.financialapp.banks.domain.usecase.account;
 
-import com.financialapp.banks.domain.port.FinancesPort.TransactionSummary;
+import com.financialapp.banks.domain.gateway.FinancesGateway.TransactionSummary;
 
 import java.time.LocalDate;
 import java.util.List;

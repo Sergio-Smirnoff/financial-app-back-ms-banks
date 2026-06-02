@@ -1,11 +1,11 @@
-package com.financialapp.banks.domain.port;
+package com.financialapp.banks.domain.gateway;
 
 import com.financialapp.banks.domain.common.model.Money;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public interface FinancesPort {
+public interface FinancesGateway {
 
     record TransactionSummary(
             Long transactionId,

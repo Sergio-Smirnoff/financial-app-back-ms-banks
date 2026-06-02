@@ -20,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Currency;
 import java.util.List;
@@ -71,7 +70,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse<AccountResponse>> create(
             @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody AccountRequest request) {
-        Money initialBalance = Money.of(BigDecimal.ZERO, request.currency());
+        Money initialBalance = Money.zero(request.currency());
         var result = openAccountUseCase.execute(new OpenAccountCommand(
                 new UserId(userId),
                 new BankNumber(request.bankNumber()),
@@ -139,13 +138,13 @@ public class AccountController {
             @PathVariable String cbu,
             @RequestParam String delta,
             @RequestParam String currency) {
-        adjustBalanceUseCase.execute(new AdjustBalanceCommand(cbu, Money.of(new BigDecimal(delta), currency)));
+        adjustBalanceUseCase.execute(new AdjustBalanceCommand(cbu, Money.of(delta, currency)));
         return ResponseEntity.ok(ApiResponse.ok("Balance adjusted", null));
     }
 
     private Money toMoney(String amount, String currency) {
         return amount != null && currency != null
-                ? Money.of(new BigDecimal(amount), currency)
+                ? Money.of(amount, currency)
                 : null;
     }
 }

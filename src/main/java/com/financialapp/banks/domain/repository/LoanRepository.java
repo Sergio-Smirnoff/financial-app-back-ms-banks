@@ -16,6 +16,7 @@ public interface LoanRepository {
     Optional<Loan> findByIdAndUserId(LoanId id, UserId userId);
     int countByBankNumber(BankNumber bankNumber);
     List<Loan> findActiveWithUpcomingPayment(LocalDate from, LocalDate to);
+    List<Loan> findWithUpcomingUnpaidInstallments(UserId userId, LocalDate from, LocalDate to);
     Loan save(Loan loan);
     void delete(LoanId id);
 }

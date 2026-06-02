@@ -6,6 +6,7 @@ import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.loan.AmortizationType;
 import com.financialapp.banks.domain.model.loan.Loan;
+import com.financialapp.banks.domain.model.loan.LoanId;
 import com.financialapp.banks.domain.repository.LoanRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Currency;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -87,6 +90,19 @@ class LoanAggregatePersistenceIT {
         Loan saved = loanRepository.save(newLoan(BANK));
         loanRepository.delete(saved.id());
         assertThat(loanRepository.findById(saved.id())).isEmpty();
+    }
+
+    @Test
+    void save_withNullIdObject_insertsViaToJpa() {
+        // Given a loan whose id object itself is null (covers the loan.id() != null FALSE branch of save)
+        Loan idless = new Loan(null, USER, BANK, "Fresh",
+                new Money(new BigDecimal("100.00"), ARS), BigDecimal.ZERO, 1, 1,
+                AmortizationType.FRENCH, START, true, List.of(),
+                LocalDateTime.now(), LocalDateTime.now());
+
+        // When saved / Then it is inserted with a generated id
+        Loan saved = loanRepository.save(idless);
+        assertThat(saved.id().value()).isNotNull();
     }
 
     @Test

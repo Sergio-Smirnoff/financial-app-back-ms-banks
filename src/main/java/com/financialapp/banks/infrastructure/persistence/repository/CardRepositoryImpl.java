@@ -5,12 +5,15 @@ import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardBrand;
+import com.financialapp.banks.domain.model.card.CardInstallment;
 import com.financialapp.banks.domain.model.card.CardType;
 import com.financialapp.banks.domain.repository.CardRepository;
 import com.financialapp.banks.infrastructure.persistence.entity.BankJpaEntity;
 import com.financialapp.banks.infrastructure.persistence.entity.CardJpaEntity;
 import com.financialapp.banks.infrastructure.persistence.jpa.BankJpaRepository;
+import com.financialapp.banks.infrastructure.persistence.jpa.CardInstallmentJpaRepository;
 import com.financialapp.banks.infrastructure.persistence.jpa.CardJpaRepository;
+import com.financialapp.banks.infrastructure.persistence.mapper.CardInstallmentPersistenceMapper;
 import com.financialapp.banks.infrastructure.persistence.mapper.CardPersistenceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -25,8 +28,10 @@ import java.util.Optional;
 public class CardRepositoryImpl implements CardRepository {
 
     private final CardJpaRepository cardJpaRepository;
+    private final CardInstallmentJpaRepository cardInstallmentJpaRepository;
     private final BankJpaRepository bankJpaRepository;
     private final CardPersistenceMapper mapper;
+    private final CardInstallmentPersistenceMapper installmentMapper;
 
     @Override
     public List<Card> findByUserId(UserId userId) {
@@ -69,6 +74,12 @@ public class CardRepositoryImpl implements CardRepository {
     public List<Card> findExpiringBetween(LocalDate from, LocalDate to) {
         return cardJpaRepository.findExpiringBetween(from, to)
                 .stream().map(this::loadDomain).toList();
+    }
+
+    @Override
+    public List<CardInstallment> findUpcomingUnpaidInstallments(UserId userId, LocalDate from, LocalDate to) {
+        return cardInstallmentJpaRepository.findUpcomingUnpaid(userId.value(), from, to)
+                .stream().map(installmentMapper::toDomain).toList();
     }
 
     @Override

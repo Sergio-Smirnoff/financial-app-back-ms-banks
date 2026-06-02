@@ -32,6 +32,12 @@ class LoanPersistenceMapperTest {
     }
 
     @Test
+    void toDomain_returnsNull_whenEntityNull() {
+        // Given a null entity / When mapped / Then null (the null guard)
+        assertThat(mapper.toDomain(null, bank())).isNull();
+    }
+
+    @Test
     void toJpa_returnsNull_whenLoanNull() {
         // Given null / When mapped / Then null (the null guard)
         assertThat(mapper.toJpa(null, bank())).isNull();

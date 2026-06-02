@@ -1,4 +1,4 @@
-package com.financialapp.banks.domain.port;
+package com.financialapp.banks.domain.gateway;
 
 import com.financialapp.banks.domain.common.DomainEvent;
 

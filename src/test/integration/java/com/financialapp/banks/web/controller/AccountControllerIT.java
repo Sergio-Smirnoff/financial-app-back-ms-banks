@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.financialapp.banks.domain.usecase.account.GetAccountTransactionsUseCase;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.model.account.AccountType;
-import com.financialapp.banks.domain.port.FinancesPort.TransactionSummary;
+import com.financialapp.banks.domain.gateway.FinancesGateway.TransactionSummary;
 import com.financialapp.banks.domain.exception.FinancesServiceException;
 import com.financialapp.banks.web.dto.request.AccountRequest;
 import org.junit.jupiter.api.Test;
@@ -288,5 +288,84 @@ class AccountControllerIT {
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.currency").value("USD"));
+    }
+
+    @Test
+    void deleteAccount_returnsOk() throws Exception {
+        // Given a created (zero-balance) account / When deleted / Then OK
+        AccountRequest createReq = new AccountRequest("007", "Savings", AccountType.SAVINGS,
+                "USD", true, "0070001600000000123459", "aliasDel");
+        mockMvc.perform(post("/api/v1/banks/accounts")
+                        .header("X-User-Id", "1").header("X-Internal-Token", "test-token")
+                        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(createReq)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(delete("/api/v1/banks/accounts/{cbu}", "0070001600000000123459")
+                        .header("X-User-Id", "1").header("X-Internal-Token", "test-token"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void listAccounts_byBankNumberFilter_returns200() throws Exception {
+        // Covers the bankNumber != null branch of list
+        mockMvc.perform(get("/api/v1/banks/accounts?bankNumber=007")
+                        .header("X-User-Id", "1").header("X-Internal-Token", "test-token"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray());
+    }
+
+    @Test
+    void openAccount_withoutIsActive_defaultsToTrue() throws Exception {
+        // Covers the create isActive == null branch (defaults to true)
+        String body = """
+                {"bankNumber":"007","name":"NoActive","type":"SAVINGS","currency":"USD",
+                 "cbu":"0070001600000000123459","alias":"aliasN"}
+                """;
+        mockMvc.perform(post("/api/v1/banks/accounts")
+                        .header("X-User-Id", "1").header("X-Internal-Token", "test-token")
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.isActive").value(true));
+    }
+
+    @Test
+    void getTransactions_fromWithoutTo_fallsBackToRecent() throws Exception {
+        // Covers the date-range guard / selection when only 'from' is present (to == null)
+        when(getTransactionsUseCase.getRecent(eq("CBU1"), eq(5))).thenReturn(List.of());
+        mockMvc.perform(get("/api/v1/banks/accounts/CBU1/transactions?from=2026-01-01")
+                        .header("X-User-Id", "1").header("X-Internal-Token", "test-token"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void updateAccount_withoutBalance_keepsExisting() throws Exception {
+        // Covers toMoney's amount == null branch (no balance supplied)
+        AccountRequest createReq = new AccountRequest("007", "Savings", AccountType.SAVINGS,
+                "USD", true, "0070001600000000123459", "aliasNB");
+        mockMvc.perform(post("/api/v1/banks/accounts")
+                        .header("X-User-Id", "1").header("X-Internal-Token", "test-token")
+                        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(createReq)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(patch("/api/v1/banks/accounts/{cbu}", "0070001600000000123459")
+                        .header("X-User-Id", "1").header("X-Internal-Token", "test-token")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"isActive\":false}"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void updateAccount_withBalanceButNoCurrency_ignoresBalance() throws Exception {
+        // Covers toMoney's currency == null branch (balance present, currency absent)
+        AccountRequest createReq = new AccountRequest("007", "Savings", AccountType.SAVINGS,
+                "USD", true, "0070001600000000123459", "aliasNC");
+        mockMvc.perform(post("/api/v1/banks/accounts")
+                        .header("X-User-Id", "1").header("X-Internal-Token", "test-token")
+                        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(createReq)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(patch("/api/v1/banks/accounts/{cbu}", "0070001600000000123459")
+                        .header("X-User-Id", "1").header("X-Internal-Token", "test-token")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"balance\":\"100.00\"}"))
+                .andExpect(status().isOk());
     }
 }

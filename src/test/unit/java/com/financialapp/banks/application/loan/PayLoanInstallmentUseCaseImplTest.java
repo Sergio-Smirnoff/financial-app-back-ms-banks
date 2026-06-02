@@ -13,7 +13,7 @@ import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.model.loan.LoanId;
 import com.financialapp.banks.domain.model.loan.LoanInstallment;
 import com.financialapp.banks.domain.model.loan.LoanInstallmentId;
-import com.financialapp.banks.domain.port.DomainEventPublisher;
+import com.financialapp.banks.domain.gateway.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.LoanRepository;
 import com.financialapp.banks.domain.usecase.account.AdjustBalanceUseCase;
 import com.financialapp.banks.domain.usecase.account.command.AdjustBalanceCommand;

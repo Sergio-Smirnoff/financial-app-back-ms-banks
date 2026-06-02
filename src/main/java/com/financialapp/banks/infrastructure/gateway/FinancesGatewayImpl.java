@@ -1,7 +1,7 @@
-package com.financialapp.banks.infrastructure.client.adapter;
+package com.financialapp.banks.infrastructure.gateway;
 
 import com.financialapp.banks.domain.common.model.Money;
-import com.financialapp.banks.domain.port.FinancesPort;
+import com.financialapp.banks.domain.gateway.FinancesGateway;
 import com.financialapp.banks.infrastructure.client.FinancesFeignClient;
 import com.financialapp.banks.domain.exception.InfrastructureException;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class FinancesClientAdapter implements FinancesPort {
+public class FinancesGatewayImpl implements FinancesGateway {
 
     private final FinancesFeignClient client;
 

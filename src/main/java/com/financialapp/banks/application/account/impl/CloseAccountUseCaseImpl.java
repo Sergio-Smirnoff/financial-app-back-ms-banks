@@ -10,7 +10,7 @@ import com.financialapp.banks.domain.exception.ResourceConflictException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
-import com.financialapp.banks.domain.port.InvestmentsPort;
+import com.financialapp.banks.domain.gateway.InvestmentsGateway;
 import com.financialapp.banks.domain.repository.AccountRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import java.util.Map;
 public class CloseAccountUseCaseImpl implements CloseAccountUseCase {
 
     private final AccountRepository accountRepository;
-    private final InvestmentsPort investmentsPort;
+    private final InvestmentsGateway investmentsGateway;
 
     @Override
     @Transactional
@@ -35,7 +35,7 @@ public class CloseAccountUseCaseImpl implements CloseAccountUseCase {
 
         if (account instanceof InvestmentAccount) {
             try {
-                int holdings = investmentsPort.countHoldings(account.cbu().value());
+                int holdings = investmentsGateway.countHoldings(account.cbu().value());
                 if (holdings > 0) {
                     throw new ResourceConflictException(
                         DomainError.ACCOUNT_NOT_DELETABLE,

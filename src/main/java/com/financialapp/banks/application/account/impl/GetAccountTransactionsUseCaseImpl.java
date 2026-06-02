@@ -3,8 +3,8 @@ package com.financialapp.banks.application.account.impl;
 import com.financialapp.banks.domain.usecase.account.GetAccountTransactionsUseCase;
 import com.financialapp.banks.domain.exception.FinancesServiceException;
 import com.financialapp.banks.domain.exception.InfrastructureException;
-import com.financialapp.banks.domain.port.FinancesPort;
-import com.financialapp.banks.domain.port.FinancesPort.TransactionSummary;
+import com.financialapp.banks.domain.gateway.FinancesGateway;
+import com.financialapp.banks.domain.gateway.FinancesGateway.TransactionSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +15,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetAccountTransactionsUseCaseImpl implements GetAccountTransactionsUseCase {
 
-    private final FinancesPort financesPort;
+    private final FinancesGateway financesGateway;
 
     @Override
     public List<TransactionSummary> getRecent(String accountCbu, int limit) {
         try {
-            return financesPort.getRecentTransactions(accountCbu, limit);
+            return financesGateway.getRecentTransactions(accountCbu, limit);
         } catch (InfrastructureException e) {
             throw new FinancesServiceException("getRecentTransactions", e.getMessage());
         }
@@ -29,7 +29,7 @@ public class GetAccountTransactionsUseCaseImpl implements GetAccountTransactions
     @Override
     public List<TransactionSummary> getAll(String accountCbu) {
         try {
-            return financesPort.getAllTransactions(accountCbu);
+            return financesGateway.getAllTransactions(accountCbu);
         } catch (InfrastructureException e) {
             throw new FinancesServiceException("getAllTransactions", e.getMessage());
         }
@@ -38,7 +38,7 @@ public class GetAccountTransactionsUseCaseImpl implements GetAccountTransactions
     @Override
     public List<TransactionSummary> getFiltered(String accountCbu, LocalDate from, LocalDate to) {
         try {
-            return financesPort.getFilteredTransactions(accountCbu, from, to);
+            return financesGateway.getFilteredTransactions(accountCbu, from, to);
         } catch (InfrastructureException e) {
             throw new FinancesServiceException("getFilteredTransactions", e.getMessage());
         }

@@ -12,7 +12,7 @@ import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardInstallment;
 import com.financialapp.banks.domain.model.card.CardInstallmentId;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
-import com.financialapp.banks.domain.port.DomainEventPublisher;
+import com.financialapp.banks.domain.gateway.DomainEventPublisher;
 import com.financialapp.banks.domain.service.CardInstallmentEventFactory;
 import com.financialapp.banks.domain.repository.CardRepository;
 import lombok.RequiredArgsConstructor;

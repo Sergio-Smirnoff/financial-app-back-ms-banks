@@ -17,7 +17,7 @@ import com.financialapp.banks.domain.model.card.CardInstallmentId;
 import com.financialapp.banks.domain.model.card.CardNumber;
 import com.financialapp.banks.domain.model.card.CardType;
 import com.financialapp.banks.domain.model.card.cardPaymentMethod.CreditCard;
-import com.financialapp.banks.domain.port.DomainEventPublisher;
+import com.financialapp.banks.domain.gateway.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.CardRepository;
 import com.financialapp.banks.domain.usecase.account.AdjustBalanceUseCase;
 import com.financialapp.banks.domain.usecase.account.command.AdjustBalanceCommand;

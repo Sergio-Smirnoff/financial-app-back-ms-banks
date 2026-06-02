@@ -9,7 +9,7 @@ import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.model.bank.BankNumber;
-import com.financialapp.banks.domain.port.InvestmentsPort;
+import com.financialapp.banks.domain.gateway.InvestmentsGateway;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import com.financialapp.banks.domain.usecase.account.command.CloseAccountCommand;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 class CloseAccountBranchesTest {
 
     @Mock AccountRepository accountRepository;
-    @Mock InvestmentsPort investmentsPort;
+    @Mock InvestmentsGateway investmentsGateway;
     CloseAccountUseCaseImpl useCase;
 
     private static final Cbu CBU = Cbu.from("0070001600000000123459");
@@ -42,7 +42,7 @@ class CloseAccountBranchesTest {
 
     @BeforeEach
     void setUp() {
-        useCase = new CloseAccountUseCaseImpl(accountRepository, investmentsPort);
+        useCase = new CloseAccountUseCaseImpl(accountRepository, investmentsGateway);
     }
 
     private CheckingAccount checking(String balance) {
@@ -66,7 +66,7 @@ class CloseAccountBranchesTest {
     @Test
     void rejectsInvestmentAccount_whenHoldingsRemain() {
         when(accountRepository.findByCbu(CBU.value())).thenReturn(Optional.of(investment()));
-        when(investmentsPort.countHoldings(CBU.value())).thenReturn(3);
+        when(investmentsGateway.countHoldings(CBU.value())).thenReturn(3);
 
         assertThatThrownBy(() -> useCase.execute(new CloseAccountCommand(CBU.value())))
                 .isInstanceOf(ResourceConflictException.class)

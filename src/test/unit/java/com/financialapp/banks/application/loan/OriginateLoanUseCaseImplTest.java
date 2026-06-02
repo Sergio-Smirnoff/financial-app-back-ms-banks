@@ -16,7 +16,7 @@ import com.financialapp.banks.domain.model.bank.SucursalCode;
 import com.financialapp.banks.domain.model.loan.AmortizationType;
 import com.financialapp.banks.domain.model.loan.Loan;
 import com.financialapp.banks.domain.model.loan.LoanId;
-import com.financialapp.banks.domain.port.DomainEventPublisher;
+import com.financialapp.banks.domain.gateway.DomainEventPublisher;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import com.financialapp.banks.domain.repository.BankRepository;
 import com.financialapp.banks.domain.repository.LoanRepository;
@@ -75,8 +75,8 @@ class OriginateLoanUseCaseImplTest {
         });
 
         Loan result = useCase.execute(new OriginateLoanCommand(new UserId(1L), new BankNumber("007"),
-                "1234567890123456789012", "Car Loan", new BigDecimal("10000.00"),
-                new BigDecimal("12.00"), 12, LocalDate.of(2026, 1, 1), AmortizationType.FRENCH));
+                "1234567890123456789012", "Car Loan", "10000.00",
+                "12.00", 12, LocalDate.of(2026, 1, 1), AmortizationType.FRENCH));
 
         assertThat(result.id().value()).isEqualTo(500L);
 
@@ -98,7 +98,7 @@ class OriginateLoanUseCaseImplTest {
         when(accountRepository.findByCbu("1234567890123456789012")).thenReturn(Optional.of(otherBankAccount));
 
         assertThatThrownBy(() -> useCase.execute(new OriginateLoanCommand(new UserId(1L), new BankNumber("007"),
-                "1234567890123456789012", "Car Loan", new BigDecimal("100"), new BigDecimal("12"),
+                "1234567890123456789012", "Car Loan", "100", "12",
                 1, LocalDate.now(), AmortizationType.FRENCH)))
                 .isInstanceOf(LoanAccountMismatchException.class);
     }
@@ -108,7 +108,7 @@ class OriginateLoanUseCaseImplTest {
         when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase.execute(new OriginateLoanCommand(new UserId(1L), new BankNumber("007"),
-                "cbu", "Loan", new BigDecimal("100"), new BigDecimal("12"), 1, LocalDate.now(), AmortizationType.FRENCH)))
+                "cbu", "Loan", "100", "12", 1, LocalDate.now(), AmortizationType.FRENCH)))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 }
