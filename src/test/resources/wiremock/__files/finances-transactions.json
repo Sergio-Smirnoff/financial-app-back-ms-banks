@@ -1,0 +1,11 @@
+{
+  "success": true,
+  "message": "ok",
+  "data": [
+    {"transactionId": 1, "accountCbu": "0070000000000000000001", "amount": -1500.00,
+     "currency": "ARS", "description": "Coffee", "category": "Food", "subcategory": "Cafe",
+     "date": "2026-05-20"}
+  ],
+  "errors": null,
+  "timestamp": "2026-05-20T10:00:00Z"
+}
