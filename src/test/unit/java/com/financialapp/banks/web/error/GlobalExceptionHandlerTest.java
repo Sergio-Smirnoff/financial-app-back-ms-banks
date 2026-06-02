@@ -102,6 +102,20 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void handleDataIntegrity_handlesNullCauseMessage() {
+        // Given a data-integrity error whose most-specific cause has no message (cause == null branch)
+        DataIntegrityViolationException ex = mock(DataIntegrityViolationException.class);
+        when(ex.getMostSpecificCause()).thenReturn(new RuntimeException());
+
+        // When handled
+        ResponseEntity<ErrorResponse> response = handler.handleDataIntegrity(ex);
+
+        // Then it falls back to a generic data-conflict message
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody().getMessage()).isEqualTo("Data conflict");
+    }
+
+    @Test
     void handleGeneric_returns500() {
         // Given an unexpected exception / When handled
         ResponseEntity<ErrorResponse> response = handler.handleGeneric(new RuntimeException("boom"));
