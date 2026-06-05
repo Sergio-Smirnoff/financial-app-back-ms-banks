@@ -2,8 +2,10 @@
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /build
 
-# Copy BOM parent first (layer-cache friendly)
-COPY financial-app-parent/pom.xml financial-app-parent/pom.xml
+# Copy BOM parent + commons modules first (layer-cache friendly)
+COPY financial-app-parent financial-app-parent
+RUN mvn -f financial-app-parent/pom.xml -B -q -DskipTests install
+
 COPY ms-banks/pom.xml ms-banks/pom.xml
 
 # Pre-fetch dependencies

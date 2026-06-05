@@ -13,7 +13,9 @@ import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.web.dto.request.CardRequest;
 import com.financialapp.banks.web.dto.request.UpdateCardRequest;
-import com.financialapp.banks.web.dto.response.ApiResponse;
+import com.financialapp.banks.domain.exception.DomainError;
+import com.financialapp.commons.core.response.ApiResponse;
+import com.financialapp.commons.web.openapi.ApiErrorCodes;
 import com.financialapp.banks.web.dto.response.CardResponse;
 import com.financialapp.banks.web.mapper.CardWebMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,6 +60,7 @@ public class CardController {
 
     @GetMapping("/{cardNumber}")
     @Operation(summary = "Get a single card")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found"})
     public ResponseEntity<ApiResponse<CardResponse>> get(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable @Pattern(regexp = CARD_NUMBER_REGEX, message = CARD_NUMBER_MESSAGE) String cardNumber) {
@@ -67,6 +70,7 @@ public class CardController {
 
     @PostMapping
     @Operation(summary = "Create a card")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "resource_already_exists", "invalid_card_number", "invalid_issuer_bin", "invalid_issuer_card_account", "card_invalid_type"})
     public ResponseEntity<ApiResponse<CardResponse>> create(
             @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody CardRequest request) {
@@ -82,11 +86,12 @@ public class CardController {
                 request.dueDay()
         ));
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Card created", cardMapper.toResponse(result)));
+                .body(ApiResponse.created("Card created", cardMapper.toResponse(result)));
     }
 
     @PatchMapping("/{cardNumber}")
     @Operation(summary = "Update card billing and expiry date")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "card_expired", "card_invalid_type"})
     public ResponseEntity<ApiResponse<CardResponse>> update(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cardNumber,
@@ -103,6 +108,7 @@ public class CardController {
 
     @DeleteMapping("/{cardNumber}")
     @Operation(summary = "Delete a card")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "card_not_deletable"})
     public ResponseEntity<ApiResponse<Void>> delete(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cardNumber) {

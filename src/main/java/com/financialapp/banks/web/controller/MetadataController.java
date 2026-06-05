@@ -1,7 +1,7 @@
 package com.financialapp.banks.web.controller;
 
 import com.financialapp.banks.domain.usecase.catalog.GetBankingCatalogUseCase;
-import com.financialapp.banks.web.dto.response.ApiResponse;
+import com.financialapp.commons.core.response.ApiResponse;
 import com.financialapp.banks.web.dto.response.BankingCatalogResponse;
 import com.financialapp.banks.web.mapper.BankWebMapper;
 import io.swagger.v3.oas.annotations.Operation;

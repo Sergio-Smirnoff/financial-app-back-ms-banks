@@ -9,7 +9,9 @@ import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.bank.Bank;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.web.dto.response.AccountResponse;
-import com.financialapp.banks.web.dto.response.ApiResponse;
+import com.financialapp.banks.domain.exception.DomainError;
+import com.financialapp.commons.core.response.ApiResponse;
+import com.financialapp.commons.web.openapi.ApiErrorCodes;
 import com.financialapp.banks.web.dto.response.AvailableBankResponse;
 import com.financialapp.banks.web.dto.response.BankResponse;
 import com.financialapp.banks.web.mapper.AccountWebMapper;
@@ -57,6 +59,7 @@ public class BankController {
 
     @GetMapping("/{bankNumber}")
     @Operation(summary = "Get a bank with the user's accounts there")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found"})
     public ResponseEntity<ApiResponse<BankResponse>> get(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String bankNumber) {

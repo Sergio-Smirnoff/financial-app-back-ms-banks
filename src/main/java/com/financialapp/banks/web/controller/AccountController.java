@@ -10,7 +10,9 @@ import com.financialapp.banks.web.dto.request.AccountRequest;
 import com.financialapp.banks.web.dto.request.UpdateAccountRequest;
 import com.financialapp.banks.web.dto.response.AccountResponse;
 import com.financialapp.banks.web.dto.response.AccountTransactionResponse;
-import com.financialapp.banks.web.dto.response.ApiResponse;
+import com.financialapp.banks.domain.exception.DomainError;
+import com.financialapp.commons.core.response.ApiResponse;
+import com.financialapp.commons.web.openapi.ApiErrorCodes;
 import com.financialapp.banks.web.mapper.AccountWebMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -59,6 +61,7 @@ public class AccountController {
 
     @GetMapping("/{cbu}")
     @Operation(summary = "Get an account by CBU")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "invalid_cbu"})
     public ResponseEntity<ApiResponse<AccountResponse>> get(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cbu) {
@@ -68,6 +71,7 @@ public class AccountController {
 
     @PostMapping
     @Operation(summary = "Create an account inside a bank")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_already_exists", "invalid_cbu", "cbu_bank_mismatch", "invalid_account_number", "invalid_currency"})
     public ResponseEntity<ApiResponse<AccountResponse>> create(
             @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody AccountRequest request) {
@@ -88,6 +92,7 @@ public class AccountController {
 
     @PatchMapping("/{cbu}")
     @Operation(summary = "Update an account")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "resource_already_exists", "account_invalid_type"})
     public ResponseEntity<ApiResponse<AccountResponse>> update(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cbu,
@@ -100,6 +105,7 @@ public class AccountController {
 
     @DeleteMapping("/{cbu}")
     @Operation(summary = "Delete an account")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "account_not_deletable", "investments_service_unavailable"})
     public ResponseEntity<ApiResponse<Void>> delete(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cbu) {
@@ -109,6 +115,7 @@ public class AccountController {
 
     @GetMapping("/{cbu}/transactions")
     @Operation(summary = "Get account transactions. Default: last 5. Use ?all=true or ?from=&to= for date filtering.")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "invalid_date_range", "finances_service_unavailable"})
     public ResponseEntity<ApiResponse<List<AccountTransactionResponse>>> getTransactions(
             @PathVariable String cbu,
             @RequestParam(defaultValue = "false") boolean all,
@@ -135,6 +142,7 @@ public class AccountController {
 
     @PostMapping("/{cbu}/balance/adjust")
     @Operation(summary = "Adjust account balance")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "account_insufficient_funds", "account_currency_mismatch", "account_investment_restriction"})
     public ResponseEntity<ApiResponse<Void>> adjustBalance(
             @PathVariable String cbu,
             @RequestParam String delta,

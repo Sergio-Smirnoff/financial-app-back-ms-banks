@@ -1,7 +1,7 @@
 package com.financialapp.banks.domain.exception.account;
 
 import com.financialapp.banks.domain.exception.DomainError;
-import com.financialapp.banks.domain.exception.DomainException;
+import com.financialapp.commons.core.error.DomainException;
 import java.util.Map;
 
 public class AccountInvestmentRestrictionException extends DomainException {

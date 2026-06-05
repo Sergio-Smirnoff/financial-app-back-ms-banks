@@ -4,7 +4,7 @@ import com.financialapp.banks.domain.usecase.account.command.AdjustBalanceComman
 import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.domain.exception.DomainException;
+import com.financialapp.commons.core.error.DomainException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.account.AccountInsufficientFundsException;
 import com.financialapp.banks.domain.exception.account.AccountInvestmentRestrictionException;

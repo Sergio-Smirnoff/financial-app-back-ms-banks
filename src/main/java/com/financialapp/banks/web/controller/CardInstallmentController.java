@@ -7,7 +7,9 @@ import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.card.CardInstallmentId;
 import com.financialapp.banks.web.dto.request.CardExpenseCreateRequest;
 import com.financialapp.banks.web.dto.request.CardExpenseImportRequest;
-import com.financialapp.banks.web.dto.response.ApiResponse;
+import com.financialapp.banks.domain.exception.DomainError;
+import com.financialapp.commons.core.response.ApiResponse;
+import com.financialapp.commons.web.openapi.ApiErrorCodes;
 import com.financialapp.banks.web.dto.response.BatchImportResponse;
 import com.financialapp.banks.web.dto.response.CardInstallmentResponse;
 import com.financialapp.banks.web.mapper.CardInstallmentWebMapper;
@@ -38,6 +40,7 @@ public class CardInstallmentController {
 
     @GetMapping
     @Operation(summary = "List installments for a card")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found"})
     public ResponseEntity<ApiResponse<List<CardInstallmentResponse>>> list(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cardNumber) {
@@ -49,6 +52,7 @@ public class CardInstallmentController {
 
     @PostMapping
     @Operation(summary = "Create an expense with installments for a card")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "card_installment_not_supported", "card_expired"})
     public ResponseEntity<ApiResponse<List<CardInstallmentResponse>>> createExpense(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cardNumber,
@@ -67,6 +71,7 @@ public class CardInstallmentController {
 
     @PostMapping("/{installmentId}/pay")
     @Operation(summary = "Mark an installment as paid from a specific account")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "card_installment_already_paid", "card_installment_mismatch", "account_insufficient_funds", "account_currency_mismatch"})
     public ResponseEntity<ApiResponse<CardInstallmentResponse>> pay(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cardNumber,
@@ -85,6 +90,7 @@ public class CardInstallmentController {
 
     @PostMapping("/import")
     @Operation(summary = "Batch import card expenses from statements")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "card_installment_not_supported"})
     public ResponseEntity<ApiResponse<BatchImportResponse>> importExpenses(
             @PathVariable String cardNumber,
             @RequestHeader("X-User-Id") Long userId,
@@ -108,6 +114,7 @@ public class CardInstallmentController {
 
     @PostMapping("/duplicates-check")
     @Operation(summary = "Check for existing card installments to avoid duplicates")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found"})
     public ResponseEntity<ApiResponse<List<Integer>>> checkDuplicates(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cardNumber,

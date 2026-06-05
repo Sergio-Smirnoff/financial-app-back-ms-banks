@@ -48,6 +48,14 @@ Swagger UI: http://localhost:8083/swagger-ui.html
 
 ## Endpoints
 
+All endpoints return the shared envelope `{ status, title, code, message, data }` defined in
+`commons-core` (built from `financial-app-parent`). `status`/`title` mirror the HTTP status;
+`code` appears only on errors and carries the machine-readable `DomainError` slug
+(e.g. `account_insufficient_funds`); error details (validation field map, constraint info)
+travel in `data`. Errors are rendered by `GlobalExceptionHandler extends ApiExceptionHandler`
+(commons-web), and every endpoint declares its throwable codes with `@ApiErrorCodes`, so the
+Swagger UI lists each error code with a generated example body.
+
 ### BankController — `/api/v1/banks`
 
 | Method | Path | Purpose |

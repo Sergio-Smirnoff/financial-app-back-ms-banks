@@ -8,7 +8,9 @@ import com.financialapp.banks.domain.model.loan.AmortizationType;
 import com.financialapp.banks.domain.model.loan.LoanId;
 import com.financialapp.banks.domain.model.loan.LoanInstallmentId;
 import com.financialapp.banks.web.dto.request.LoanRequest;
-import com.financialapp.banks.web.dto.response.ApiResponse;
+import com.financialapp.banks.domain.exception.DomainError;
+import com.financialapp.commons.core.response.ApiResponse;
+import com.financialapp.commons.web.openapi.ApiErrorCodes;
 import com.financialapp.banks.web.dto.response.LoanInstallmentResponse;
 import com.financialapp.banks.web.dto.response.LoanResponse;
 import com.financialapp.banks.web.mapper.LoanInstallmentWebMapper;
@@ -52,6 +54,7 @@ public class LoanController {
 
     @PostMapping
     @Operation(summary = "Create a loan with amortized installments")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "loan_account_mismatch", "invalid_currency"})
     public ResponseEntity<ApiResponse<LoanResponse>> create(
             @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody LoanRequest request) {
@@ -72,6 +75,7 @@ public class LoanController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a loan")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "loan_already_closed"})
     public ResponseEntity<ApiResponse<Void>> delete(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id) {
@@ -81,6 +85,7 @@ public class LoanController {
 
     @GetMapping("/{id}/installments")
     @Operation(summary = "List installments for a loan")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found"})
     public ResponseEntity<ApiResponse<List<LoanInstallmentResponse>>> getInstallments(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id) {
@@ -92,6 +97,7 @@ public class LoanController {
 
     @PostMapping("/{id}/installments/{installmentId}/pay")
     @Operation(summary = "Mark a loan installment as paid from a specific account")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "loan_already_closed", "loan_installment_already_paid", "loan_installment_mismatch", "account_insufficient_funds", "account_currency_mismatch"})
     public ResponseEntity<ApiResponse<LoanInstallmentResponse>> payInstallment(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id,

@@ -1,6 +1,9 @@
 package com.financialapp.banks.domain.exception;
 
-public enum DomainError {
+import com.financialapp.commons.core.error.ErrorCategory;
+import com.financialapp.commons.core.error.ErrorCode;
+
+public enum DomainError implements ErrorCode {
 
     // --- Resource lifecycle ---
     RESOURCE_NOT_FOUND(ErrorCategory.NOT_FOUND, "resource_not_found"),
@@ -45,9 +48,9 @@ public enum DomainError {
     CBU_BANK_MISMATCH(ErrorCategory.UNPROCESSABLE, "cbu_bank_mismatch"),
 
     // --- Downstream / infrastructure ---
-    FINANCES_SERVICE_UNAVAILABLE(ErrorCategory.INTERNAL, "finances_service_unavailable"),
-    INVESTMENTS_SERVICE_UNAVAILABLE(ErrorCategory.INTERNAL, "investments_service_unavailable"),
-    INTERNAL_ERROR(ErrorCategory.INTERNAL, "internal_error");
+    FINANCES_SERVICE_UNAVAILABLE(ErrorCategory.INTERNAL_SERVER_ERROR, "finances_service_unavailable"),
+    INVESTMENTS_SERVICE_UNAVAILABLE(ErrorCategory.INTERNAL_SERVER_ERROR, "investments_service_unavailable"),
+    INTERNAL_ERROR(ErrorCategory.INTERNAL_SERVER_ERROR, "internal_error");
 
     private final ErrorCategory category;
     private final String code;
@@ -57,6 +60,9 @@ public enum DomainError {
         this.code = code;
     }
 
-    public ErrorCategory getCategory() { return category; }
-    public String getCode() { return code; }
+    @Override
+    public ErrorCategory category() { return category; }
+
+    @Override
+    public String code() { return code; }
 }

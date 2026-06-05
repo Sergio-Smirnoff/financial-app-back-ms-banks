@@ -2,7 +2,7 @@ package com.financialapp.banks.web.controller;
 
 import com.financialapp.banks.domain.usecase.upcoming.GetUpcomingPaymentsUseCase;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.banks.web.dto.response.ApiResponse;
+import com.financialapp.commons.core.response.ApiResponse;
 import com.financialapp.banks.web.dto.response.UpcomingPaymentResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -3,7 +3,7 @@ package com.financialapp.banks.application.account.impl;
 import com.financialapp.banks.domain.usecase.account.command.CloseAccountCommand;
 import com.financialapp.banks.domain.usecase.account.CloseAccountUseCase;
 import com.financialapp.banks.domain.exception.DomainError;
-import com.financialapp.banks.domain.exception.DomainException;
+import com.financialapp.commons.core.error.DomainException;
 import com.financialapp.banks.domain.exception.InfrastructureException;
 import com.financialapp.banks.domain.exception.InvestmentsServiceException;
 import com.financialapp.banks.domain.exception.ResourceConflictException;
