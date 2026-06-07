@@ -23,6 +23,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -87,6 +88,6 @@ class TransactionEventListenerTest {
 
         listener.handleTransactionCreated(event);
 
-        verify(adjustBalanceUseCase, never()).execute(org.mockito.ArgumentMatchers.any());
+        verify(adjustBalanceUseCase, never()).execute(any());
     }
 }

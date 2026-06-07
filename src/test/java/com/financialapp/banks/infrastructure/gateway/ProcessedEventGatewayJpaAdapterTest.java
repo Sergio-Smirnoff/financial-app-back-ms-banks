@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +37,7 @@ class ProcessedEventGatewayJpaAdapterTest {
     @Test
     void markProcessed_savesEntityWithCorrectId() {
         adapter.markProcessed(new EventId("ce-id-3"));
-        verify(repository).save(org.mockito.ArgumentMatchers.argThat(e ->
+        verify(repository).save(argThat(e ->
                 "ce-id-3".equals(e.getEventId())));
     }
 }
