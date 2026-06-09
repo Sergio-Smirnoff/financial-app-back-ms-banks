@@ -1,11 +1,11 @@
 package com.financialapp.banks.infrastructure.messaging.listener;
 
-import com.financialapp.banks.domain.usecase.account.command.AdjustBalanceCommand;
-import com.financialapp.banks.domain.usecase.account.AdjustBalanceUseCase;
 import com.financialapp.banks.domain.common.model.Money;
-import com.financialapp.banks.infrastructure.messaging.payload.TransactionCreatedEvent;
-import com.financialapp.banks.infrastructure.persistence.entity.ProcessedEventJpaEntity;
-import com.financialapp.banks.infrastructure.persistence.jpa.ProcessedEventJpaRepository;
+import com.financialapp.banks.domain.usecase.account.AdjustBalanceUseCase;
+import com.financialapp.banks.domain.usecase.account.command.AdjustBalanceCommand;
+import com.financialapp.banks.infrastructure.messaging.payload.TransactionCreatedData;
+import com.financialapp.commons.messaging.infrastructure.messaging.consume.IdempotentEventProcessor;
+import io.cloudevents.CloudEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -20,34 +20,22 @@ import java.util.Currency;
 public class TransactionEventListener {
 
     private final AdjustBalanceUseCase adjustBalanceUseCase;
-    private final ProcessedEventJpaRepository processedEventRepository;
+    private final IdempotentEventProcessor processor;
 
-    @KafkaListener(topics = "transaction.created", groupId = "banks-group")
+    @KafkaListener(topics = "finances.transaction.created", groupId = "banks-group")
     @Transactional
-    public void handleTransactionCreated(TransactionCreatedEvent event) {
-        log.info("Received transaction.created event: id={}, accountCbu={}, amount={}",
-                event.transactionId(), event.accountCbu(), event.amount());
+    public void handleTransactionCreated(CloudEvent event) {
+        processor.process(event, TransactionCreatedData.class, this::handle);
+    }
 
-        if (processedEventRepository.existsById(event.transactionId())) {
-            log.warn("Event already processed: {}. Skipping.", event.transactionId());
-            return;
-        }
-
-        try {
-            Currency currency = event.currency() != null ? Currency.getInstance(event.currency()) : null;
-            adjustBalanceUseCase.execute(new AdjustBalanceCommand(
-                    event.accountCbu(),
-                    new Money(event.amount(), currency)
-            ));
-
-            processedEventRepository.save(ProcessedEventJpaEntity.builder()
-                    .eventId(event.transactionId())
-                    .build());
-
-            log.info("Successfully adjusted balance for transaction: {}", event.transactionId());
-        } catch (Exception e) {
-            log.error("Failed to process transaction event {}: {}", event.transactionId(), e.getMessage());
-            throw e;
-        }
+    private void handle(TransactionCreatedData data) {
+        log.info("Processing finances.transaction.created: id={}, accountCbu={}, amount={}",
+                data.transactionId(), data.accountCbu(), data.amount());
+        Currency currency = data.currency() != null ? Currency.getInstance(data.currency()) : null;
+        adjustBalanceUseCase.execute(new AdjustBalanceCommand(
+                data.accountCbu(),
+                new Money(data.amount(), currency)
+        ));
+        log.info("Successfully adjusted balance for transaction: {}", data.transactionId());
     }
 }
