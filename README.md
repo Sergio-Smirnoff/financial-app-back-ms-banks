@@ -2,7 +2,7 @@
 
 Banking-instruments microservice for the financial-app platform. **This is its own git repo** (`financial-app-back-ms-banks`) — commit banks work here, not the parent repo.
 
-Owns banks, accounts (CBU-addressed), credit/debit cards with installment schedules, loans amortised via the French method, upcoming-payments aggregation, and metadata for form selectors. Domain events published to Kafka on balance adjustments, installment payments, and loan creation. Consumes `transaction.created` from ms-finances to keep account balances in sync.
+Owns banks, accounts (CBU-addressed), credit/debit cards with installment schedules, loans amortised via the French method, upcoming-payments aggregation, and metadata for form selectors. Domain events published via a transactional outbox (CloudEvents) on balance adjustments, low balance, installment payments, and the daily card/loan alerts. Consumes `finances.transaction.created` from ms-finances to keep account balances in sync.
 
 **Port:** 8083 | **Schema:** `banks` | **Stack:** Java 21, Spring Boot 3.4.2, JPA, Flyway, MapStruct, Kafka
 
@@ -185,7 +185,7 @@ src/main/java/com/financialapp/banks/
     │   └── seed/                  (BankCatalogSeeder)
     ├── messaging/
     │   ├── KafkaDomainEventPublisher
-    │   ├── listener/              (TransactionEventListener, TransactionalKafkaListener)
+    │   ├── listener/              (TransactionEventListener)
     │   ├── payload/               (TransactionCreatedEvent, BankAlertEvent, …)
     │   └── mapper/
     ├── client/
@@ -201,17 +201,19 @@ src/main/java/com/financialapp/banks/
 
 ## Kafka
 
+CloudEvents 1.0 (Kafka binding, binary mode) via `commons-messaging`. Outbound events use a transactional outbox (`outbox_event`) + commons `OutboxRelay`; inbound is deduped on `ce_id` (`processed_events`). Topic `= ce_type`.
+
 | Direction | Topic | Trigger |
 |-----------|-------|---------|
-| Consumes | `transaction.created` | ms-finances publishes on transaction record; ms-banks adjusts balance (idempotent via `processed_events` table) |
-| Publishes | `balance.adjusted` | After every successful credit or debit |
-| Publishes | `low.balance` | Post-adjustment balance < 500 |
-| Publishes | `loan.created` | After loan origination |
-| Publishes | `loan.installment.paid` | After paying a loan installment |
-| Publishes | `card.installment.paid` | After paying a card installment |
-| Publishes | `bank.alert` | Daily 08:00 scheduler — card expiries (30d), upcoming payments (3d), low-balance accounts |
+| Consumes | `finances.transaction.created` | ms-finances records a transaction; ms-banks adjusts the addressed account balance (idempotent via `processed_events`) |
+| Publishes → ms-finances | `banks.payment.recorded` | After a loan/card installment is paid — records the cash leg in ms-finances |
+| Publishes → ms-notifications | `banks.account.balance_adjusted` | After every successful credit or debit |
+| Publishes → ms-notifications | `banks.account.low_balance` | Post-adjustment balance < 500 |
+| Publishes → ms-notifications | `banks.loan.reminder` | Daily 08:00 scheduler — loan installments due ≤3d |
+| Publishes → ms-notifications | `banks.card.expiring` | Daily 08:00 scheduler — cards expiring ≤30d |
+| Publishes → ms-notifications | `banks.card.installment_due` | Daily 08:00 scheduler — card installments due ≤3d |
 
-All publishes happen `AFTER_COMMIT`.
+Delivery is at-least-once via outbox + relay (no `AFTER_COMMIT`); failed consumes retry then land on `<topic>.DLT`.
 
 ---
 
