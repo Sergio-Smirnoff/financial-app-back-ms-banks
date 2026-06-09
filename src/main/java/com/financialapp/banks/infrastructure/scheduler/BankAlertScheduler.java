@@ -145,7 +145,8 @@ public class BankAlertScheduler {
             OutboxRecord record = OutboxRecord.create(topic, key, new EventType(topic), SOURCE, schema, json);
             outboxGateway.save(record);
         } catch (Exception ex) {
-            log.error("Failed to publish scheduler event for topic={}: {}", topic, ex.getMessage());
+            log.error("Failed to publish scheduler event for topic={}", topic, ex);
+            throw new IllegalStateException("Failed to publish scheduler event for topic=" + topic, ex);
         }
     }
 }
