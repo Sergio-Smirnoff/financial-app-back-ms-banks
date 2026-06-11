@@ -35,13 +35,13 @@ public class OpenAccountUseCaseImpl implements OpenAccountUseCase {
             throw new CbuBankMismatchException(cmd.bankNumber().value(), cbu.bankNumber().value());
         }
 
-        if (accountRepository.existsByBankNumberAndName(cmd.bankNumber(), cmd.name())) {
+        if (accountRepository.existsByUserIdAndBankNumberAndName(cmd.userId(), cmd.bankNumber(), cmd.name())) {
             throw new ResourceAlreadyExistsException("Account", cmd.name() + " in bank " + cmd.bankNumber().value());
         }
 
         if (cmd.type() == AccountType.INVESTMENT &&
-                accountRepository.existsByBankNumberAndTypeAndCurrency(
-                        cmd.bankNumber(), AccountType.INVESTMENT.name(), cmd.initialBalance().currency())) {
+                accountRepository.existsByUserIdAndBankNumberAndTypeAndCurrency(
+                        cmd.userId(), cmd.bankNumber(), AccountType.INVESTMENT.name(), cmd.initialBalance().currency())) {
             throw new ResourceAlreadyExistsException("InvestmentAccount", cmd.initialBalance().currency() + " in bank " + cmd.bankNumber().value());
         }
 

@@ -14,8 +14,8 @@ public interface AccountJpaRepository extends JpaRepository<AccountJpaEntity, Lo
     List<AccountJpaEntity> findByBank_IdOrderByNameAsc(Long bankId);
     Optional<AccountJpaEntity> findByCbu(String cbu);
     Optional<AccountJpaEntity> findByAliasAndBank_BankNumber(String alias, String bankNumber);
-    boolean existsByBank_BankNumberAndName(String bankNumber, String name);
-    boolean existsByBank_BankNumberAndTypeAndCurrency(String bankNumber, String type, String currency);
+    boolean existsByUserIdAndBank_BankNumberAndName(Long userId, String bankNumber, String name);
+    boolean existsByUserIdAndBank_BankNumberAndTypeAndCurrency(Long userId, String bankNumber, String type, String currency);
     int countByBank_BankNumber(String bankNumber);
     void deleteByCbu(String cbu);
 

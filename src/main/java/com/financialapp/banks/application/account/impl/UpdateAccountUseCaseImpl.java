@@ -31,7 +31,7 @@ public class UpdateAccountUseCaseImpl implements UpdateAccountUseCase {
                 .orElseThrow(() -> new ResourceNotFoundException("Account", cmd.cbu()));
 
         if (cmd.name() != null && !existing.name().equals(cmd.name()) &&
-                accountRepository.existsByBankNumberAndName(existing.bankNumber(), cmd.name())) {
+                accountRepository.existsByUserIdAndBankNumberAndName(existing.userId(), existing.bankNumber(), cmd.name())) {
             throw new ResourceAlreadyExistsException("Account", cmd.name() + " in bank");
         }
 

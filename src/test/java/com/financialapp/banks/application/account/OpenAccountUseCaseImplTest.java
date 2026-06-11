@@ -49,7 +49,7 @@ class OpenAccountUseCaseImplTest {
     @Test
     void create_persistsSavingsAccount() {
         when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
-        when(accountRepository.existsByBankNumberAndName(new BankNumber("007"), "Savings")).thenReturn(false);
+        when(accountRepository.existsByUserIdAndBankNumberAndName(new UserId(1L), new BankNumber("007"), "Savings")).thenReturn(false);
         when(accountRepository.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Account result = useCase.execute(command(AccountType.SAVINGS));
@@ -59,11 +59,34 @@ class OpenAccountUseCaseImplTest {
     }
 
     @Test
-    void create_rejectsDuplicateName() {
+    void create_rejectsDuplicateNameForSameUser() {
         when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
-        when(accountRepository.existsByBankNumberAndName(new BankNumber("007"), "Savings")).thenReturn(true);
+        when(accountRepository.existsByUserIdAndBankNumberAndName(new UserId(1L), new BankNumber("007"), "Savings")).thenReturn(true);
 
         assertThatThrownBy(() -> useCase.execute(command(AccountType.SAVINGS)))
+                .isInstanceOf(ResourceAlreadyExistsException.class)
+                .hasMessageContaining("already exists");
+    }
+
+    @Test
+    void create_allowsSameNameForDifferentUser() {
+        when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
+        when(accountRepository.existsByUserIdAndBankNumberAndName(new UserId(1L), new BankNumber("007"), "Savings")).thenReturn(false);
+        when(accountRepository.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Account result = useCase.execute(command(AccountType.SAVINGS));
+
+        assertThat(result).isInstanceOf(SavingsAccount.class);
+    }
+
+    @Test
+    void create_rejectsSecondInvestmentSameCurrencyForSameUser() {
+        when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
+        when(accountRepository.existsByUserIdAndBankNumberAndName(new UserId(1L), new BankNumber("007"), "Savings")).thenReturn(false);
+        when(accountRepository.existsByUserIdAndBankNumberAndTypeAndCurrency(
+                new UserId(1L), new BankNumber("007"), AccountType.INVESTMENT.name(), Currency.getInstance("USD"))).thenReturn(true);
+
+        assertThatThrownBy(() -> useCase.execute(command(AccountType.INVESTMENT)))
                 .isInstanceOf(ResourceAlreadyExistsException.class)
                 .hasMessageContaining("already exists");
     }
