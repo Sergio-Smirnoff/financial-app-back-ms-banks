@@ -16,7 +16,6 @@ public interface AccountRepository {
     Optional<Account> findByCbu(String cbu);
     Optional<Account> findByAliasAndBankNumber(String alias, BankNumber bankNumber);
     boolean existsByUserIdAndBankNumberAndName(UserId userId, BankNumber bankNumber, String name);
-    boolean existsByUserIdAndBankNumberAndTypeAndCurrency(UserId userId, BankNumber bankNumber, String type, Currency currency);
     List<Account> findLowBalance(BigDecimal threshold);
     List<Account> findFiltered(UserId userId, String type, Currency currency, BankNumber bankNumber, String name, boolean hideEmpty);
     Account save(Account account);

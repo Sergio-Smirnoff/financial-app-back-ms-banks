@@ -7,7 +7,7 @@ import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.AccountNumber;
-import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
+import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.bank.SucursalCode;
 import com.financialapp.banks.domain.model.card.Card;
@@ -75,7 +75,8 @@ class BankAlertSchedulerTest {
     }
 
     private Account lowBalanceAccount() {
-        return new SavingsAccount(
+        return new Account(
+                AccountType.SAVINGS,
                 new Cbu(new BankNumber("072"), new SucursalCode("0001"), new AccountNumber("0000000001234")),
                 "alias",
                 new Money(new BigDecimal("100.00"), Currency.getInstance("ARS")),

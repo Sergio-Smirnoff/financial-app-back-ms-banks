@@ -7,7 +7,6 @@ import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.AccountType;
-import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
 import com.financialapp.banks.domain.model.bank.Bank;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.repository.AccountRepository;
@@ -54,7 +53,7 @@ class OpenAccountUseCaseImplTest {
 
         Account result = useCase.execute(command(AccountType.SAVINGS));
 
-        assertThat(result).isInstanceOf(SavingsAccount.class);
+        assertThat(result.type()).isEqualTo(AccountType.SAVINGS);
         assertThat(result.balance().amount()).isEqualByComparingTo("100.00");
     }
 
@@ -76,18 +75,6 @@ class OpenAccountUseCaseImplTest {
 
         Account result = useCase.execute(command(AccountType.SAVINGS));
 
-        assertThat(result).isInstanceOf(SavingsAccount.class);
-    }
-
-    @Test
-    void create_rejectsSecondInvestmentSameCurrencyForSameUser() {
-        when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
-        when(accountRepository.existsByUserIdAndBankNumberAndName(new UserId(1L), new BankNumber("007"), "Savings")).thenReturn(false);
-        when(accountRepository.existsByUserIdAndBankNumberAndTypeAndCurrency(
-                new UserId(1L), new BankNumber("007"), AccountType.INVESTMENT.name(), Currency.getInstance("USD"))).thenReturn(true);
-
-        assertThatThrownBy(() -> useCase.execute(command(AccountType.INVESTMENT)))
-                .isInstanceOf(ResourceAlreadyExistsException.class)
-                .hasMessageContaining("already exists");
+        assertThat(result.type()).isEqualTo(AccountType.SAVINGS);
     }
 }

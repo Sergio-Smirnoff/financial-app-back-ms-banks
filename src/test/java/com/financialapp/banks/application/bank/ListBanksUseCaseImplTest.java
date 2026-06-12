@@ -6,7 +6,7 @@ import com.financialapp.banks.domain.common.model.Cbu;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.account.Account;
-import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
+import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.bank.Bank;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.bank.Logo;
@@ -41,7 +41,7 @@ class ListBanksUseCaseImplTest {
 
     private Account account(BankNumber bank, String name) {
         LocalDateTime now = LocalDateTime.now();
-        return new CheckingAccount(A_CBU, "alias",
+        return new Account(AccountType.CHECKING, A_CBU, "alias",
                 new Money(new BigDecimal("100.00"), Currency.getInstance("USD")),
                 user, bank, name, true, now, now);
     }

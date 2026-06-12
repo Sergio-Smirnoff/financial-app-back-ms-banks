@@ -61,12 +61,6 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     @Override
-    public boolean existsByUserIdAndBankNumberAndTypeAndCurrency(UserId userId, BankNumber bankNumber, String type, Currency currency) {
-        return accountJpaRepository.existsByUserIdAndBank_BankNumberAndTypeAndCurrency(
-                userId.value(), bankNumber.value(), type, currency.getCurrencyCode());
-    }
-
-    @Override
     public List<Account> findLowBalance(BigDecimal threshold) {
         return accountJpaRepository.findLowBalanceAccounts(threshold)
                 .stream().map(mapper::toDomain).toList();
