@@ -105,7 +105,7 @@ public class AccountController {
 
     @DeleteMapping("/{cbu}")
     @Operation(summary = "Delete an account")
-    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "account_not_deletable", "investments_service_unavailable"})
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "account_not_deletable"})
     public ResponseEntity<ApiResponse<Void>> delete(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cbu) {
@@ -142,7 +142,7 @@ public class AccountController {
 
     @PostMapping("/{cbu}/balance/adjust")
     @Operation(summary = "Adjust account balance")
-    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "account_insufficient_funds", "account_currency_mismatch", "account_investment_restriction"})
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "account_insufficient_funds", "account_currency_mismatch"})
     public ResponseEntity<ApiResponse<Void>> adjustBalance(
             @PathVariable String cbu,
             @RequestParam String delta,
