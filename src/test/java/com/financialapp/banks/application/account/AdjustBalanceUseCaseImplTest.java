@@ -9,7 +9,7 @@ import com.financialapp.banks.domain.exception.account.AccountInsufficientFundsE
 import com.financialapp.banks.domain.common.model.Cbu;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.AccountNumber;
-import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
+import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.bank.SucursalCode;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
@@ -44,8 +44,9 @@ class AdjustBalanceUseCaseImplTest {
         useCase = new AdjustBalanceUseCaseImpl(accountRepository, eventPublisher);
     }
 
-    private CheckingAccount checking(BigDecimal balance) {
-        return new CheckingAccount(
+    private Account checking(BigDecimal balance) {
+        return new Account(
+                AccountType.CHECKING,
                 new Cbu(new BankNumber("007"), new SucursalCode("0001"), new AccountNumber("0000000012345")), "alias",
                 new Money(balance, Currency.getInstance("USD")),
                 new UserId(1L), new BankNumber("007"), "My acc", true,
@@ -54,7 +55,7 @@ class AdjustBalanceUseCaseImplTest {
 
     @Test
     void adjust_creditsBalance() {
-        CheckingAccount acc = checking(new BigDecimal("100.00"));
+        Account acc = checking(new BigDecimal("100.00"));
         when(accountRepository.findByCbu(acc.cbu().value())).thenReturn(Optional.of(acc));
         when(accountRepository.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -68,7 +69,7 @@ class AdjustBalanceUseCaseImplTest {
 
     @Test
     void adjust_rejectsInsufficientFunds() {
-        CheckingAccount acc = checking(new BigDecimal("10.00"));
+        Account acc = checking(new BigDecimal("10.00"));
         when(accountRepository.findByCbu(acc.cbu().value())).thenReturn(Optional.of(acc));
 
         assertThatThrownBy(() -> useCase.execute(new AdjustBalanceCommand(acc.cbu().value(),

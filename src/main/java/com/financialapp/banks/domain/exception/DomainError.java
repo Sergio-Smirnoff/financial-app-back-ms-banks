@@ -18,7 +18,6 @@ public enum DomainError implements ErrorCode {
     // --- Account invariants ---
     ACCOUNT_INSUFFICIENT_FUNDS(ErrorCategory.UNPROCESSABLE, "account_insufficient_funds"),
     ACCOUNT_CURRENCY_MISMATCH(ErrorCategory.UNPROCESSABLE, "account_currency_mismatch"),
-    ACCOUNT_INVALID_TYPE(ErrorCategory.UNPROCESSABLE, "account_invalid_type"),
 
     // --- Card invariants ---
     CARD_EXPIRED(ErrorCategory.UNPROCESSABLE, "card_expired"),

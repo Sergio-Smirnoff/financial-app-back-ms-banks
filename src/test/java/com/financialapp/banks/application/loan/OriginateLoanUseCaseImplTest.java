@@ -8,8 +8,9 @@ import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.loan.LoanAccountMismatchException;
 import com.financialapp.banks.domain.common.model.Cbu;
+import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.AccountNumber;
-import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
+import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.bank.Bank;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.bank.SucursalCode;
@@ -55,8 +56,9 @@ class OriginateLoanUseCaseImplTest {
                 adjustBalance, eventPublisher);
     }
 
-    private CheckingAccount destAccount() {
-        return new CheckingAccount(
+    private Account destAccount() {
+        return new Account(
+                AccountType.CHECKING,
                 new Cbu(new BankNumber("007"), new SucursalCode("0001"), new AccountNumber("0000000012345")), "alias",
                 new Money(BigDecimal.ZERO, Currency.getInstance("USD")),
                 new UserId(1L), new BankNumber("007"), "My acc", true,
@@ -90,7 +92,8 @@ class OriginateLoanUseCaseImplTest {
     @Test
     void create_rejectsMismatchedBank() {
         when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
-        CheckingAccount otherBankAccount = new CheckingAccount(
+        Account otherBankAccount = new Account(
+                AccountType.CHECKING,
                 new Cbu(new BankNumber("072"), new SucursalCode("0001"), new AccountNumber("0000000012345")), "alias",
                 new Money(BigDecimal.ZERO, Currency.getInstance("USD")),
                 new UserId(1L), new BankNumber("072"), "My acc", true,

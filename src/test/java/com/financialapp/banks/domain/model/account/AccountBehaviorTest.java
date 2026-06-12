@@ -5,7 +5,6 @@ import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.account.AccountCurrencyMismatchException;
 import com.financialapp.banks.domain.exception.account.AccountInsufficientFundsException;
-import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import org.junit.jupiter.api.Test;
 
@@ -22,8 +21,8 @@ class AccountBehaviorTest {
     private static final Currency USD = Currency.getInstance("USD");
     private static final LocalDateTime NOW = LocalDateTime.now();
 
-    private CheckingAccount checking(BigDecimal balance) {
-        return new CheckingAccount(Cbu.from("0070001600000000123459"), "alias",
+    private Account checking(BigDecimal balance) {
+        return new Account(AccountType.CHECKING, Cbu.from("0070001600000000123459"), "alias",
                 new Money(balance, ARS),
                 new UserId(1L), new BankNumber("007"), "My acc", true,
                 NOW, NOW);
@@ -35,7 +34,7 @@ class AccountBehaviorTest {
 
     @Test
     void debit_reducesBalanceByAmount() {
-        CheckingAccount acc = checking(new BigDecimal("100.00"));
+        Account acc = checking(new BigDecimal("100.00"));
 
         Account result = acc.debit(ars("30.00"), NOW).account();
 
@@ -44,7 +43,7 @@ class AccountBehaviorTest {
 
     @Test
     void debit_returnsNewInstanceLeavingOriginalUnchanged() {
-        CheckingAccount acc = checking(new BigDecimal("100.00"));
+        Account acc = checking(new BigDecimal("100.00"));
 
         Account result = acc.debit(ars("30.00"), NOW).account();
 
@@ -54,7 +53,7 @@ class AccountBehaviorTest {
 
     @Test
     void debit_moreThanBalance_throwsInsufficientFunds() {
-        CheckingAccount acc = checking(new BigDecimal("10.00"));
+        Account acc = checking(new BigDecimal("10.00"));
 
         assertThatThrownBy(() -> acc.debit(ars("50.00"), NOW))
                 .isInstanceOf(AccountInsufficientFundsException.class)
@@ -63,7 +62,7 @@ class AccountBehaviorTest {
 
     @Test
     void debit_differentCurrency_throwsCurrencyMismatch() {
-        CheckingAccount acc = checking(new BigDecimal("100.00"));
+        Account acc = checking(new BigDecimal("100.00"));
 
         assertThatThrownBy(() -> acc.debit(new Money(new BigDecimal("10.00"), USD), NOW))
                 .isInstanceOf(AccountCurrencyMismatchException.class);
@@ -71,7 +70,7 @@ class AccountBehaviorTest {
 
     @Test
     void credit_increasesBalanceByAmount() {
-        CheckingAccount acc = checking(new BigDecimal("100.00"));
+        Account acc = checking(new BigDecimal("100.00"));
 
         Account result = acc.credit(ars("50.00"), NOW).account();
 
@@ -80,7 +79,7 @@ class AccountBehaviorTest {
 
     @Test
     void credit_differentCurrency_throwsCurrencyMismatch() {
-        CheckingAccount acc = checking(new BigDecimal("100.00"));
+        Account acc = checking(new BigDecimal("100.00"));
 
         assertThatThrownBy(() -> acc.credit(new Money(new BigDecimal("10.00"), USD), NOW))
                 .isInstanceOf(AccountCurrencyMismatchException.class);
@@ -88,14 +87,14 @@ class AccountBehaviorTest {
 
     @Test
     void isLowBalance_belowThreshold_returnsTrue() {
-        CheckingAccount acc = checking(new BigDecimal("100.00"));
+        Account acc = checking(new BigDecimal("100.00"));
 
         assertThat(acc.isLowBalance(ars("500.00"))).isTrue();
     }
 
     @Test
     void isLowBalance_atOrAboveThreshold_returnsFalse() {
-        CheckingAccount acc = checking(new BigDecimal("500.00"));
+        Account acc = checking(new BigDecimal("500.00"));
 
         assertThat(acc.isLowBalance(ars("500.00"))).isFalse();
         assertThat(checking(new BigDecimal("800.00")).isLowBalance(ars("500.00"))).isFalse();

@@ -6,7 +6,8 @@ import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.common.model.Cbu;
 import com.financialapp.banks.domain.exception.ResourceConflictException;
-import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
+import com.financialapp.banks.domain.model.account.Account;
+import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,16 +39,18 @@ class CloseAccountUseCaseImplTest {
         useCase = new CloseAccountUseCaseImpl(accountRepository);
     }
 
-    private CheckingAccount zeroBankAccount() {
-        return new CheckingAccount(
+    private Account zeroBankAccount() {
+        return new Account(
+                AccountType.CHECKING,
                 CBU, "alias.test",
                 new Money(BigDecimal.ZERO, Currency.getInstance("ARS")),
                 new UserId(1L), BANK_NUMBER, "My Checking Account",
                 true, LocalDateTime.now(), LocalDateTime.now());
     }
 
-    private CheckingAccount nonZeroAccount() {
-        return new CheckingAccount(
+    private Account nonZeroAccount() {
+        return new Account(
+                AccountType.CHECKING,
                 CBU, "alias.test",
                 new Money(new BigDecimal("100.00"), Currency.getInstance("ARS")),
                 new UserId(1L), BANK_NUMBER, "My Checking Account",

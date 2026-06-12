@@ -7,8 +7,6 @@ import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.event.BalanceAdjustedEvent;
 import com.financialapp.banks.domain.event.LowBalanceEvent;
 import com.financialapp.banks.domain.exception.account.AccountInsufficientFundsException;
-import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
-import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 
 import java.math.BigDecimal;
@@ -16,23 +14,25 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Account {
+public class Account {
 
     private static final BigDecimal LOW_BALANCE_THRESHOLD = new BigDecimal("500.00");
 
-    protected final Cbu cbu;
-    protected final String alias;
-    protected final Money balance;
-    protected final UserId userId;
-    protected final BankNumber bankNumber;
-    protected final String name;
-    protected final Boolean isActive;
-    protected final LocalDateTime createdAt;
-    protected final LocalDateTime updatedAt;
+    private final AccountType type;
+    private final Cbu cbu;
+    private final String alias;
+    private final Money balance;
+    private final UserId userId;
+    private final BankNumber bankNumber;
+    private final String name;
+    private final Boolean isActive;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 
-    protected Account(Cbu cbu, String alias, Money balance, UserId userId,
-                      BankNumber bankNumber, String name, Boolean isActive,
-                      LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Account(AccountType type, Cbu cbu, String alias, Money balance, UserId userId,
+                   BankNumber bankNumber, String name, Boolean isActive,
+                   LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.type = type;
         this.cbu = cbu;
         this.alias = alias;
         this.balance = balance;
@@ -47,12 +47,10 @@ public abstract class Account {
     public static Account create(AccountType type, Cbu cbu, String alias, Money balance,
                                  UserId userId, BankNumber bankNumber, String name, boolean isActive,
                                  LocalDateTime createdAt, LocalDateTime updatedAt) {
-        return switch (type) {
-            case CHECKING -> new CheckingAccount(cbu, alias, balance, userId, bankNumber, name, isActive, createdAt, updatedAt);
-            case SAVINGS -> new SavingsAccount(cbu, alias, balance, userId, bankNumber, name, isActive, createdAt, updatedAt);
-        };
+        return new Account(type, cbu, alias, balance, userId, bankNumber, name, isActive, createdAt, updatedAt);
     }
 
+    public AccountType type() { return type; }
     public Cbu cbu() { return cbu; }
     public String alias() { return alias; }
     public Money balance() { return balance; }
@@ -63,7 +61,9 @@ public abstract class Account {
     public LocalDateTime createdAt() { return createdAt; }
     public LocalDateTime updatedAt() { return updatedAt; }
 
-    public abstract Account withBalance(Money newBalance, LocalDateTime updatedAt);
+    public Account withBalance(Money newBalance, LocalDateTime newUpdatedAt) {
+        return new Account(type, cbu, alias, newBalance, userId, bankNumber, name, isActive, createdAt, newUpdatedAt);
+    }
 
     public AccountAdjustment debit(Money amount, LocalDateTime when) {
         if (balance.isLessThan(amount)) {

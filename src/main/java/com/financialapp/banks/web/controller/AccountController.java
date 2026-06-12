@@ -92,7 +92,7 @@ public class AccountController {
 
     @PatchMapping("/{cbu}")
     @Operation(summary = "Update an account")
-    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "resource_already_exists", "account_invalid_type"})
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "resource_already_exists"})
     public ResponseEntity<ApiResponse<AccountResponse>> update(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String cbu,
