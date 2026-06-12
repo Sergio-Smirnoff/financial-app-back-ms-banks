@@ -4,15 +4,12 @@ import com.financialapp.banks.domain.usecase.account.command.AdjustBalanceComman
 import com.financialapp.banks.application.account.impl.AdjustBalanceUseCaseImpl;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
-import com.financialapp.commons.core.error.DomainException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.account.AccountInsufficientFundsException;
-import com.financialapp.banks.domain.exception.account.AccountInvestmentRestrictionException;
 import com.financialapp.banks.domain.common.model.Cbu;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.AccountNumber;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
-import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import com.financialapp.banks.domain.model.bank.SucursalCode;
 import com.financialapp.banks.domain.port.DomainEventPublisher;
@@ -67,21 +64,6 @@ class AdjustBalanceUseCaseImplTest {
         ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
         verify(accountRepository).save(captor.capture());
         assertThat(captor.getValue().balance().amount()).isEqualByComparingTo("150.00");
-    }
-
-    @Test
-    void adjust_rejectsInvestmentAccount() {
-        InvestmentAccount acc = new InvestmentAccount(
-                new Cbu(new BankNumber("007"), new SucursalCode("0001"), new AccountNumber("0000000012345")), "alias",
-                new Money(BigDecimal.TEN, Currency.getInstance("USD")),
-                new UserId(1L), new BankNumber("007"), "Inv", true,
-                LocalDateTime.now(), LocalDateTime.now());
-        when(accountRepository.findByCbu(acc.cbu().value())).thenReturn(Optional.of(acc));
-
-        assertThatThrownBy(() -> useCase.execute(new AdjustBalanceCommand(acc.cbu().value(),
-                new Money(BigDecimal.ONE, Currency.getInstance("USD")))))
-                .isInstanceOf(AccountInvestmentRestrictionException.class)
-                .hasMessageContaining("investment account");
     }
 
     @Test

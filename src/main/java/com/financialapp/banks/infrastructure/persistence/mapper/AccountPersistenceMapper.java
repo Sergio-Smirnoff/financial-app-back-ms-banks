@@ -6,7 +6,6 @@ import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
-import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
 import com.financialapp.banks.domain.exception.InfrastructureException;
 import com.financialapp.banks.domain.model.bank.BankNumber;
@@ -32,9 +31,6 @@ public class AccountPersistenceMapper {
                     cbu, entity.getAlias(), balance, userId, bankNumber,
                     entity.getName(), entity.getIsActive(), entity.getCreatedAt(), entity.getUpdatedAt());
             case SAVINGS -> new SavingsAccount(
-                    cbu, entity.getAlias(), balance, userId, bankNumber,
-                    entity.getName(), entity.getIsActive(), entity.getCreatedAt(), entity.getUpdatedAt());
-            case INVESTMENT -> new InvestmentAccount(
                     cbu, entity.getAlias(), balance, userId, bankNumber,
                     entity.getName(), entity.getIsActive(), entity.getCreatedAt(), entity.getUpdatedAt());
         };
@@ -74,7 +70,6 @@ public class AccountPersistenceMapper {
     private String resolveType(Account account) {
         if (account instanceof CheckingAccount) return AccountType.CHECKING.name();
         if (account instanceof SavingsAccount) return AccountType.SAVINGS.name();
-        if (account instanceof InvestmentAccount) return AccountType.INVESTMENT.name();
         throw new InfrastructureException("Unknown account subtype: " + account.getClass().getSimpleName());
     }
 }

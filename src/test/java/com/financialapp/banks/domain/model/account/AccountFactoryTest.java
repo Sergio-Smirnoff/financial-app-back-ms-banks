@@ -4,7 +4,6 @@ import com.financialapp.banks.domain.common.model.Cbu;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
-import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import org.junit.jupiter.api.Test;
@@ -41,15 +40,6 @@ class AccountFactoryTest {
         Account account = create(AccountType.SAVINGS);
 
         assertThat(account).isInstanceOf(SavingsAccount.class);
-        assertThat(account.cbu().value()).isEqualTo("0070001600000000123459");
-        assertThat(account.balance().amount()).isEqualByComparingTo("100.00");
-    }
-
-    @Test
-    void create_investmentReturnsInvestmentAccount() {
-        Account account = create(AccountType.INVESTMENT);
-
-        assertThat(account).isInstanceOf(InvestmentAccount.class);
         assertThat(account.cbu().value()).isEqualTo("0070001600000000123459");
         assertThat(account.balance().amount()).isEqualByComparingTo("100.00");
     }

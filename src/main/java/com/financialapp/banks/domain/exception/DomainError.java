@@ -18,7 +18,6 @@ public enum DomainError implements ErrorCode {
     // --- Account invariants ---
     ACCOUNT_INSUFFICIENT_FUNDS(ErrorCategory.UNPROCESSABLE, "account_insufficient_funds"),
     ACCOUNT_CURRENCY_MISMATCH(ErrorCategory.UNPROCESSABLE, "account_currency_mismatch"),
-    ACCOUNT_INVESTMENT_RESTRICTION(ErrorCategory.UNPROCESSABLE, "account_investment_restriction"),
     ACCOUNT_INVALID_TYPE(ErrorCategory.UNPROCESSABLE, "account_invalid_type"),
 
     // --- Card invariants ---
@@ -49,7 +48,6 @@ public enum DomainError implements ErrorCode {
 
     // --- Downstream / infrastructure ---
     FINANCES_SERVICE_UNAVAILABLE(ErrorCategory.INTERNAL_SERVER_ERROR, "finances_service_unavailable"),
-    INVESTMENTS_SERVICE_UNAVAILABLE(ErrorCategory.INTERNAL_SERVER_ERROR, "investments_service_unavailable"),
     INTERNAL_ERROR(ErrorCategory.INTERNAL_SERVER_ERROR, "internal_error");
 
     private final ErrorCategory category;

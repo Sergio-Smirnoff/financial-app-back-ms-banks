@@ -7,7 +7,6 @@ import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.account.AccountInvalidTypeException;
 import com.financialapp.banks.domain.model.account.Account;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
-import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
 import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.repository.AccountRepository;
@@ -44,8 +43,6 @@ public class UpdateAccountUseCaseImpl implements UpdateAccountUseCase {
             case CheckingAccount ignored -> new CheckingAccount(existing.cbu(), existing.alias(), newBalance,
                     existing.userId(), existing.bankNumber(), newName, newActive, existing.createdAt(), now);
             case SavingsAccount ignored -> new SavingsAccount(existing.cbu(), existing.alias(), newBalance,
-                    existing.userId(), existing.bankNumber(), newName, newActive, existing.createdAt(), now);
-            case InvestmentAccount ignored -> new InvestmentAccount(existing.cbu(), existing.alias(), newBalance,
                     existing.userId(), existing.bankNumber(), newName, newActive, existing.createdAt(), now);
             default -> throw new AccountInvalidTypeException(existing.getClass().getSimpleName());
         };

@@ -78,16 +78,4 @@ class OpenAccountUseCaseImplTest {
 
         assertThat(result).isInstanceOf(SavingsAccount.class);
     }
-
-    @Test
-    void create_rejectsSecondInvestmentSameCurrencyForSameUser() {
-        when(bankRepository.findByBankNumber(new BankNumber("007"))).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
-        when(accountRepository.existsByUserIdAndBankNumberAndName(new UserId(1L), new BankNumber("007"), "Savings")).thenReturn(false);
-        when(accountRepository.existsByUserIdAndBankNumberAndTypeAndCurrency(
-                new UserId(1L), new BankNumber("007"), AccountType.INVESTMENT.name(), Currency.getInstance("USD"))).thenReturn(true);
-
-        assertThatThrownBy(() -> useCase.execute(command(AccountType.INVESTMENT)))
-                .isInstanceOf(ResourceAlreadyExistsException.class)
-                .hasMessageContaining("already exists");
-    }
 }

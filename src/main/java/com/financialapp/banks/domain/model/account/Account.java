@@ -8,7 +8,6 @@ import com.financialapp.banks.domain.event.BalanceAdjustedEvent;
 import com.financialapp.banks.domain.event.LowBalanceEvent;
 import com.financialapp.banks.domain.exception.account.AccountInsufficientFundsException;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
-import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.model.account.accountTypes.SavingsAccount;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 
@@ -19,7 +18,6 @@ import java.util.List;
 
 public abstract class Account {
 
-    /** Balance below which a {@link LowBalanceEvent} is raised (in the account's own currency). */
     private static final BigDecimal LOW_BALANCE_THRESHOLD = new BigDecimal("500.00");
 
     protected final Cbu cbu;
@@ -52,7 +50,6 @@ public abstract class Account {
         return switch (type) {
             case CHECKING -> new CheckingAccount(cbu, alias, balance, userId, bankNumber, name, isActive, createdAt, updatedAt);
             case SAVINGS -> new SavingsAccount(cbu, alias, balance, userId, bankNumber, name, isActive, createdAt, updatedAt);
-            case INVESTMENT -> new InvestmentAccount(cbu, alias, balance, userId, bankNumber, name, isActive, createdAt, updatedAt);
         };
     }
 
@@ -68,15 +65,7 @@ public abstract class Account {
 
     public abstract Account withBalance(Money newBalance, LocalDateTime updatedAt);
 
-    /**
-     * Removes {@code amount} from the balance. The amount is a positive magnitude.
-     * Enforces the investment-account restriction, the same-currency guard
-     * (via {@link Money#subtract}) and the no-overdraft (insufficient funds) invariant.
-     * Records a {@link BalanceAdjustedEvent} (signed delta = {@code -amount}) and, when the
-     * new balance is low, a {@link LowBalanceEvent}.
-     */
     public AccountAdjustment debit(Money amount, LocalDateTime when) {
-        ensureNotInvestmentRestricted();
         if (balance.isLessThan(amount)) {
             throw new AccountInsufficientFundsException(cbu.value(), balance, amount);
         }
@@ -84,19 +73,11 @@ public abstract class Account {
         return adjusted.adjustmentWith(new Money(amount.amount().negate(), amount.currency()));
     }
 
-    /**
-     * Adds {@code amount} to the balance. The amount is a positive magnitude.
-     * Enforces the investment-account restriction and the same-currency guard
-     * (via {@link Money#add}). Records a {@link BalanceAdjustedEvent} (signed delta = {@code +amount})
-     * and, when the resulting balance is low, a {@link LowBalanceEvent}.
-     */
     public AccountAdjustment credit(Money amount, LocalDateTime when) {
-        ensureNotInvestmentRestricted();
         Account adjusted = withBalance(balance.add(amount), when);
         return adjusted.adjustmentWith(amount);
     }
 
-    /** Builds the events for a just-applied balance change on this (already-updated) account. */
     private AccountAdjustment adjustmentWith(Money signedDelta) {
         List<DomainEvent> events = new ArrayList<>();
         events.add(new BalanceAdjustedEvent(userId, cbu.value(), bankNumber, name, signedDelta));
@@ -108,13 +89,5 @@ public abstract class Account {
 
     public boolean isLowBalance(Money threshold) {
         return balance.isLessThan(threshold);
-    }
-
-    /**
-     * Hook for account types that forbid manual balance adjustments.
-     * Default: no restriction.
-     */
-    protected void ensureNotInvestmentRestricted() {
-        // no-op by default
     }
 }

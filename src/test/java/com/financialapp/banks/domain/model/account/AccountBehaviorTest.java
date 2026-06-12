@@ -5,9 +5,7 @@ import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.exception.account.AccountCurrencyMismatchException;
 import com.financialapp.banks.domain.exception.account.AccountInsufficientFundsException;
-import com.financialapp.banks.domain.exception.account.AccountInvestmentRestrictionException;
 import com.financialapp.banks.domain.model.account.accountTypes.CheckingAccount;
-import com.financialapp.banks.domain.model.account.accountTypes.InvestmentAccount;
 import com.financialapp.banks.domain.model.bank.BankNumber;
 import org.junit.jupiter.api.Test;
 
@@ -28,13 +26,6 @@ class AccountBehaviorTest {
         return new CheckingAccount(Cbu.from("0070001600000000123459"), "alias",
                 new Money(balance, ARS),
                 new UserId(1L), new BankNumber("007"), "My acc", true,
-                NOW, NOW);
-    }
-
-    private InvestmentAccount investment(BigDecimal balance) {
-        return new InvestmentAccount(Cbu.from("0070001600000000123459"), "alias",
-                new Money(balance, ARS),
-                new UserId(1L), new BankNumber("007"), "Inv", true,
                 NOW, NOW);
     }
 
@@ -93,24 +84,6 @@ class AccountBehaviorTest {
 
         assertThatThrownBy(() -> acc.credit(new Money(new BigDecimal("10.00"), USD), NOW))
                 .isInstanceOf(AccountCurrencyMismatchException.class);
-    }
-
-    @Test
-    void investmentAccount_debit_throwsRestriction() {
-        InvestmentAccount acc = investment(new BigDecimal("100.00"));
-
-        assertThatThrownBy(() -> acc.debit(ars("10.00"), NOW))
-                .isInstanceOf(AccountInvestmentRestrictionException.class)
-                .hasMessageContaining("investment account");
-    }
-
-    @Test
-    void investmentAccount_credit_throwsRestriction() {
-        InvestmentAccount acc = investment(new BigDecimal("100.00"));
-
-        assertThatThrownBy(() -> acc.credit(ars("10.00"), NOW))
-                .isInstanceOf(AccountInvestmentRestrictionException.class)
-                .hasMessageContaining("investment account");
     }
 
     @Test
