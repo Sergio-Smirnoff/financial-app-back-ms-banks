@@ -34,13 +34,11 @@ Swagger UI: http://localhost:8083/swagger-ui.html
 | Aggregate | Key VOs | Notes |
 |-----------|---------|-------|
 | `Bank` | `BankNumber` (3-digit BCRA code), `Logo` | Read-only catalog seeded at startup |
-| `Account` | `Cbu` (22-digit), `AccountNumber`, `SucursalCode`, `Money`, `UserId` | Subtypes: `CheckingAccount`, `SavingsAccount`, `InvestmentAccount` |
+| `Account` | `Cbu` (22-digit), `AccountNumber`, `SucursalCode`, `Money`, `UserId` | Concrete class; `AccountType` enum — `CHECKING` or `SAVINGS`; `debit()`/`credit()` enforce invariants and raise domain events |
 | `Card` | `CardNumber` (16-digit Luhn), `CardDetails` (`CardBrand`, `CardType`, `CardBehavior`, `YearMonth`, `CardBilling`) | Subtypes: `CreditCard`, `DebitCard` |
 | `CardInstallment` | `CardInstallmentId`, `Money` | Immutable record; `pay()` returns new instance |
 | `Loan` | `LoanId`, `BankNumber`, `Money`, `AmortizationType` | Record; `originate()` builds full French-method schedule |
 | `LoanInstallment` | `LoanInstallmentId`, `Money` | Immutable record; `pay()` returns new instance |
-
-`INVESTMENT` accounts are metadata-only — the aggregate throws `AccountInvestmentRestrictionException` on any balance adjustment attempt.
 
 **CBU contract:** `BankNumber` (3-digit BCRA code) prefixes every CBU. `Cbu.from(String)` validates both BCRA modulo-10 check digits. All API paths and Kafka payloads address accounts by CBU string.
 
@@ -165,7 +163,7 @@ src/main/java/com/financialapp/banks/
 │   │                               AmortizationType)
 │   ├── usecase/                   (use-case interfaces + command records)
 │   ├── repository/
-│   ├── port/                      (DomainEventPublisher, FinancesPort, InvestmentsPort)
+│   ├── port/                      (DomainEventPublisher, FinancesPort)
 │   ├── service/                   (LoanAmortization, CardInstallmentEventFactory)
 │   ├── event/                     (BalanceAdjustedEvent, LowBalanceEvent,
 │   │                               LoanCreatedEvent, LoanInstallmentPaidEvent,
@@ -190,8 +188,7 @@ src/main/java/com/financialapp/banks/
     │   └── mapper/
     ├── client/
     │   ├── FinancesFeignClient
-    │   ├── InvestmentsFeignClient
-    │   ├── adapter/               (FinancesClientAdapter, InvestmentsClientAdapter)
+    │   ├── adapter/               (FinancesClientAdapter)
     │   └── dto/                   (ExternalApiResponse)
     ├── scheduler/                 (BankAlertScheduler)
     └── config/                    (JPA, Kafka, Feign, serializers)
@@ -235,6 +232,10 @@ Delivery is at-least-once via outbox + relay (no `AFTER_COMMIT`); failed consume
 | V12 | Normalise legacy `card_behavior` values |
 | V13 | Add `bank_number` column to `banks` |
 | V14 | Change `bank_number` to `varchar` |
+| V15 | Create `outbox_event` table (transactional outbox) |
+| V16 | Create `inbound_events` table (idempotency for consumed events) |
+| V17 | Scope account name uniqueness to user (`uq_accounts_bank_name` revised) |
+| V18 | Delete legacy `INVESTMENT`-type account rows (type removed from domain) |
 
 ---
 
