@@ -70,7 +70,7 @@ public class CardController {
 
     @PostMapping
     @Operation(summary = "Create a card")
-    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "resource_already_exists", "invalid_card_number", "invalid_issuer_bin", "invalid_issuer_card_account", "card_invalid_type"})
+    @ApiErrorCodes(catalog = DomainError.class, value = {"resource_not_found", "resource_already_exists", "invalid_card_number", "invalid_card_check_digit", "invalid_issuer_bin", "invalid_issuer_card_account", "card_invalid_type"})
     public ResponseEntity<ApiResponse<CardResponse>> create(
             @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody CardRequest request) {

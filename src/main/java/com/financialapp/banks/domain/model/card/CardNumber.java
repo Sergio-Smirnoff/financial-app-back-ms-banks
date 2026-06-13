@@ -1,5 +1,6 @@
 package com.financialapp.banks.domain.model.card;
 
+import com.financialapp.banks.domain.exception.card.InvalidCardCheckDigitException;
 import com.financialapp.banks.domain.exception.card.InvalidCardNumberException;
 
 /**
@@ -9,8 +10,18 @@ import com.financialapp.banks.domain.exception.card.InvalidCardNumberException;
  */
 public record CardNumber(IssuerBin issuerBin, IssuerCardAccount issuerCardAccount) {
 
-    /** Parses a 16-digit PAN into its parts, validating format and the Luhn check digit. */
+    /**
+     * Parses a card number into its parts. A 15-digit BIN+account has its Luhn check digit
+     * computed and appended; a full 16-digit PAN must carry a matching check digit. Wrong
+     * length raises {@link InvalidCardNumberException}; a wrong 16th digit raises
+     * {@link InvalidCardCheckDigitException}.
+     */
     public static CardNumber from(String pan) {
+        if (pan != null && pan.matches("\\d{15}")) {
+            return new CardNumber(
+                    new IssuerBin(pan.substring(0, 6)),
+                    new IssuerCardAccount(pan.substring(6, 15)));
+        }
         requireSixteenDigits(pan);
         CardNumber cardNumber = new CardNumber(
                 new IssuerBin(pan.substring(0, 6)),
@@ -47,7 +58,7 @@ public record CardNumber(IssuerBin issuerBin, IssuerCardAccount issuerCardAccoun
 
     private static void requireMatchingCheckDigit(String pan, CardNumber parsed) {
         if (!parsed.value().equals(pan)) {
-            throw new InvalidCardNumberException(pan);
+            throw new InvalidCardCheckDigitException(pan);
         }
     }
 

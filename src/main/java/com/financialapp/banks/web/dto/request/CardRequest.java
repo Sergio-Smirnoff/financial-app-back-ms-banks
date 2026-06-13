@@ -18,7 +18,7 @@ public record CardRequest(
         @NotNull CardBrand brand,
         @NotNull CardType cardType,
         @NotNull CardBehavior behavior,
-        @NotBlank @Pattern(regexp = "^\\d{16}$", message = "Must be exactly 16 digits") String cardNumber,
+        @NotBlank @Pattern(regexp = "^\\d{15,16}$", message = "Must be 16 digits, or 15 to auto-complete the check digit") String cardNumber,
         @NotNull
         @JsonFormat(pattern = "MM/yy")
         @Schema(type = "string", example = "08/30", description = "Card expiry in MM/YY format")
