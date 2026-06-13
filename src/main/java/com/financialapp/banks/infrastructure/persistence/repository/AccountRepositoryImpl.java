@@ -56,14 +56,8 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     @Override
-    public boolean existsByBankNumberAndName(BankNumber bankNumber, String name) {
-        return accountJpaRepository.existsByBank_BankNumberAndName(bankNumber.value(), name);
-    }
-
-    @Override
-    public boolean existsByBankNumberAndTypeAndCurrency(BankNumber bankNumber, String type, Currency currency) {
-        return accountJpaRepository.existsByBank_BankNumberAndTypeAndCurrency(
-                bankNumber.value(), type, currency.getCurrencyCode());
+    public boolean existsByUserIdAndBankNumberAndName(UserId userId, BankNumber bankNumber, String name) {
+        return accountJpaRepository.existsByUserIdAndBank_BankNumberAndName(userId.value(), bankNumber.value(), name);
     }
 
     @Override

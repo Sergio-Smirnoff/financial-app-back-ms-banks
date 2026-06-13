@@ -7,7 +7,6 @@ import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.cbu.CbuBankMismatchException;
 import com.financialapp.banks.domain.model.account.Account;
-import com.financialapp.banks.domain.model.account.AccountType;
 import com.financialapp.banks.domain.repository.AccountRepository;
 import com.financialapp.banks.domain.repository.BankRepository;
 
@@ -35,14 +34,8 @@ public class OpenAccountUseCaseImpl implements OpenAccountUseCase {
             throw new CbuBankMismatchException(cmd.bankNumber().value(), cbu.bankNumber().value());
         }
 
-        if (accountRepository.existsByBankNumberAndName(cmd.bankNumber(), cmd.name())) {
+        if (accountRepository.existsByUserIdAndBankNumberAndName(cmd.userId(), cmd.bankNumber(), cmd.name())) {
             throw new ResourceAlreadyExistsException("Account", cmd.name() + " in bank " + cmd.bankNumber().value());
-        }
-
-        if (cmd.type() == AccountType.INVESTMENT &&
-                accountRepository.existsByBankNumberAndTypeAndCurrency(
-                        cmd.bankNumber(), AccountType.INVESTMENT.name(), cmd.initialBalance().currency())) {
-            throw new ResourceAlreadyExistsException("InvestmentAccount", cmd.initialBalance().currency() + " in bank " + cmd.bankNumber().value());
         }
 
         LocalDateTime now = LocalDateTime.now();

@@ -24,7 +24,7 @@ class MetadataControllerIT {
                         .header("X-Internal-Token", "test-token"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.accountTypes",
-                        org.hamcrest.Matchers.containsInAnyOrder("CHECKING", "SAVINGS", "INVESTMENT")))
+                        org.hamcrest.Matchers.containsInAnyOrder("CHECKING", "SAVINGS")))
                 .andExpect(jsonPath("$.data.cardTypes",
                         org.hamcrest.Matchers.hasItems("STANDARD", "GOLD", "BLACK")))
                 .andExpect(jsonPath("$.data.cardBrands",

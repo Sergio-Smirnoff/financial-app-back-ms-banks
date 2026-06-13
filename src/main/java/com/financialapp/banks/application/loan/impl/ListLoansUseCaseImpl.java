@@ -21,7 +21,7 @@ public class ListLoansUseCaseImpl implements ListLoansUseCase {
     @Transactional(readOnly = true)
     public List<Loan> execute(UserId userId, BankNumber bankNumber) {
         return bankNumber != null
-                ? loanRepository.findByBankNumber(bankNumber)
+                ? loanRepository.findByBankNumberAndUserId(bankNumber, userId)
                 : loanRepository.findByUserId(userId);
     }
 }
