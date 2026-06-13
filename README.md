@@ -96,6 +96,8 @@ Swagger UI lists each error code with a generated example body.
 
 ### LoanController — `/api/v1/banks/loans`
 
+**Security fix (2026-06-12):** Listing loans with `?bankNumber=` is now user-scoped. `LoanRepository.findByBankNumberAndUserId(BankNumber, UserId)` replaced the removed `findByBankNumber(BankNumber)`, closing a data-leak where a bank filter returned every user's loans on that bank.
+
 | Method | Path | Purpose |
 |--------|------|---------|
 | `GET` | `/api/v1/banks/loans` | List user loans; optional `?bankNumber=` filter |
