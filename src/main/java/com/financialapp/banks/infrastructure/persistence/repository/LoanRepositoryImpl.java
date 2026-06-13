@@ -34,9 +34,9 @@ public class LoanRepositoryImpl implements LoanRepository {
     }
 
     @Override
-    public List<Loan> findByBankNumber(BankNumber bankNumber) {
+    public List<Loan> findByBankNumberAndUserId(BankNumber bankNumber, UserId userId) {
         BankJpaEntity bank = requireBank(bankNumber);
-        return loanJpaRepository.findByBankId(bank.getId())
+        return loanJpaRepository.findByBankIdAndUserId(bank.getId(), userId.value())
                 .stream().map(entity -> mapper.toDomain(entity, bank)).toList();
     }
 

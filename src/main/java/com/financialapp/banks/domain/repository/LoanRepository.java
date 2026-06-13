@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface LoanRepository {
     List<Loan> findByUserId(UserId userId);
-    List<Loan> findByBankNumber(BankNumber bankNumber);
+    List<Loan> findByBankNumberAndUserId(BankNumber bankNumber, UserId userId);
     Optional<Loan> findById(LoanId id);
     Optional<Loan> findByIdAndUserId(LoanId id, UserId userId);
     int countByBankNumber(BankNumber bankNumber);
