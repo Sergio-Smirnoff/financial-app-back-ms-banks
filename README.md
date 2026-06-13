@@ -35,7 +35,7 @@ Swagger UI: http://localhost:8083/swagger-ui.html
 |-----------|---------|-------|
 | `Bank` | `BankNumber` (3-digit BCRA code), `Logo` | Read-only catalog seeded at startup |
 | `Account` | `Cbu` (22-digit), `AccountNumber`, `SucursalCode`, `Money`, `UserId` | Concrete class; `AccountType` enum — `CHECKING` or `SAVINGS`; `debit()`/`credit()` enforce invariants and raise domain events |
-| `Card` | `CardNumber` (16-digit Luhn), `CardDetails` (`CardBrand`, `CardType`, `CardBehavior`, `YearMonth`, `CardBilling`) | Subtypes: `CreditCard`, `DebitCard` |
+| `Card` | `CardNumber` (Luhn PAN: accepts a 15-digit BIN+account and auto-completes the check digit, or a full 16-digit PAN whose check digit must match — a wrong 16th digit raises `invalid_card_check_digit`, distinct from the length error `invalid_card_number`), `CardDetails` (`CardBrand`, `CardType`, `CardBehavior`, `YearMonth`, `CardBilling`) | Subtypes: `CreditCard`, `DebitCard` |
 | `CardInstallment` | `CardInstallmentId`, `Money` | Immutable record; `pay()` returns new instance |
 | `Loan` | `LoanId`, `BankNumber`, `Money`, `AmortizationType` | Record; `originate()` builds full French-method schedule |
 | `LoanInstallment` | `LoanInstallmentId`, `Money` | Immutable record; `pay()` returns new instance |
