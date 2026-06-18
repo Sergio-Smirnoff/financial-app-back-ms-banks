@@ -77,4 +77,20 @@ class OpenAccountUseCaseImplTest {
 
         assertThat(result.type()).isEqualTo(AccountType.SAVINGS);
     }
+
+    @Test
+    void defaultsAliasToCbuWhenAliasBlank() {
+        when(bankRepository.findByBankNumber(any())).thenReturn(Optional.of(new Bank(new BankNumber("007"), "GALICIA", null)));
+        when(accountRepository.existsByUserIdAndBankNumberAndName(any(), any(), any())).thenReturn(false);
+        when(accountRepository.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        OpenAccountCommand cmd = new OpenAccountCommand(
+                new UserId(1L), new BankNumber("007"), "Sueldo", AccountType.CHECKING,
+                new Money(BigDecimal.ZERO, Currency.getInstance("ARS")),
+                true, "0070001600000000123459", "  ");
+
+        Account saved = useCase.execute(cmd);
+
+        assertThat(saved.alias()).isEqualTo("0070001600000000123459");
+    }
 }

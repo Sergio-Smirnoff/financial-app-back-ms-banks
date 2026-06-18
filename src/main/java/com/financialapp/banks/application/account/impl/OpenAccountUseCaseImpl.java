@@ -40,7 +40,8 @@ public class OpenAccountUseCaseImpl implements OpenAccountUseCase {
 
         LocalDateTime now = LocalDateTime.now();
         boolean isActive = cmd.isActive() != null ? cmd.isActive() : true;
-        Account account = Account.create(cmd.type(), cbu, cmd.alias(), cmd.initialBalance(),
+        String alias = (cmd.alias() == null || cmd.alias().isBlank()) ? cbu.value() : cmd.alias().trim();
+        Account account = Account.create(cmd.type(), cbu, alias, cmd.initialBalance(),
                 cmd.userId(), cmd.bankNumber(), cmd.name(), isActive, now, now);
 
         return accountRepository.save(account);
