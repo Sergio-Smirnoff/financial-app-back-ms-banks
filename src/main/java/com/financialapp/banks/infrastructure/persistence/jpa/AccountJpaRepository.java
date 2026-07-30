@@ -35,4 +35,7 @@ public interface AccountJpaRepository extends JpaRepository<AccountJpaEntity, Lo
             @Param("bankNumber") String bankNumber,
             @Param("name") String name,
             @Param("hideEmpty") boolean hideEmpty);
+
+    @Query("SELECT DISTINCT a.userId FROM AccountJpaEntity a")
+    List<Long> findDistinctUserIds();
 }

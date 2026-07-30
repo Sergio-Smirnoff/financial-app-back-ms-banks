@@ -80,6 +80,13 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     @Override
+    public List<UserId> findDistinctOwners() {
+        return accountJpaRepository.findDistinctUserIds().stream()
+                .map(UserId::new)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public Account save(Account account) {
         BankJpaEntity bank = requireBank(account.bankNumber());
