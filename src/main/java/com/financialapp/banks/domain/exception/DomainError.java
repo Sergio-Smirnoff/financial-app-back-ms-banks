@@ -45,6 +45,7 @@ public enum DomainError implements ErrorCode {
     INVALID_ACCOUNT_NUMBER(ErrorCategory.BAD_REQUEST, "invalid_account_number"),
     INVALID_CBU(ErrorCategory.BAD_REQUEST, "invalid_cbu"),
     CBU_BANK_MISMATCH(ErrorCategory.UNPROCESSABLE, "cbu_bank_mismatch"),
+    INVALID_BALANCE_SNAPSHOT(ErrorCategory.BAD_REQUEST, "invalid_balance_snapshot"),
 
     // --- Downstream / infrastructure ---
     FINANCES_SERVICE_UNAVAILABLE(ErrorCategory.INTERNAL_SERVER_ERROR, "finances_service_unavailable"),
