@@ -5,6 +5,7 @@ import com.financialapp.banks.domain.usecase.card.UpdateCardUseCase;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
 import com.financialapp.banks.domain.exception.card.CardExpiredException;
 import com.financialapp.banks.domain.exception.card.CardInvalidTypeException;
+import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardBilling;
 import com.financialapp.banks.domain.model.card.CardDetails;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.Currency;
 
 @Service
 @RequiredArgsConstructor
@@ -38,12 +40,17 @@ public class UpdateCardUseCaseImpl implements UpdateCardUseCase {
         int newClosing = cmd.closingDay() != null ? cmd.closingDay() : current.billing().closingDay();
         int newDue = cmd.dueDay() != null ? cmd.dueDay() : current.billing().dueDay();
 
+        Money newLimit = cmd.creditLimit() != null
+                ? new Money(cmd.creditLimit(), Currency.getInstance("ARS"))
+                : current.creditLimit();
+
         CardDetails updated = new CardDetails(
                 current.brand(),
                 current.cardType(),
                 current.behavior(),
                 newExpiry,
-                new CardBilling(newClosing, newDue));
+                new CardBilling(newClosing, newDue),
+                newLimit);
 
         Card updatedCard = switch (card) {
             case CreditCard c -> new CreditCard(c.cardNumber(), c.userId(), c.bankNumber(),

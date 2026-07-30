@@ -2,6 +2,7 @@ package com.financialapp.banks.domain.usecase.card.command;
 
 import com.financialapp.banks.domain.common.model.UserId;
 
+import java.math.BigDecimal;
 import java.time.YearMonth;
 
 public record UpdateCardCommand(
@@ -9,5 +10,6 @@ public record UpdateCardCommand(
         UserId userId,
         YearMonth expiringDate,
         Integer closingDay,
-        Integer dueDay
+        Integer dueDay,
+        BigDecimal creditLimit
 ) {}

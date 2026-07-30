@@ -45,7 +45,7 @@ class IssueCardUseCaseImplTest {
     private IssueCardCommand command(CardBehavior behavior) {
         return new IssueCardCommand(new UserId(1L), new BankNumber("007"),
                 CardBrand.VISA, CardType.PLATINUM, behavior,
-                "4111111111111111", YearMonth.now().plusYears(2), 20, 10);
+                "4111111111111111", YearMonth.now().plusYears(2), 20, 10, null);
     }
 
     @Test

@@ -37,7 +37,7 @@ class UpdateCardUseCaseImplTest {
     private CreditCard buildCreditCard(String cardNumber, YearMonth expiry, int closing, int due) {
         CardDetails details = new CardDetails(
                 CardBrand.VISA, CardType.PLATINUM, CardBehavior.CREDIT,
-                expiry, new CardBilling(closing, due));
+                expiry, new CardBilling(closing, due), null);
         return new CreditCard(CardNumber.from(cardNumber), new UserId(1L), new BankNumber("007"),
                 details, LocalDateTime.now(), LocalDateTime.now());
     }
@@ -45,7 +45,7 @@ class UpdateCardUseCaseImplTest {
     private DebitCard buildDebitCard(String cardNumber, YearMonth expiry, int closing, int due) {
         CardDetails details = new CardDetails(
                 CardBrand.MASTERCARD, CardType.STANDARD, CardBehavior.INSTANT_PAYMENT,
-                expiry, new CardBilling(closing, due));
+                expiry, new CardBilling(closing, due), null);
         return new DebitCard(CardNumber.from(cardNumber), new UserId(2L), new BankNumber("072"),
                 details, LocalDateTime.now(), LocalDateTime.now());
     }
@@ -57,7 +57,7 @@ class UpdateCardUseCaseImplTest {
         when(cardRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         YearMonth newExpiry = YearMonth.of(2028, 6);
-        UpdateCardCommand cmd = new UpdateCardCommand("4111111111111111", new UserId(1L), newExpiry, 20, 5);
+        UpdateCardCommand cmd = new UpdateCardCommand("4111111111111111", new UserId(1L), newExpiry, 20, 5, null);
 
         var result = useCase.execute(cmd);
 
@@ -75,7 +75,7 @@ class UpdateCardUseCaseImplTest {
         when(cardRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         // only update closingDay, keep expiry and dueDay
-        UpdateCardCommand cmd = new UpdateCardCommand("4242424242424242", new UserId(2L), null, 25, null);
+        UpdateCardCommand cmd = new UpdateCardCommand("4242424242424242", new UserId(2L), null, 25, null, null);
 
         var result = useCase.execute(cmd);
 
@@ -91,7 +91,7 @@ class UpdateCardUseCaseImplTest {
         when(cardRepository.findByCardNumberAndUserId(eq("5555555555554444"), any())).thenReturn(Optional.of(existing));
         when(cardRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        UpdateCardCommand cmd = new UpdateCardCommand("5555555555554444", new UserId(1L), null, null, null);
+        UpdateCardCommand cmd = new UpdateCardCommand("5555555555554444", new UserId(1L), null, null, null, null);
 
         var result = useCase.execute(cmd);
 
@@ -105,7 +105,7 @@ class UpdateCardUseCaseImplTest {
         when(cardRepository.findByCardNumberAndUserId(any(), any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase.execute(
-                new UpdateCardCommand("0000", new UserId(1L), null, null, null)))
+                new UpdateCardCommand("0000", new UserId(1L), null, null, null, null)))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("0000");
     }

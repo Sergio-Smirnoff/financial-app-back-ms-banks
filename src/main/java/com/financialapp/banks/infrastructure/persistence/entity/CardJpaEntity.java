@@ -6,6 +6,7 @@ import com.financialapp.banks.domain.model.card.CardType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,6 +54,9 @@ public class CardJpaEntity {
 
     @Column(name = "due_day", nullable = false)
     private int dueDay;
+
+    @Column(name = "credit_limit")
+    private BigDecimal creditLimit;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

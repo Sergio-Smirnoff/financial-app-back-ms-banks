@@ -27,12 +27,16 @@ public class CardPersistenceMapper {
 
     public Card toDomain(CardJpaEntity entity, BankJpaEntity bank) {
         if (entity == null) return null;
+        Money creditLimit = entity.getCreditLimit() != null
+                ? new Money(entity.getCreditLimit(), Currency.getInstance("ARS"))
+                : null;
         CardDetails details = new CardDetails(
                 entity.getBrand(),
                 entity.getCardType(),
                 entity.getBehavior(),
                 YearMonth.from(entity.getExpiringDate()),
-                new CardBilling(entity.getClosingDay(), entity.getDueDay())
+                new CardBilling(entity.getClosingDay(), entity.getDueDay()),
+                creditLimit
         );
         UserId userId = new UserId(entity.getUserId());
         BankNumber bankNumber = new BankNumber(bank.getBankNumber());
@@ -79,6 +83,7 @@ public class CardPersistenceMapper {
                 .expiringDate(d.expiringDate().atEndOfMonth())
                 .closingDay(d.billing().closingDay())
                 .dueDay(d.billing().dueDay())
+                .creditLimit(d.creditLimit() != null ? d.creditLimit().amount() : null)
                 .createdAt(card.createdAt())
                 .updatedAt(card.updatedAt())
                 .build();
@@ -97,6 +102,7 @@ public class CardPersistenceMapper {
         existing.setExpiringDate(d.expiringDate().atEndOfMonth());
         existing.setClosingDay(d.billing().closingDay());
         existing.setDueDay(d.billing().dueDay());
+        existing.setCreditLimit(d.creditLimit() != null ? d.creditLimit().amount() : null);
         existing.setUpdatedAt(card.updatedAt());
         syncInstallments(existing, card);
         return existing;

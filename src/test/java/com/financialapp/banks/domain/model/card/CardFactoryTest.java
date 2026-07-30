@@ -19,7 +19,7 @@ class CardFactoryTest {
 
     private CardDetails details(CardBehavior behavior) {
         return new CardDetails(CardBrand.VISA, CardType.PLATINUM, behavior,
-                YearMonth.now().plusYears(2), new CardBilling(20, 10));
+                YearMonth.now().plusYears(2), new CardBilling(20, 10), null);
     }
 
     private Card create(CardBehavior behavior) {
