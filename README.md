@@ -35,10 +35,13 @@ Swagger UI: http://localhost:8083/swagger-ui.html
 |-----------|---------|-------|
 | `Bank` | `BankNumber` (3-digit BCRA code), `Logo` | Read-only catalog seeded at startup |
 | `Account` | `Cbu` (22-digit), `AccountNumber`, `SucursalCode`, `Money`, `UserId` | Concrete class; `AccountType` enum — `CHECKING` or `SAVINGS`; `debit()`/`credit()` enforce invariants and raise domain events |
-| `Card` | `CardNumber` (Luhn PAN: accepts a 15-digit BIN+account and auto-completes the check digit, or a full 16-digit PAN whose check digit must match — a wrong 16th digit raises `invalid_card_check_digit`, distinct from the length error `invalid_card_number`), `CardDetails` (`CardBrand`, `CardType`, `CardBehavior`, `YearMonth`, `CardBilling`) | Subtypes: `CreditCard`, `DebitCard` |
+| `Card` | `CardNumber` (Luhn PAN), `CardDetails` (`CardBrand`, `CardType`, `CardBehavior`, `YearMonth`, `CardBilling`, `creditLimit`) | Subtypes: `CreditCard` (supports installments & credit limit), `DebitCard` (INSTANT\_PAYMENT) |
 | `CardInstallment` | `CardInstallmentId`, `Money` | Immutable record; `pay()` returns new instance |
 | `Loan` | `LoanId`, `BankNumber`, `Money`, `AmortizationType` | Record; `originate()` builds full French-method schedule |
 | `LoanInstallment` | `LoanInstallmentId`, `Money` | Immutable record; `pay()` returns new instance |
+| `BalanceSnapshot` | `BalanceSnapshotId`, `UserId`, `LocalDate`, `cashByCurrency`, `cardDebtByCurrency`, `loanDebtByCurrency` | Daily net worth snapshot record generated automatically by scheduler |
+| `AccountFeeSchedule` | `AccountFeeScheduleId`, `Cbu`, `maintenanceFee`, `transferFee`, `IvaTreatment` | Account fee schedule display metadata (fees do NOT post transactions) |
+| `CardFeeSchedule` | `CardFeeScheduleId`, `CardNumber`, `annualFee`, `internationalSurchargePct`, `IvaTreatment` | Card fee schedule display metadata (fees do NOT post transactions) |
 
 **CBU contract:** `BankNumber` (3-digit BCRA code) prefixes every CBU. `Cbu.from(String)` validates both BCRA modulo-10 check digits. All API paths and Kafka payloads address accounts by CBU string.
 
@@ -78,10 +81,10 @@ Swagger UI lists each error code with a generated example body.
 
 | Method | Path | Purpose |
 |--------|------|---------|
-| `GET` | `/api/v1/banks/cards` | List user cards; optional `?bankNumber=` filter |
+| `GET` | `/api/v1/banks/cards` | List user cards; optional `?bankNumber=` filter (returns `CardResponse` with `creditLimit`, `usedAmount`, `usedPercent`, `closingDate`, `dueDate`, `statementOpen`) |
 | `GET` | `/api/v1/banks/cards/{cardNumber}` | Get one card by 16-digit card number |
-| `POST` | `/api/v1/banks/cards` | Issue (create) a card |
-| `PATCH` | `/api/v1/banks/cards/{cardNumber}` | Update billing cycle (closingDay, dueDay) and expiry date |
+| `POST` | `/api/v1/banks/cards` | Issue (create) a card (accepts optional `creditLimit`) |
+| `PATCH` | `/api/v1/banks/cards/{cardNumber}` | Update billing cycle, expiry date, or optional `creditLimit` |
 | `DELETE` | `/api/v1/banks/cards/{cardNumber}` | Cancel (delete) a card |
 
 ### CardInstallmentController — `/api/v1/banks/cards/{cardNumber}/installments`
@@ -106,6 +109,20 @@ Swagger UI lists each error code with a generated example body.
 | `GET` | `/api/v1/banks/loans/{id}/installments` | List installments for a loan |
 | `POST` | `/api/v1/banks/loans/{id}/installments/{installmentId}/pay` | Mark one loan installment as paid from a given account CBU |
 
+### FeeController — `/api/v1/banks/fees`
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| `PUT` | `/api/v1/banks/accounts/{cbu}/fees` | Upsert fee schedule (maintenance/transfer fees, IVA treatment) for an account |
+| `PUT` | `/api/v1/banks/cards/{cardNumber}/fees` | Upsert fee schedule (annual fee, international surcharge %, IVA treatment) for a card |
+| `GET` | `/api/v1/banks/fees` | Get all account and card fee schedules for user, including computed debit/credit tax rates |
+
+### BalanceSnapshotController — `/api/v1/banks/balance-snapshots`
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| `GET` | `/api/v1/banks/balance-snapshots?from=&to=` | Daily balance snapshot history by currency for net worth trend calculation |
+
 ### MetadataController — `/api/v1/banks/metadata`
 
 | Method | Path | Purpose |
@@ -128,9 +145,11 @@ src/main/java/com/financialapp/banks/
 ├── web/
 │   ├── controller/
 │   │   ├── AccountController
+│   │   ├── BalanceSnapshotController
 │   │   ├── BankController
 │   │   ├── CardController
 │   │   ├── CardInstallmentController
+│   │   ├── FeeController
 │   │   ├── LoanController
 │   │   ├── MetadataController
 │   │   └── UpcomingPaymentController
@@ -149,6 +168,8 @@ src/main/java/com/financialapp/banks/
 │   │                               ListCards, RegisterCardExpense,
 │   │                               ListCardInstallments, PayCardInstallment,
 │   │                               ImportCardExpenses, CheckDuplicateExpenses)
+│   ├── fee/impl/                  (UpsertAccountFeeSchedule, UpsertCardFeeSchedule, GetUserFees)
+│   ├── snapshot/impl/             (GetBalanceSnapshots)
 │   ├── catalog/impl/              (GetBankingCatalog)
 │   ├── loan/impl/                 (OriginateLoan, ListLoans, GetLoanInstallments,
 │   │                               PayLoanInstallment, CancelLoan)
@@ -161,23 +182,27 @@ src/main/java/com/financialapp/banks/
 │   │   ├── bank/                  (Bank, BankNumber, Logo, SucursalCode)
 │   │   ├── card/                  (Card, CardInstallment, CardDetails, CardBrand,
 │   │   │                           CardType, CardBehavior, CardBilling, CardNumber)
+│   │   ├── fee/                   (AccountFeeSchedule, AccountFeeScheduleId,
+│   │   │                           CardFeeSchedule, CardFeeScheduleId)
+│   │   ├── snapshot/              (BalanceSnapshot, BalanceSnapshotId)
 │   │   └── loan/                  (Loan, LoanInstallment, LoanId, LoanOrigination,
 │   │                               AmortizationType)
 │   ├── usecase/                   (use-case interfaces + command records)
-│   ├── repository/
+│   ├── repository/                (AccountRepository, CardRepository, BalanceSnapshotRepository, AccountFeeScheduleRepository, CardFeeScheduleRepository, …)
 │   ├── port/                      (DomainEventPublisher, FinancesPort)
-│   ├── service/                   (LoanAmortization, CardInstallmentEventFactory)
+│   ├── service/                   (LoanAmortization, ComputeBalanceSnapshot, CardBillingCycle, CreditLimitUsage, DebitCreditTax)
 │   ├── event/                     (BalanceAdjustedEvent, LowBalanceEvent,
 │   │                               LoanCreatedEvent, LoanInstallmentPaidEvent,
 │   │                               CardInstallmentPaidEvent)
 │   └── exception/                 (DomainException, DomainError, ErrorCategory,
-│                                   account/*, bank/*, card/*, cbu/*, loan/*)
+│                                   account/*, bank/*, card/*, cbu/*, fee/*, loan/*, snapshot/*)
 │
 └── infrastructure/
     ├── persistence/
     │   ├── entity/                (AccountJpaEntity, BankJpaEntity, CardJpaEntity,
     │   │                           CardInstallmentJpaEntity, LoanJpaEntity,
-    │   │                           LoanInstallmentJpaEntity, ProcessedEventJpaEntity)
+    │   │                           LoanInstallmentJpaEntity, BalanceSnapshotJpaEntity,
+    │   │                           AccountFeeScheduleJpaEntity, CardFeeScheduleJpaEntity, ProcessedEventJpaEntity)
     │   ├── jpa/                   (Spring Data JPA repositories)
     │   ├── mapper/
     │   ├── repository/            (domain port implementations)
@@ -192,7 +217,7 @@ src/main/java/com/financialapp/banks/
     │   ├── FinancesFeignClient
     │   ├── adapter/               (FinancesClientAdapter)
     │   └── dto/                   (ExternalApiResponse)
-    ├── scheduler/                 (BankAlertScheduler)
+    ├── scheduler/                 (BankAlertScheduler, BalanceSnapshotScheduler)
     └── config/                    (JPA, Kafka, Feign, serializers)
 ```
 
@@ -238,6 +263,10 @@ Delivery is at-least-once via outbox + relay (no `AFTER_COMMIT`); failed consume
 | V16 | Create `inbound_events` table (idempotency for consumed events) |
 | V17 | Scope account name uniqueness to user (`uq_accounts_bank_name` revised) |
 | V18 | Delete legacy `INVESTMENT`-type account rows (type removed from domain) |
+| V20 | Create `balance_snapshots` table with JSONB maps for cash/card/loan currency totals |
+| V21 | Add `credit_limit` column to `cards` table |
+| V22 | Create `account_fee_schedules` table |
+| V23 | Create `card_fee_schedules` table |
 
 ---
 
