@@ -9,7 +9,7 @@ RUN mvn -f financial-app-parent/pom.xml -B -q -DskipTests install
 COPY ms-banks/pom.xml ms-banks/pom.xml
 
 # Pre-fetch dependencies
-RUN mvn -f ms-banks/pom.xml -B -q -DskipTests dependency:go-offline
+RUN mvn -f ms-banks/pom.xml dependency:resolve -q
 
 # Copy source and build
 COPY ms-banks/src ms-banks/src
