@@ -3,6 +3,8 @@ package com.financialapp.banks.infrastructure.persistence.entity;
 import com.financialapp.commons.core.domain.model.IvaTreatment;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 
@@ -32,6 +34,7 @@ public class CardFeeScheduleJpaEntity {
     @Column(name = "iva_treatment", nullable = false, length = 10)
     private IvaTreatment ivaTreatment;
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "currency", nullable = false, length = 3)
     private String currency;
 }
