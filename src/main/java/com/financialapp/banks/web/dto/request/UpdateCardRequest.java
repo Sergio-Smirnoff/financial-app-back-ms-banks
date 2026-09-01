@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
+import java.math.BigDecimal;
 import java.time.YearMonth;
 
 public record UpdateCardRequest(
@@ -11,5 +13,6 @@ public record UpdateCardRequest(
         @Schema(type = "string", example = "08/30", description = "Card expiry in MM/YY format")
         YearMonth expiringDate,
         @Min(1) @Max(31) Integer closingDay,
-        @Min(1) @Max(31) Integer dueDay
+        @Min(1) @Max(31) Integer dueDay,
+        @Positive BigDecimal creditLimit
 ) {}

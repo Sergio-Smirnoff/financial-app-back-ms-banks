@@ -83,7 +83,8 @@ public class CardController {
                 request.cardNumber(),
                 request.expiringDate(),
                 request.closingDay(),
-                request.dueDay()
+                request.dueDay(),
+                request.creditLimit()
         ));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created("Card created", cardMapper.toResponse(result)));
@@ -101,7 +102,8 @@ public class CardController {
                 new UserId(userId),
                 request.expiringDate(),
                 request.closingDay(),
-                request.dueDay()
+                request.dueDay(),
+                request.creditLimit()
         ));
         return ResponseEntity.ok(ApiResponse.ok("Card updated", cardMapper.toResponse(result)));
     }

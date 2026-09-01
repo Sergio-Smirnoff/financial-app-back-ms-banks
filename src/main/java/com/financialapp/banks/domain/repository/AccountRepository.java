@@ -18,6 +18,7 @@ public interface AccountRepository {
     boolean existsByUserIdAndBankNumberAndName(UserId userId, BankNumber bankNumber, String name);
     List<Account> findLowBalance(BigDecimal threshold);
     List<Account> findFiltered(UserId userId, String type, Currency currency, BankNumber bankNumber, String name, boolean hideEmpty);
+    List<UserId> findDistinctOwners();
     Account save(Account account);
     void delete(String cbu);
 }

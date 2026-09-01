@@ -7,6 +7,7 @@ import com.financialapp.banks.domain.model.card.CardType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 
@@ -24,6 +25,12 @@ public record CardResponse(
         YearMonth expiringDate,
         int closingDay,
         int dueDay,
+        String creditLimit,
+        String usedAmount,
+        String usedPercent,
+        LocalDate closingDate,
+        LocalDate dueDate,
+        Boolean statementOpen,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {}

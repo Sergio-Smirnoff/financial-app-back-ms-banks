@@ -1,5 +1,7 @@
 package com.financialapp.banks.domain.model.card;
 
+import com.financialapp.banks.domain.common.model.Money;
+
 import java.time.YearMonth;
 
 public record CardDetails(
@@ -7,5 +9,7 @@ public record CardDetails(
     CardType cardType,
     CardBehavior behavior,
     YearMonth expiringDate,
-    CardBilling billing
+    CardBilling billing,
+    Money creditLimit
 ) {}
+

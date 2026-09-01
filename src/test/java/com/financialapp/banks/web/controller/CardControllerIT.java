@@ -41,7 +41,7 @@ class CardControllerIT {
     @Test
     void issueCard_then_listIncludesIt() throws Exception {
         CardRequest req = new CardRequest("007", CardBrand.VISA, CardType.PLATINUM,
-                CardBehavior.CREDIT, "4111111111111111", YearMonth.now().plusYears(2), 20, 10);
+                CardBehavior.CREDIT, "4111111111111111", YearMonth.now().plusYears(2), 20, 10, null);
 
         mockMvc.perform(post("/api/v1/banks/cards")
                         .header("X-User-Id", "1")
@@ -75,7 +75,7 @@ class CardControllerIT {
     @Test
     void issueCard_rejectsNon16DigitNumber() throws Exception {
         CardRequest req = new CardRequest("007", CardBrand.VISA, CardType.PLATINUM,
-                CardBehavior.CREDIT, "1234", YearMonth.now().plusYears(2), 20, 10);
+                CardBehavior.CREDIT, "1234", YearMonth.now().plusYears(2), 20, 10, null);
 
         mockMvc.perform(post("/api/v1/banks/cards")
                         .header("X-User-Id", "1")

@@ -6,6 +6,7 @@ import com.financialapp.banks.domain.model.card.CardBehavior;
 import com.financialapp.banks.domain.model.card.CardBrand;
 import com.financialapp.banks.domain.model.card.CardType;
 
+import java.math.BigDecimal;
 import java.time.YearMonth;
 
 public record IssueCardCommand(
@@ -17,5 +18,6 @@ public record IssueCardCommand(
     String number,
     YearMonth expiringDate,
     int closingDay,
-    int dueDay
+    int dueDay,
+    BigDecimal creditLimit
 ) {}

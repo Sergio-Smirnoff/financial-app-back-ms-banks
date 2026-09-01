@@ -158,7 +158,8 @@ class BankAlertSchedulerTest {
                         CardType.PLATINUM,
                         CardBehavior.CREDIT,
                         YearMonth.now().plusMonths(1),
-                        new CardBilling(20, 10)
+                        new CardBilling(20, 10),
+                        null
                 ),
                 LocalDateTime.now(),
                 LocalDateTime.now()

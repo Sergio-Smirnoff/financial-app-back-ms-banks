@@ -4,6 +4,7 @@ import com.financialapp.banks.domain.usecase.card.command.IssueCardCommand;
 import com.financialapp.banks.domain.usecase.card.IssueCardUseCase;
 import com.financialapp.banks.domain.exception.ResourceAlreadyExistsException;
 import com.financialapp.banks.domain.exception.ResourceNotFoundException;
+import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.model.card.Card;
 import com.financialapp.banks.domain.model.card.CardBilling;
 import com.financialapp.banks.domain.model.card.CardDetails;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Currency;
 
 @Service
 @RequiredArgsConstructor
@@ -32,12 +34,17 @@ public class IssueCardUseCaseImpl implements IssueCardUseCase {
             throw new ResourceAlreadyExistsException("Card", cmd.number());
         }
 
+        Money creditLimit = cmd.creditLimit() != null
+                ? new Money(cmd.creditLimit(), Currency.getInstance("ARS"))
+                : null;
+
         CardDetails details = new CardDetails(
                 cmd.brand(),
                 cmd.cardType(),
                 cmd.behavior(),
                 cmd.expiringDate(),
-                new CardBilling(cmd.closingDay(), cmd.dueDay())
+                new CardBilling(cmd.closingDay(), cmd.dueDay()),
+                creditLimit
         );
 
         LocalDateTime now = LocalDateTime.now();

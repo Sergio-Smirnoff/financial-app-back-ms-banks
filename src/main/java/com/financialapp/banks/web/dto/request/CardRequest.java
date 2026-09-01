@@ -11,6 +11,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
+import jakarta.validation.constraints.Positive;
+import java.math.BigDecimal;
 import java.time.YearMonth;
 
 public record CardRequest(
@@ -24,5 +26,6 @@ public record CardRequest(
         @Schema(type = "string", example = "08/30", description = "Card expiry in MM/YY format")
         YearMonth expiringDate,
         @Min(1) @Max(31) int closingDay,
-        @Min(1) @Max(31) int dueDay
+        @Min(1) @Max(31) int dueDay,
+        @Positive BigDecimal creditLimit
 ) {}

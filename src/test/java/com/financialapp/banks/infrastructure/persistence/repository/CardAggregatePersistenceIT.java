@@ -38,7 +38,7 @@ class CardAggregatePersistenceIT {
     @Test
     void save_then_load_round_trips_installments() {
         CardDetails details = new CardDetails(CardBrand.VISA, CardType.STANDARD, CardBehavior.CREDIT,
-                YearMonth.of(2030, 1), new CardBilling(20, 10));
+                YearMonth.of(2030, 1), new CardBilling(20, 10), null);
         List<CardInstallment> installments = CardInstallment.schedule(
                 "5555555555554444", "TV", new Money(new BigDecimal("300.00"), Currency.getInstance("ARS")),
                 3, LocalDate.of(2026, 7, 1));
