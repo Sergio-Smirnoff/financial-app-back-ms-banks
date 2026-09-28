@@ -4,6 +4,7 @@ import com.financialapp.banks.domain.common.model.Money;
 import com.financialapp.banks.domain.common.model.UserId;
 import com.financialapp.banks.domain.model.snapshot.BalanceSnapshot;
 import com.financialapp.banks.domain.repository.BalanceSnapshotRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +24,28 @@ class BalanceSnapshotRepositoryImplIT {
 
     @Autowired
     private BalanceSnapshotRepository repository;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @Test
+    void save_storesEachMapAsAJsonObjectThatSurvivesARealRead() {
+        UserId userId = new UserId(300L);
+        LocalDate date = LocalDate.of(2026, 9, 28);
+        Money cash = Money.of(new BigDecimal("434608.43"), "ARS");
+        repository.save(BalanceSnapshot.create(userId, date, List.of(cash), List.of(), List.of()));
+        entityManager.flush();
+        entityManager.clear();
+
+        Object stored = entityManager
+                .createNativeQuery("SELECT CAST(cash_by_currency AS VARCHAR) FROM banks.balance_snapshots WHERE user_id = 300")
+                .getSingleResult();
+        assertThat(stored.toString()).startsWith("{").contains("\"ARS\"");
+
+        assertThat(repository.findByUserIdAndDateBetween(userId, date, date))
+                .singleElement()
+                .satisfies(snapshot -> assertThat(snapshot.cashByCurrency()).containsExactly(cash));
+    }
 
     @Test
     void roundTrip_allThreeMaps_persistsAndRestoresCorrectly() {
