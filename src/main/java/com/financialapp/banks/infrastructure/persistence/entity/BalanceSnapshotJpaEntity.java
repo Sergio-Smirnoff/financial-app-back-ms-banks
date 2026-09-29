@@ -2,6 +2,8 @@ package com.financialapp.banks.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,12 +28,15 @@ public class BalanceSnapshotJpaEntity {
     @Column(name = "snapshot_date", nullable = false)
     private LocalDate snapshotDate;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "cash_by_currency", nullable = false, columnDefinition = "JSONB")
     private String cashByCurrency;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "card_debt_by_currency", nullable = false, columnDefinition = "JSONB")
     private String cardDebtByCurrency;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "loan_debt_by_currency", nullable = false, columnDefinition = "JSONB")
     private String loanDebtByCurrency;
 
