@@ -85,7 +85,7 @@ erDiagram
 | V17 | Scopes account-name uniqueness to `(user_id, bank_id, name)` |
 | V18 | Deletes remaining `INVESTMENT`-type accounts |
 | V19 | Drops `NOT NULL` on `accounts.alias` |
-| V20 | `balance_snapshots` table (JSONB maps per currency) |
+| V20 | `balance_snapshots` table (JSONB maps per currency). `BalanceSnapshotJpaEntity` maps the three jsonb columns with `@JdbcTypeCode(SqlTypes.JSON)`; before Round C no snapshot was ever stored on PostgreSQL |
 | V21 | `credit_limit` column on `cards` |
 | V22 | `account_fee_schedules` table |
 | V23 | `card_fee_schedules` table |

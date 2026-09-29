@@ -263,7 +263,7 @@ Delivery is at-least-once via outbox + relay (no `AFTER_COMMIT`); failed consume
 | V16 | Create `inbound_events` table (idempotency for consumed events) |
 | V17 | Scope account name uniqueness to user (`uq_accounts_bank_name` revised) |
 | V18 | Delete legacy `INVESTMENT`-type account rows (type removed from domain) |
-| V20 | Create `balance_snapshots` table with JSONB maps for cash/card/loan currency totals |
+| V20 | Create `balance_snapshots` table with JSONB maps for cash/card/loan currency totals (entity columns mapped `@JdbcTypeCode(SqlTypes.JSON)`; before Round C no snapshot was ever stored on PostgreSQL) |
 | V21 | Add `credit_limit` column to `cards` table |
 | V22 | Create `account_fee_schedules` table |
 | V23 | Create `card_fee_schedules` table |
